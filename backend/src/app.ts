@@ -1,0 +1,75 @@
+import express, { Express } from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import compression from 'compression';
+import rateLimit from 'express-rate-limit';
+import passport from './config/passport';
+import { config } from './config';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+import authRoutes from './routes/authRoutes';
+import userRoutes from './routes/userRoutes';
+import organizationRoutes from './routes/organizationRoutes';
+import productRoutes from './routes/productRoutes';
+import cartRoutes from './routes/cartRoutes';
+import orderRoutes from './routes/orderRoutes';
+import blogRoutes from './routes/blogRoutes';
+import eventRoutes from './routes/eventRoutes';
+
+const app: Express = express();
+
+// Security middleware
+app.use(helmet());
+app.use(cors({
+  origin: config.frontendUrl,
+  credentials: true
+}));
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: config.rateLimit.windowMs,
+  max: config.rateLimit.maxRequests,
+  message: 'Too many requests from this IP, please try again later.'
+});
+app.use('/api/', limiter);
+
+// Body parsing middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Compression
+app.use(compression());
+
+// Logging
+if (config.nodeEnv === 'development') {
+  app.use(morgan('dev'));
+} else {
+  app.use(morgan('combined'));
+}
+
+// Passport initialization
+app.use(passport.initialize());
+
+// Static files
+app.use('/uploads', express.static(config.upload.dir));
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// API routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/organizations', organizationRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/blog', blogRoutes);
+app.use('/api/events', eventRoutes);
+
+// Error handling
+app.use(notFoundHandler);
+app.use(errorHandler);
+
+export default app;
