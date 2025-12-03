@@ -15,15 +15,15 @@ import { RegisterPage } from './pages/RegisterPage';
 import { ProductsPage } from './pages/ProductsPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
 import { CartPage } from './pages/CartPage';
+import { BlogPage } from './pages/BlogPage';
+import { BlogPostPage } from './pages/BlogPostPage';
+import { EventsPage } from './pages/EventsPage';
+import { EventDetailPage } from './pages/EventDetailPage';
+import { DashboardPage } from './pages/DashboardPage';
 
 // Placeholder components - to be implemented
 const ShopPage = () => <div>Shop Page</div>;
 const CheckoutPage = () => <div>Checkout Page</div>;
-const BlogPage = () => <div>Blog Page</div>;
-const BlogPostPage = () => <div>Blog Post Page</div>;
-const EventsPage = () => <div>Events Page</div>;
-const EventDetailPage = () => <div>Event Detail Page</div>;
-const DashboardPage = () => <div>Dashboard Page</div>;
 const AdminPage = () => <div>Admin Page</div>;
 
 function AppContent() {
