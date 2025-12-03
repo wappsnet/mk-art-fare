@@ -5,16 +5,19 @@ import { Provider } from 'react-redux';
 import { store } from './store';
 import { useAppDispatch } from './hooks/useRedux';
 import { fetchProfile } from './store/authSlice';
+import { fetchCart } from './store/cartSlice';
 import './styles/global.scss';
 
+// Implemented pages
+import { HomePage } from './pages/HomePage';
+import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
+import { ProductsPage } from './pages/ProductsPage';
+import { ProductDetailPage } from './pages/ProductDetailPage';
+import { CartPage } from './pages/CartPage';
+
 // Placeholder components - to be implemented
-const HomePage = () => <div>Home Page</div>;
-const LoginPage = () => <div>Login Page</div>;
-const RegisterPage = () => <div>Register Page</div>;
-const ProductsPage = () => <div>Products Page</div>;
-const ProductDetailPage = () => <div>Product Detail Page</div>;
 const ShopPage = () => <div>Shop Page</div>;
-const CartPage = () => <div>Cart Page</div>;
 const CheckoutPage = () => <div>Checkout Page</div>;
 const BlogPage = () => <div>Blog Page</div>;
 const BlogPostPage = () => <div>Blog Post Page</div>;
@@ -31,6 +34,7 @@ function AppContent() {
     if (token) {
       dispatch(fetchProfile());
     }
+    dispatch(fetchCart());
   }, [dispatch]);
 
   return (
