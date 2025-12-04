@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
-import { Form, Input, Button, Card, Typography, Divider, Alert, Space, Radio } from 'antd';
+import { Form, Input, Button, Card, Typography, Divider, Alert, Space, Radio, message } from 'antd';
 import { MailOutlined, LockOutlined, UserOutlined, GoogleOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
-import { useAppDispatch, useAppSelector } from '../hooks/useRedux';
-import { register } from '../store/authSlice';
+import { useAppSelector } from '../hooks/useRedux';
+import { useRegisterMutation } from '../services/apiSlice';
 import { Layout } from '../components/Layout';
 
 const { Title, Text } = Typography;
@@ -37,9 +37,9 @@ const GoogleButton = styled(Button)`
 `;
 
 export const RegisterPage = () => {
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { loading, error, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const [register, { isLoading }] = useRegisterMutation();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -50,10 +50,18 @@ export const RegisterPage = () => {
   const onFinish = async (values: {
     email: string;
     password: string;
-    firstName?: string;
-    lastName?: string;
+    first_name?: string;
+    last_name?: string;
   }) => {
-    await dispatch(register(values));
+    try {
+      const result = await register(values).unwrap();
+      if (result.success) {
+        message.success('Registration successful!');
+        navigate('/dashboard');
+      }
+    } catch (err: any) {
+      message.error(err.data?.error || 'Registration failed');
+    }
   };
 
   const handleGoogleLogin = () => {
@@ -69,10 +77,6 @@ export const RegisterPage = () => {
               <Title level={2}>Create Account</Title>
               <Text type="secondary">Join Art Fare and start your journey</Text>
             </div>
-
-            {error && (
-              <Alert message={error} type="error" showIcon closable />
-            )}
 
             <GoogleButton
               icon={<GoogleOutlined />}
@@ -106,7 +110,7 @@ export const RegisterPage = () => {
               </Form.Item>
 
               <Form.Item
-                name="firstName"
+                name="first_name"
                 label="First Name"
               >
                 <Input
@@ -117,7 +121,7 @@ export const RegisterPage = () => {
               </Form.Item>
 
               <Form.Item
-                name="lastName"
+                name="last_name"
                 label="Last Name"
               >
                 <Input
@@ -170,7 +174,7 @@ export const RegisterPage = () => {
               </Form.Item>
 
               <Form.Item>
-                <Button type="primary" htmlType="submit" size="large" block loading={loading}>
+                <Button type="primary" htmlType="submit" size="large" block loading={isLoading}>
                   Create Account
                 </Button>
               </Form.Item>

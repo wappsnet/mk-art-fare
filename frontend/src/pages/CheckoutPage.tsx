@@ -4,10 +4,8 @@ import { Row, Col, Card, Typography, Form, Input, Button, Radio, Divider, messag
 import { CreditCardOutlined, EnvironmentOutlined, ShoppingOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import { Layout } from '../components/Layout';
-import { useAppSelector, useAppDispatch } from '../hooks/useRedux';
-import { apiService } from '../services/api';
-import { clearCart } from '../store/cartSlice';
-import { ApiResponse } from '../types';
+import { useAppSelector } from '../hooks/useRedux';
+import { useGetUserAddressesQuery, useCreateUserAddressMutation, useCreateOrderMutation, useClearCartMutation } from '../services/apiSlice';
 
 const { Title, Text } = Typography;
 
@@ -47,15 +45,19 @@ interface Address {
 
 export const CheckoutPage = () => {
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const { items, total } = useAppSelector((state) => state.cart);
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
-  const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<number | null>(null);
   const [useNewAddress, setUseNewAddress] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('credit_card');
+
+  const { data: addressesData } = useGetUserAddressesQuery();
+  const [createAddress] = useCreateUserAddressMutation();
+  const [createOrder, { isLoading: orderLoading }] = useCreateOrderMutation();
+  const [clearCart] = useClearCartMutation();
+
+  const addresses = addressesData?.data || [];
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -70,33 +72,22 @@ export const CheckoutPage = () => {
       return;
     }
 
-    fetchAddresses();
-  }, [isAuthenticated, navigate, items]);
-
-  const fetchAddresses = async () => {
-    try {
-      const response = await apiService.get<ApiResponse<Address[]>>('/users/addresses');
-      if (response.success && response.data) {
-        setAddresses(response.data);
-        // Auto-select first shipping address
-        const shippingAddress = response.data.find((addr) => addr.address_type === 'shipping');
-        if (shippingAddress) {
-          setSelectedAddress(shippingAddress.id);
-        }
+    // Auto-select first shipping address
+    if (addresses.length > 0 && !selectedAddress) {
+      const shippingAddress = addresses.find((addr) => addr.address_type === 'shipping');
+      if (shippingAddress) {
+        setSelectedAddress(shippingAddress.id);
       }
-    } catch (error) {
-      console.error('Failed to fetch addresses:', error);
     }
-  };
+  }, [isAuthenticated, navigate, items, addresses, selectedAddress]);
 
   const handlePlaceOrder = async (values: any) => {
-    setLoading(true);
     try {
       let shippingAddressId = selectedAddress;
 
       // If using new address, create it first
       if (useNewAddress) {
-        const addressResponse = await apiService.post<ApiResponse<Address>>('/users/addresses', {
+        const addressResponse = await createAddress({
           address_line1: values.address_line1,
           address_line2: values.address_line2,
           city: values.city,
@@ -104,29 +95,28 @@ export const CheckoutPage = () => {
           postal_code: values.postal_code,
           country: values.country || 'USA',
           address_type: 'shipping'
-        });
+        }).unwrap();
 
-        if (addressResponse.success && addressResponse.data) {
+        if (addressResponse.data) {
           shippingAddressId = addressResponse.data.id;
         }
       }
 
       if (!shippingAddressId) {
         message.error('Please select or enter a shipping address');
-        setLoading(false);
         return;
       }
 
       // Create order
-      const orderResponse = await apiService.post<ApiResponse<any>>('/orders', {
+      const orderResponse = await createOrder({
         shipping_address_id: shippingAddressId,
         payment_method: paymentMethod,
         notes: values.notes
-      });
+      }).unwrap();
 
-      if (orderResponse.success && orderResponse.data) {
+      if (orderResponse.data) {
         // Clear cart
-        dispatch(clearCart());
+        await clearCart().unwrap();
 
         // Show success modal
         Modal.success({
@@ -142,9 +132,7 @@ export const CheckoutPage = () => {
         });
       }
     } catch (error: any) {
-      message.error(error.response?.data?.error || 'Failed to place order');
-    } finally {
-      setLoading(false);
+      message.error(error.message || 'Failed to place order');
     }
   };
 
@@ -364,7 +352,7 @@ export const CheckoutPage = () => {
                   size="large"
                   block
                   htmlType="submit"
-                  loading={loading}
+                  loading={orderLoading}
                   icon={<ShoppingOutlined />}
                 >
                   Place Order

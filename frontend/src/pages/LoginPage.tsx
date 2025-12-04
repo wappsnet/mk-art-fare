@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
-import { Form, Input, Button, Card, Typography, Divider, Alert, Space } from 'antd';
+import { Form, Input, Button, Card, Typography, Divider, Alert, Space, message } from 'antd';
 import { MailOutlined, LockOutlined, GoogleOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
-import { useAppDispatch, useAppSelector } from '../hooks/useRedux';
-import { login } from '../store/authSlice';
+import { useAppSelector } from '../hooks/useRedux';
+import { useLoginMutation } from '../services/apiSlice';
 import { Layout } from '../components/Layout';
 
 const { Title, Text } = Typography;
@@ -37,9 +37,9 @@ const GoogleButton = styled(Button)`
 `;
 
 export const LoginPage = () => {
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { loading, error, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const [login, { isLoading, error }] = useLoginMutation();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -48,7 +48,15 @@ export const LoginPage = () => {
   }, [isAuthenticated, navigate]);
 
   const onFinish = async (values: { email: string; password: string }) => {
-    await dispatch(login(values));
+    try {
+      const result = await login(values).unwrap();
+      if (result.success) {
+        message.success('Login successful!');
+        navigate('/dashboard');
+      }
+    } catch (err: any) {
+      message.error(err.data?.error || 'Login failed');
+    }
   };
 
   const handleGoogleLogin = () => {
@@ -64,10 +72,6 @@ export const LoginPage = () => {
               <Title level={2}>Welcome Back</Title>
               <Text type="secondary">Sign in to your Art Fare account</Text>
             </div>
-
-            {error && (
-              <Alert message={error} type="error" showIcon closable />
-            )}
 
             <GoogleButton
               icon={<GoogleOutlined />}
@@ -119,7 +123,7 @@ export const LoginPage = () => {
               </Form.Item>
 
               <Form.Item>
-                <Button type="primary" htmlType="submit" size="large" block loading={loading}>
+                <Button type="primary" htmlType="submit" size="large" block loading={isLoading}>
                   Sign In
                 </Button>
               </Form.Item>

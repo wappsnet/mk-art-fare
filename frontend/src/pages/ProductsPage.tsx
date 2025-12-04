@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Row, Col, Card, Input, Select, Slider, Button, Typography, Spin, Empty, Pagination } from 'antd';
 import { SearchOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { Layout } from '../components/Layout';
-import { apiService } from '../services/api';
-import { Product, ApiResponse } from '../types';
+import { useGetProductsQuery } from '../services/apiSlice';
+import { Product } from '../types';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -61,39 +61,19 @@ const ProductShop = styled(Text)`
 `;
 
 export const ProductsPage = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
   const limit = 12;
 
-  useEffect(() => {
-    fetchProducts();
-  }, [page, search]);
+  const { data: productsData, isLoading: loading } = useGetProductsQuery({
+    search,
+    page,
+    limit
+  });
 
-  const fetchProducts = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-        ...(search && { search })
-      });
-
-      const response = await apiService.get<ApiResponse<Product[]>>(`/products?${params}`);
-
-      if (response.success && response.data) {
-        setProducts(response.data);
-        setTotal(response.pagination?.total || 0);
-      }
-    } catch (error) {
-      console.error('Failed to fetch products:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const products = productsData?.data?.products || [];
+  const total = productsData?.data?.total || 0;
 
   const handleSearch = (value: string) => {
     setSearch(value);

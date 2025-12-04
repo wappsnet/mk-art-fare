@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Typography, Avatar, Divider, Button, Input, List, Comment as AntComment, Form, message, Spin, Breadcrumb } from 'antd';
 import { UserOutlined, CalendarOutlined, EyeOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import { Layout } from '../components/Layout';
-import { apiService } from '../services/api';
-import { BlogPost, BlogComment, ApiResponse } from '../types';
+import { useGetBlogPostQuery } from '../services/apiSlice';
 import { useAppSelector } from '../hooks/useRedux';
 
 const { Title, Paragraph, Text } = Typography;
@@ -60,42 +59,39 @@ const CommentSection = styled.div`
 
 export const BlogPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const [post, setPost] = useState<BlogPost | null>(null);
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [form] = Form.useForm();
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
 
-  useEffect(() => {
-    if (slug) {
-      fetchPost();
-    }
-  }, [slug]);
+  const { data: postData, isLoading: loading, refetch } = useGetBlogPostQuery(slug || '', {
+    skip: !slug
+  });
 
-  const fetchPost = async () => {
-    setLoading(true);
-    try {
-      const response = await apiService.get<ApiResponse<BlogPost>>(`/blog/${slug}`);
-      if (response.success && response.data) {
-        setPost(response.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch blog post:', error);
-      message.error('Failed to load blog post');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const post = postData?.data;
 
   const handleSubmitComment = async (values: { content: string }) => {
     if (!post) return;
 
     setSubmitting(true);
     try {
-      await apiService.post(`/blog/${post.id}/comments`, values);
-      message.success('Comment added successfully!');
-      form.resetFields();
-      fetchPost(); // Refresh to get new comments
+      // Note: This would need a separate mutation endpoint for blog comments
+      // For now, keeping the direct API call
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/blog/${post.id}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+        },
+        body: JSON.stringify(values)
+      });
+
+      if (response.ok) {
+        message.success('Comment added successfully!');
+        form.resetFields();
+        refetch(); // Refresh to get new comments
+      } else {
+        throw new Error('Failed to add comment');
+      }
     } catch (error) {
       message.error('Failed to add comment');
     } finally {

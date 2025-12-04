@@ -1,13 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Row, Col, Typography, Button, InputNumber, Divider, Tag, Spin, message, Breadcrumb, Image } from 'antd';
 import { ShoppingCartOutlined, ShopOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import { Layout } from '../components/Layout';
-import { apiService } from '../services/api';
-import { Product, ApiResponse } from '../types';
-import { useAppDispatch } from '../hooks/useRedux';
-import { addToCart, fetchCart } from '../store/cartSlice';
+import { useGetProductQuery, useAddToCartMutation } from '../services/apiSlice';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -56,45 +53,23 @@ const ComparePrice = styled.span`
 
 export const ProductDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const dispatch = useAppDispatch();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
-  const [adding, setAdding] = useState(false);
 
-  useEffect(() => {
-    if (slug) {
-      fetchProduct();
-    }
-  }, [slug]);
+  const { data: productData, isLoading: loading, error } = useGetProductQuery(slug || '', {
+    skip: !slug
+  });
+  const [addToCart, { isLoading: adding }] = useAddToCartMutation();
 
-  const fetchProduct = async () => {
-    setLoading(true);
-    try {
-      const response = await apiService.get<ApiResponse<Product>>(`/products/${slug}`);
-      if (response.success && response.data) {
-        setProduct(response.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch product:', error);
-      message.error('Failed to load product');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const product = productData?.data;
 
   const handleAddToCart = async () => {
     if (!product) return;
 
-    setAdding(true);
     try {
-      await dispatch(addToCart({ productId: product.id, quantity })).unwrap();
-      await dispatch(fetchCart());
+      await addToCart({ product_id: product.id, quantity }).unwrap();
       message.success('Added to cart!');
     } catch (error) {
       message.error('Failed to add to cart');
-    } finally {
-      setAdding(false);
     }
   };
 

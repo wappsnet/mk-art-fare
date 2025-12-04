@@ -3,9 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ConfigProvider } from 'antd';
 import { Provider } from 'react-redux';
 import { store } from './store';
-import { useAppDispatch } from './hooks/useRedux';
-import { fetchProfile } from './store/authSlice';
-import { fetchCart } from './store/cartSlice';
+import { useGetProfileQuery, useGetCartQuery } from './services/apiSlice';
 import './styles/global.scss';
 
 // Implemented pages
@@ -25,15 +23,13 @@ import { CheckoutPage } from './pages/CheckoutPage';
 import { AdminPage } from './pages/AdminPage';
 
 function AppContent() {
-  const dispatch = useAppDispatch();
+  const token = localStorage.getItem('accessToken');
 
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      dispatch(fetchProfile());
-    }
-    dispatch(fetchCart());
-  }, [dispatch]);
+  // Fetch profile if token exists
+  useGetProfileQuery(undefined, { skip: !token });
+
+  // Always fetch cart
+  useGetCartQuery();
 
   return (
     <BrowserRouter>

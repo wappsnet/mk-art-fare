@@ -1,11 +1,9 @@
-import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Row, Col, Card, Typography, Button, Tabs, Spin, Empty, Tag, Avatar } from 'antd';
 import { ShoppingCartOutlined, UserOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import { Layout } from '../components/Layout';
-import { apiService } from '../services/api';
-import { Organization, Product, ApiResponse } from '../types';
+import { useGetOrganizationQuery, useGetOrganizationProductsQuery } from '../services/apiSlice';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -89,37 +87,17 @@ const ProductPrice = styled.div`
 
 export const ShopPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const [shop, setShop] = useState<Organization | null>(null);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (slug) {
-      fetchShop();
-    }
-  }, [slug]);
+  const { data: shopData, isLoading: shopLoading } = useGetOrganizationQuery(slug || '', {
+    skip: !slug
+  });
+  const { data: productsData, isLoading: productsLoading } = useGetOrganizationProductsQuery(slug || '', {
+    skip: !slug
+  });
 
-  const fetchShop = async () => {
-    setLoading(true);
-    try {
-      const shopResponse = await apiService.get<ApiResponse<Organization>>(`/organizations/${slug}`);
-      if (shopResponse.success && shopResponse.data) {
-        setShop(shopResponse.data);
-
-        // Fetch shop products
-        const productsResponse = await apiService.get<ApiResponse<Product[]>>(
-          `/products?organizationId=${shopResponse.data.id}`
-        );
-        if (productsResponse.success && productsResponse.data) {
-          setProducts(productsResponse.data);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch shop:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const shop = shopData?.data;
+  const products = productsData?.data || [];
+  const loading = shopLoading || productsLoading;
 
   if (loading) {
     return (

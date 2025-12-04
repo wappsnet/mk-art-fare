@@ -6,8 +6,7 @@ import styled from '@emotion/styled';
 import dayjs from 'dayjs';
 import { Layout } from '../components/Layout';
 import { useAppSelector } from '../hooks/useRedux';
-import { apiService } from '../services/api';
-import { ApiResponse } from '../types';
+import { useGetUsersQuery, useUpdateUserMutation, useGetOrganizationsQuery, useGetBlogPostsQuery, useGetEventsQuery } from '../services/apiSlice';
 
 const { Title, Text } = Typography;
 
@@ -83,24 +82,31 @@ interface PlatformStats {
 export const AdminPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
-  const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState<User[]>([]);
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
-  const [events, setEvents] = useState<Event[]>([]);
-  const [stats, setStats] = useState<PlatformStats>({
-    totalUsers: 0,
-    totalOrganizations: 0,
-    totalProducts: 0,
-    totalOrders: 0,
-    totalRevenue: 0,
-    totalBlogPosts: 0,
-    totalEvents: 0
-  });
   const [editUserModal, setEditUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [form] = Form.useForm();
+
+  const { data: usersData, isLoading: usersLoading } = useGetUsersQuery();
+  const { data: orgsData, isLoading: orgsLoading } = useGetOrganizationsQuery();
+  const { data: blogData, isLoading: blogLoading } = useGetBlogPostsQuery({});
+  const { data: eventsData, isLoading: eventsLoading } = useGetEventsQuery({});
+  const [updateUser] = useUpdateUserMutation();
+
+  const users = usersData?.data || [];
+  const organizations = orgsData?.data || [];
+  const blogPosts = blogData?.data?.posts || [];
+  const events = eventsData?.data || [];
+  const loading = usersLoading || orgsLoading || blogLoading || eventsLoading;
+
+  const stats: PlatformStats = {
+    totalUsers: users.length,
+    totalOrganizations: organizations.length,
+    totalProducts: 0,
+    totalOrders: 0,
+    totalRevenue: 0,
+    totalBlogPosts: blogPosts.length,
+    totalEvents: events.length
+  };
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -113,54 +119,7 @@ export const AdminPage = () => {
       navigate('/');
       return;
     }
-
-    fetchAdminData();
   }, [isAuthenticated, user, navigate]);
-
-  const fetchAdminData = async () => {
-    setLoading(true);
-    try {
-      // Fetch users
-      const usersResponse = await apiService.get<ApiResponse<User[]>>('/users');
-      if (usersResponse.success && usersResponse.data) {
-        setUsers(usersResponse.data);
-      }
-
-      // Fetch organizations
-      const orgsResponse = await apiService.get<ApiResponse<Organization[]>>('/organizations');
-      if (orgsResponse.success && orgsResponse.data) {
-        setOrganizations(orgsResponse.data);
-      }
-
-      // Fetch blog posts
-      const blogResponse = await apiService.get<ApiResponse<{ posts: BlogPost[] }>>('/blog');
-      if (blogResponse.success && blogResponse.data) {
-        setBlogPosts(blogResponse.data.posts);
-      }
-
-      // Fetch events
-      const eventsResponse = await apiService.get<ApiResponse<Event[]>>('/events');
-      if (eventsResponse.success && eventsResponse.data) {
-        setEvents(eventsResponse.data);
-      }
-
-      // Calculate stats
-      setStats({
-        totalUsers: usersResponse.data?.length || 0,
-        totalOrganizations: orgsResponse.data?.length || 0,
-        totalProducts: 0, // Would need a separate API call
-        totalOrders: 0,
-        totalRevenue: 0,
-        totalBlogPosts: blogResponse.data?.posts?.length || 0,
-        totalEvents: eventsResponse.data?.length || 0
-      });
-    } catch (error) {
-      console.error('Failed to fetch admin data:', error);
-      message.error('Failed to load admin data');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleEditUser = (user: User) => {
     setSelectedUser(user);
@@ -175,17 +134,19 @@ export const AdminPage = () => {
     if (!selectedUser) return;
 
     try {
-      await apiService.patch(`/users/${selectedUser.id}`, {
-        role: values.role,
-        is_active: values.is_active === 'active'
-      });
+      await updateUser({
+        id: selectedUser.id,
+        data: {
+          role: values.role,
+          is_active: values.is_active === 'active'
+        }
+      }).unwrap();
 
       message.success('User updated successfully');
       setEditUserModal(false);
       form.resetFields();
-      fetchAdminData();
     } catch (error: any) {
-      message.error(error.response?.data?.error || 'Failed to update user');
+      message.error(error.message || 'Failed to update user');
     }
   };
 

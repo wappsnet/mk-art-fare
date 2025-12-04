@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Row, Col, Typography, Card, Button, InputNumber, Divider, Tag, Spin, message, Breadcrumb, Space, Modal, Form } from 'antd';
 import { CalendarOutlined, EnvironmentOutlined, UserOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import dayjs from 'dayjs';
 import { Layout } from '../components/Layout';
-import { apiService } from '../services/api';
-import { Event, EventTicket, ApiResponse } from '../types';
+import { useGetEventQuery, useBookEventMutation } from '../services/apiSlice';
+import { Event, EventTicket } from '../types';
 import { useAppSelector } from '../hooks/useRedux';
 
 const { Title, Paragraph, Text } = Typography;
@@ -59,35 +59,18 @@ const TicketCard = styled.div`
 export const EventDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const [event, setEvent] = useState<Event | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [booking, setBooking] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<EventTicket | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [modalVisible, setModalVisible] = useState(false);
   const [form] = Form.useForm();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
-  useEffect(() => {
-    if (slug) {
-      fetchEvent();
-    }
-  }, [slug]);
+  const { data: eventData, isLoading: loading, refetch } = useGetEventQuery(slug || '', {
+    skip: !slug
+  });
+  const [bookEvent, { isLoading: booking }] = useBookEventMutation();
 
-  const fetchEvent = async () => {
-    setLoading(true);
-    try {
-      const response = await apiService.get<ApiResponse<Event>>(`/events/${slug}`);
-      if (response.success && response.data) {
-        setEvent(response.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch event:', error);
-      message.error('Failed to load event');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const event = eventData?.data;
 
   const handleBookTicket = () => {
     if (!isAuthenticated) {
@@ -107,22 +90,20 @@ export const EventDetailPage = () => {
   const handleConfirmBooking = async (values: any) => {
     if (!event || !selectedTicket) return;
 
-    setBooking(true);
     try {
-      await apiService.post(`/events/${event.id}/book`, {
+      await bookEvent({
+        eventId: event.id,
         ticketId: selectedTicket.id,
         quantity,
         attendeeInfo: values
-      });
+      }).unwrap();
 
       message.success('Booking confirmed!');
       setModalVisible(false);
       form.resetFields();
-      fetchEvent();
+      refetch();
     } catch (error: any) {
-      message.error(error.response?.data?.error || 'Failed to book ticket');
-    } finally {
-      setBooking(false);
+      message.error(error.message || 'Failed to book ticket');
     }
   };
 

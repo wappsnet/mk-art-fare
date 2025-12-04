@@ -1,11 +1,10 @@
-import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Row, Col, Card, Typography, Button, InputNumber, List, Empty, Divider, Space, message } from 'antd';
 import { DeleteOutlined, ShoppingOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import { Layout } from '../components/Layout';
-import { useAppDispatch, useAppSelector } from '../hooks/useRedux';
-import { fetchCart, updateCartItem, clearCart } from '../store/cartSlice';
+import { useAppSelector } from '../hooks/useRedux';
+import { useGetCartQuery, useUpdateCartItemMutation, useRemoveFromCartMutation, useClearCartMutation } from '../services/apiSlice';
 
 const { Title, Text } = Typography;
 
@@ -43,19 +42,20 @@ const SummaryRow = styled.div`
 `;
 
 export const CartPage = () => {
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { cart, loading } = useAppSelector((state) => state.cart);
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
-  useEffect(() => {
-    dispatch(fetchCart());
-  }, [dispatch]);
+  const { data: cartData, isLoading: loading } = useGetCartQuery();
+  const [updateCartItem] = useUpdateCartItemMutation();
+  const [removeFromCart] = useRemoveFromCartMutation();
+  const [clearCart] = useClearCartMutation();
+
+  const cart = cartData?.data;
 
   const handleUpdateQuantity = async (productId: number, quantity: number) => {
     try {
-      await dispatch(updateCartItem({ productId, quantity })).unwrap();
-      await dispatch(fetchCart());
+      await updateCartItem({ product_id: productId, quantity }).unwrap();
+      message.success('Cart updated');
     } catch (error) {
       message.error('Failed to update cart');
     }
@@ -63,8 +63,7 @@ export const CartPage = () => {
 
   const handleRemoveItem = async (productId: number) => {
     try {
-      await dispatch(updateCartItem({ productId, quantity: 0 })).unwrap();
-      await dispatch(fetchCart());
+      await removeFromCart(productId).unwrap();
       message.success('Item removed from cart');
     } catch (error) {
       message.error('Failed to remove item');
@@ -73,7 +72,7 @@ export const CartPage = () => {
 
   const handleClearCart = async () => {
     try {
-      await dispatch(clearCart()).unwrap();
+      await clearCart().unwrap();
       message.success('Cart cleared');
     } catch (error) {
       message.error('Failed to clear cart');
@@ -89,7 +88,19 @@ export const CartPage = () => {
     navigate('/checkout');
   };
 
-  if (!cart || cart.items.length === 0) {
+  if (loading) {
+    return (
+      <Layout>
+        <Container>
+          <div style={{ textAlign: 'center', padding: '100px 0' }}>
+            <Empty description="Loading cart..." />
+          </div>
+        </Container>
+      </Layout>
+    );
+  }
+
+  if (!cart || cart.items?.length === 0) {
     return (
       <Layout>
         <Container>

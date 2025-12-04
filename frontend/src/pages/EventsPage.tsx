@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Row, Col, Card, Typography, Button, Select, DatePicker, Spin, Empty, Tag, Space } from 'antd';
 import { CalendarOutlined, EnvironmentOutlined, UserOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import dayjs from 'dayjs';
 import { Layout } from '../components/Layout';
-import { apiService } from '../services/api';
-import { Event, ApiResponse } from '../types';
+import { useGetEventsQuery } from '../services/apiSlice';
+import { Event } from '../types';
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;
@@ -66,37 +66,17 @@ const EventMeta = styled.div`
 `;
 
 export const EventsPage = () => {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
   const [eventType, setEventType] = useState<string>('');
   const [city, setCity] = useState<string>('');
   const [startDate, setStartDate] = useState<string>('');
 
-  useEffect(() => {
-    fetchEvents();
-  }, [eventType, city, startDate]);
+  const { data: eventsData, isLoading: loading } = useGetEventsQuery({
+    type: eventType,
+    city,
+    startDate
+  });
 
-  const fetchEvents = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        page: '1',
-        limit: '12',
-        ...(eventType && { eventType }),
-        ...(city && { city }),
-        ...(startDate && { startDate })
-      });
-
-      const response = await apiService.get<ApiResponse<Event[]>>(`/events?${params}`);
-      if (response.success && response.data) {
-        setEvents(response.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch events:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const events = eventsData?.data || [];
 
   const formatEventDate = (startDate: string, endDate: string) => {
     const start = dayjs(startDate);

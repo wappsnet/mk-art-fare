@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Row, Col, Card, Statistic, Typography, Table, Tag, Button, Space, Tabs } from 'antd';
 import { ShopOutlined, ShoppingOutlined, DollarOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import { Layout } from '../components/Layout';
 import { useAppSelector } from '../hooks/useRedux';
-import { apiService } from '../services/api';
-import { Order, Organization, ApiResponse } from '../types';
+import { useGetOrdersQuery, useGetDashboardStatsQuery } from '../services/apiSlice';
+import { Order } from '../types';
 
 const { Title, Text } = Typography;
 
@@ -26,38 +26,20 @@ const StatCard = styled(Card)`
 export const DashboardPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  const { data: statsData } = useGetDashboardStatsQuery();
+  const { data: ordersData, isLoading: loading } = useGetOrdersQuery();
+
+  const stats = statsData?.data || {};
+  const orders = ordersData?.data || [];
+  const organizations = stats?.organizations || [];
 
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
       return;
     }
-    fetchDashboardData();
   }, [isAuthenticated, navigate]);
-
-  const fetchDashboardData = async () => {
-    setLoading(true);
-    try {
-      // Fetch user's organizations
-      const orgsResponse = await apiService.get<ApiResponse<Organization[]>>('/organizations/my');
-      if (orgsResponse.success && orgsResponse.data) {
-        setOrganizations(orgsResponse.data);
-      }
-
-      // Fetch user's orders
-      const ordersResponse = await apiService.get<ApiResponse<Order[]>>('/orders/my');
-      if (ordersResponse.success && ordersResponse.data) {
-        setOrders(ordersResponse.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const orderColumns = [
     {

@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Row, Col, Card, Typography, Tag, Avatar, Spin, Empty, Pagination, Input } from 'antd';
 import { UserOutlined, EyeOutlined, CalendarOutlined, SearchOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import { Layout } from '../components/Layout';
-import { apiService } from '../services/api';
-import { BlogPost, ApiResponse } from '../types';
+import { useGetBlogPostsQuery } from '../services/apiSlice';
+import { BlogPost } from '../types';
 
 const { Title, Paragraph, Text } = Typography;
 const { Search } = Input;
@@ -65,42 +65,22 @@ const FeaturedBadge = styled(Tag)`
 `;
 
 export const BlogPage = () => {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
   const [search, setSearch] = useState('');
   const limit = 9;
 
-  useEffect(() => {
-    fetchPosts();
-  }, [page]);
+  const { data: blogData, isLoading: loading } = useGetBlogPostsQuery({
+    search,
+    page,
+    limit
+  });
 
-  const fetchPosts = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-        ...(search && { search })
-      });
-
-      const response = await apiService.get<ApiResponse<BlogPost[]>>(`/blog?${params}`);
-      if (response.success && response.data) {
-        setPosts(response.data);
-        setTotal(response.pagination?.total || 0);
-      }
-    } catch (error) {
-      console.error('Failed to fetch blog posts:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const posts = blogData?.data?.posts || [];
+  const total = blogData?.data?.total || 0;
 
   const handleSearch = (value: string) => {
     setSearch(value);
     setPage(1);
-    fetchPosts();
   };
 
   const formatDate = (dateString: string) => {

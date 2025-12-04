@@ -2,8 +2,8 @@ import { Layout as AntLayout, Menu, Badge, Avatar, Dropdown, Button, Space } fro
 import { ShoppingCartOutlined, UserOutlined, LoginOutlined, LogoutOutlined, DashboardOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
-import { useAppSelector, useAppDispatch } from '../hooks/useRedux';
-import { logout } from '../store/authSlice';
+import { useAppSelector } from '../hooks/useRedux';
+import { useGetCartQuery, useLogoutMutation } from '../services/apiSlice';
 
 const { Header: AntHeader } = AntLayout;
 
@@ -46,13 +46,13 @@ const NavMenu = styled(Menu)`
 `;
 
 export const Header = () => {
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
-  const { cart } = useAppSelector((state) => state.cart);
+  const { data: cartData } = useGetCartQuery();
+  const [logout] = useLogoutMutation();
 
   const handleLogout = async () => {
-    await dispatch(logout());
+    await logout();
     navigate('/');
   };
 
@@ -97,7 +97,7 @@ export const Header = () => {
 
       <Space size="large">
         <Link to="/cart">
-          <Badge count={cart?.items?.length || 0}>
+          <Badge count={cartData?.data?.items?.length || 0}>
             <ShoppingCartOutlined style={{ fontSize: '24px', color: '#000' }} />
           </Badge>
         </Link>
