@@ -134,7 +134,7 @@ export const DashboardPage = () => {
               { pattern: /^[a-z0-9-]+$/, message: 'Only lowercase letters, numbers, and hyphens' },
             ]}
           >
-            <Input placeholder="e.g., my-art-studio" addonBefore="artfare.com/" />
+            <Input placeholder="e.g., my-art-studio" />
           </Form.Item>
 
           <Form.Item name="description" label="Description">

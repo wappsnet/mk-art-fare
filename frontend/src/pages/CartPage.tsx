@@ -80,7 +80,7 @@ export const CartPage = () => {
 
   const handleRemoveItem = async (productId: number) => {
     try {
-      await removeFromCart(productId).unwrap();
+      await removeFromCart({ productId }).unwrap();
       message.success('Item removed from cart');
     } catch (error) {
       message.error('Failed to remove item');
@@ -171,7 +171,7 @@ export const CartPage = () => {
                       </Text>
                       <div style={{ marginTop: 8 }}>
                         <Text strong style={{ fontSize: 16, color: '#1890ff' }}>
-                          ${item.price.toFixed(2)}
+                          ${parseFloat(item.price).toFixed(2)}
                         </Text>
                       </div>
                     </Col>

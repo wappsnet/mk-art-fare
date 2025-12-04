@@ -10,22 +10,22 @@ export default defineConfig({
     react({
       jsxImportSource: '@emotion/react',
       babel: {
-        plugins: ['@emotion/babel-plugin']
-      }
-    })
+        plugins: ['@emotion/babel-plugin'],
+      },
+    }),
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src')
-    }
+      '@': path.resolve(__dirname, './src'),
+    },
   },
   server: {
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true
-      }
-    }
-  }
+        target: 'http://localhost:5001',
+        changeOrigin: true,
+      },
+    },
+  },
 });

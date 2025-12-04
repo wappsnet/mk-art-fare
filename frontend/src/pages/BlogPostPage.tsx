@@ -92,17 +92,14 @@ export const BlogPostPage = () => {
     try {
       // Note: This would need a separate mutation endpoint for blog comments
       // For now, keeping the direct API call
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/blog/${post.id}/comments`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-          },
-          body: JSON.stringify(values),
-        }
-      );
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/blog/${post.id}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+        body: JSON.stringify(values),
+      });
 
       if (response.ok) {
         message.success('Comment added successfully!');

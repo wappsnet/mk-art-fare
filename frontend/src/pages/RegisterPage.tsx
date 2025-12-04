@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Form, Input, Button, Card, Typography, Divider, Alert, Space, Radio, message } from 'antd';
+import { Form, Input, Button, Card, Typography, Divider, Space, message } from 'antd';
 import { MailOutlined, LockOutlined, UserOutlined, GoogleOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
@@ -50,8 +50,8 @@ export const RegisterPage = () => {
   const onFinish = async (values: {
     email: string;
     password: string;
-    first_name?: string;
-    last_name?: string;
+    first_name: string;
+    last_name: string;
   }) => {
     try {
       const result = await register(values).unwrap();

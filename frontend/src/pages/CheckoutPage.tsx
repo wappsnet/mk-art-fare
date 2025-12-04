@@ -20,6 +20,7 @@ import styled from '@emotion/styled';
 import { Layout } from '../components/Layout';
 import { useAppSelector } from '../hooks/useRedux';
 import {
+  useGetCartQuery,
   useGetUserAddressesQuery,
   useCreateUserAddressMutation,
   useCreateOrderMutation,
@@ -65,17 +66,20 @@ interface Address {
 export const CheckoutPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
-  const { items, total } = useAppSelector((state) => state.cart);
   const [form] = Form.useForm();
   const [selectedAddress, setSelectedAddress] = useState<number | null>(null);
   const [useNewAddress, setUseNewAddress] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('credit_card');
 
+  const { data: cartData } = useGetCartQuery();
   const { data: addressesData } = useGetUserAddressesQuery();
   const [createAddress] = useCreateUserAddressMutation();
   const [createOrder, { isLoading: orderLoading }] = useCreateOrderMutation();
   const [clearCart] = useClearCartMutation();
 
+  const cart = cartData?.data;
+  const items = cart?.items || [];
+  const total = cart?.total || 0;
   const addresses = addressesData?.data || [];
 
   useEffect(() => {
@@ -347,11 +351,11 @@ export const CheckoutPage = () => {
                   {items.map((item) => (
                     <CartItem key={item.product_id}>
                       <div>
-                        <Text strong>{item.product_name}</Text>
+                        <Text strong>{item.name}</Text>
                         <br />
                         <Text type="secondary">Quantity: {item.quantity}</Text>
                       </div>
-                      <Text>${(item.price * item.quantity).toFixed(2)}</Text>
+                      <Text>${(parseFloat(item.price) * item.quantity).toFixed(2)}</Text>
                     </CartItem>
                   ))}
                 </div>

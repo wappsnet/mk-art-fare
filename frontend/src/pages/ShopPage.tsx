@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
-import { Row, Col, Card, Typography, Button, Tabs, Spin, Empty, Tag, Avatar } from 'antd';
-import { ShoppingCartOutlined, UserOutlined, EnvironmentOutlined } from '@ant-design/icons';
+import { Row, Col, Card, Typography, Button, Tabs, Spin, Empty, Tag } from 'antd';
+import { ShoppingCartOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import { Layout } from '../components/Layout';
 import { useGetOrganizationQuery, useGetOrganizationProductsQuery } from '@/services/apiSlice';
@@ -137,7 +137,7 @@ export const ShopPage = () => {
                   <Link to={`/products/${product.slug}`}>
                     <ProductCard
                       cover={
-                        product.images && product.images[0] ? (
+                        product.images?.[0] ? (
                           <img alt={product.name} src={product.images[0].url} />
                         ) : (
                           <div
@@ -196,8 +196,7 @@ export const ShopPage = () => {
           <div style={{ marginTop: 24 }}>
             <Text strong>Shop Information</Text>
             <div style={{ marginTop: 12 }}>
-              <Avatar size={48} icon={<UserOutlined />} style={{ marginRight: 12 }} />
-              <Text>{shop.owner_first_name || 'Shop Owner'}</Text>
+              <Text type="secondary">Visit this shop to discover unique artwork and products.</Text>
             </div>
           </div>
         </Card>
@@ -208,9 +207,13 @@ export const ShopPage = () => {
   return (
     <Layout>
       <ShopHeader bgColor={shop.primary_color} textColor={shop.text_color}>
-        {shop.banner_url && <BannerImage url={shop.banner_url} />}
+        {shop.banner_url && (
+          <BannerImage url={`${import.meta.env.VITE_API_HOST}${shop.banner_url}`} />
+        )}
         <ShopContent>
-          {shop.logo_url && <ShopLogo src={shop.logo_url} alt={shop.name} />}
+          {shop.logo_url && (
+            <ShopLogo src={`${import.meta.env.VITE_API_HOST}${shop.logo_url}`} alt={shop.name} />
+          )}
           <Title level={1} style={{ color: 'inherit', marginBottom: 16 }}>
             {shop.name}
           </Title>

@@ -1,8 +1,11 @@
 import { Router } from 'express';
 import { organizationController } from '../controllers/organizationController.js';
 import { authenticate, authorize } from '../middleware/auth.js';
-import { asyncHandler } from '../middleware/errorHandler.js';
+import { asyncHandler, AppError } from '../middleware/errorHandler.js';
 import { UserRole } from '../types/index.js';
+import { organizationUpload } from '../config/organizationMulter.js';
+import { sendSuccess } from '../utils/response.js';
+import { query } from '../config/database.js';
 
 const router = Router();
 
@@ -50,6 +53,48 @@ router.patch(
   authenticate,
   authorize(UserRole.ARTIST, UserRole.ADMIN),
   asyncHandler(organizationController.updateTheme.bind(organizationController))
+);
+
+// Upload logo
+router.post(
+  '/:id/upload-logo',
+  authenticate,
+  authorize(UserRole.ARTIST, UserRole.ADMIN),
+  organizationUpload.single('logo'),
+  asyncHandler(async (req, res) => {
+    const orgId = parseInt(req.params.id);
+
+    if (!req.file) {
+      throw new AppError('No file uploaded', 400);
+    }
+
+    const logoUrl = `/uploads/organizations/${req.file.filename}`;
+
+    await query('UPDATE organizations SET logo_url = ? WHERE id = ?', [logoUrl, orgId]);
+
+    sendSuccess(res, { logo_url: logoUrl }, 'Logo uploaded successfully');
+  })
+);
+
+// Upload banner
+router.post(
+  '/:id/upload-banner',
+  authenticate,
+  authorize(UserRole.ARTIST, UserRole.ADMIN),
+  organizationUpload.single('banner'),
+  asyncHandler(async (req, res) => {
+    const orgId = parseInt(req.params.id);
+
+    if (!req.file) {
+      throw new AppError('No file uploaded', 400);
+    }
+
+    const bannerUrl = `/uploads/organizations/${req.file.filename}`;
+
+    await query('UPDATE organizations SET banner_url = ? WHERE id = ?', [bannerUrl, orgId]);
+
+    sendSuccess(res, { banner_url: bannerUrl }, 'Banner uploaded successfully');
+  })
 );
 
 router.delete(

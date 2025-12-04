@@ -289,7 +289,7 @@ export const EventDetailPage = () => {
                         >
                           <Text strong>{ticket.ticket_type}</Text>
                           <Text strong style={{ color: '#1890ff' }}>
-                            ${ticket.price.toFixed(2)}
+                            ${parseFloat(ticket.price).toFixed(2)}
                           </Text>
                         </div>
                         {ticket.description && (

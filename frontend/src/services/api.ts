@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
 class ApiService {
   private api: AxiosInstance;
@@ -9,8 +9,8 @@ class ApiService {
     this.api = axios.create({
       baseURL: API_URL,
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
 
     this.api.interceptors.request.use(
@@ -35,7 +35,7 @@ class ApiService {
           try {
             const refreshToken = localStorage.getItem('refreshToken');
             const response = await axios.post(`${API_URL}/auth/refresh-token`, {
-              refreshToken
+              refreshToken,
             });
 
             const { accessToken, refreshToken: newRefreshToken } = response.data.data;

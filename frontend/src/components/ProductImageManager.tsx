@@ -57,6 +57,8 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [altTexts, setAltTexts] = useState<Record<string, string>>({});
   const [localImages, setLocalImages] = useState<ProductImage[]>(images);
+  const [editingAltId, setEditingAltId] = useState<number | null>(null);
+  const [editingAltText, setEditingAltText] = useState('');
 
   const [addImage, { isLoading: adding }] = useAddProductImageMutation();
   const [updateImage, { isLoading: updating }] = useUpdateProductImageMutation();
@@ -137,6 +139,25 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
     });
   };
 
+  const handleUpdateAltText = async (imageId: number) => {
+    try {
+      await updateImage({
+        productId,
+        imageId,
+        data: { alt_text: editingAltText },
+      }).unwrap();
+      message.success('Alt text updated!');
+      setLocalImages((prev) =>
+        prev.map((img) => (img.id === imageId ? { ...img, alt_text: editingAltText } : img))
+      );
+      setEditingAltId(null);
+      setEditingAltText('');
+      onUpdate();
+    } catch (error: any) {
+      message.error(error?.data?.message || 'Failed to update alt text');
+    }
+  };
+
   const handleUploadSelected = async () => {
     if (!fileList.length) {
       message.error('Please select image file(s)');
@@ -157,7 +178,7 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
 
     try {
       const token = localStorage.getItem('accessToken');
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const apiUrl = import.meta.env.VITE_API_URL;
       const resp = await axios.post(`${apiUrl}/products/${productId}/images/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -315,35 +336,82 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
               dataSource={localImages}
               renderItem={(img) => (
                 <ImageItem>
-                  <div style={{ position: 'relative' }}>
+                  <div style={{ position: 'relative', flexShrink: 0 }}>
                     <Image
                       src={img.url}
                       alt={img.alt_text}
-                      width={80}
-                      height={80}
+                      width={100}
+                      height={100}
                       style={{ objectFit: 'cover', borderRadius: 4 }}
                     />
                     {img.is_thumbnail && <ThumbnailBadge>Thumbnail</ThumbnailBadge>}
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <div>{img.alt_text || 'No alt text'}</div>
-                    <div style={{ fontSize: 12, color: '#999' }}>{img.url.substring(0, 50)}...</div>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <div style={{ fontSize: 12, color: '#999' }}>{img.url.substring(0, 60)}...</div>
+                    <div>
+                      {editingAltId === img.id ? (
+                        <Space.Compact style={{ width: '100%' }}>
+                          <Input
+                            placeholder="Alt text"
+                            value={editingAltText}
+                            onChange={(e) => setEditingAltText(e.target.value)}
+                            onPressEnter={() => handleUpdateAltText(img.id)}
+                            autoFocus
+                          />
+                          <Button
+                            type="primary"
+                            onClick={() => handleUpdateAltText(img.id)}
+                            loading={updating}
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              setEditingAltId(null);
+                              setEditingAltText('');
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </Space.Compact>
+                      ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <Input
+                            value={img.alt_text || ''}
+                            placeholder="No alt text - click Edit to add"
+                            readOnly
+                            style={{ flex: 1 }}
+                          />
+                          <Button
+                            size="small"
+                            onClick={() => {
+                              setEditingAltId(img.id);
+                              setEditingAltText(img.alt_text || '');
+                            }}
+                          >
+                            Edit Alt
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <Space>
+                  <Space direction="vertical">
                     <Button
                       icon={img.is_thumbnail ? <StarFilled /> : <StarOutlined />}
                       onClick={() => handleSetThumbnail(img.id, img.is_thumbnail || false)}
-                      loading={updating}
+                      loading={updating && editingAltId !== img.id}
                       type={img.is_thumbnail ? 'primary' : 'default'}
                       size="small"
+                      block
                     >
-                      {img.is_thumbnail ? 'Thumbnail' : 'Set as Thumbnail'}
+                      {img.is_thumbnail ? 'Thumbnail' : 'Set Thumbnail'}
                     </Button>
                     <Button
                       danger
                       icon={<DeleteOutlined />}
                       onClick={() => handleDeleteImage(img.id)}
                       size="small"
+                      block
                     >
                       Delete
                     </Button>

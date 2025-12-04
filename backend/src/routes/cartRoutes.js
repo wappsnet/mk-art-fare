@@ -56,6 +56,13 @@ router.post(
   asyncHandler(async (req, res) => {
     const { productId, quantity, sessionId } = req.body;
 
+    if (!productId) {
+      throw new AppError('Product ID is required', 400);
+    }
+    if (!quantity || quantity < 1) {
+      throw new AppError('Valid quantity is required', 400);
+    }
+
     let cartId = null;
 
     if (req.user) {

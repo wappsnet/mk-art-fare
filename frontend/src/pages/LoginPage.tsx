@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Form, Input, Button, Card, Typography, Divider, Alert, Space, message } from 'antd';
+import { Form, Input, Button, Card, Typography, Divider, Space, message } from 'antd';
 import { MailOutlined, LockOutlined, GoogleOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
@@ -39,7 +39,7 @@ const GoogleButton = styled(Button)`
 export const LoginPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
-  const [login, { isLoading, error }] = useLoginMutation();
+  const [login, { isLoading }] = useLoginMutation();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -47,9 +47,10 @@ export const LoginPage = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const onFinish = async (values: { email: string; password: string }) => {
+  const onFinish = async (values: unknown) => {
     try {
-      const result = await login(values).unwrap();
+      const { email, password } = values as { email: string; password: string };
+      const result = await login({ email, password }).unwrap();
       if (result.success) {
         message.success('Login successful!');
         navigate('/dashboard');
@@ -87,14 +88,19 @@ export const LoginPage = () => {
                   { type: 'email', message: 'Please enter a valid email!' },
                 ]}
               >
-                <Input prefix={<MailOutlined />} placeholder="Email" size="large" />
+                <Input name="email" prefix={<MailOutlined />} placeholder="Email" size="large" />
               </Form.Item>
 
               <Form.Item
                 name="password"
                 rules={[{ required: true, message: 'Please input your password!' }]}
               >
-                <Input.Password prefix={<LockOutlined />} placeholder="Password" size="large" />
+                <Input.Password
+                  name="password"
+                  prefix={<LockOutlined />}
+                  placeholder="Password"
+                  size="large"
+                />
               </Form.Item>
 
               <Form.Item>

@@ -16,9 +16,9 @@ const pool = mysql.createPool({
   keepAliveInitialDelay: 0,
 });
 
-export const query = async (sql, params) => {
+export const query = async (sql, params = []) => {
   try {
-    const [results] = await pool.execute(sql, params);
+    const [results] = await pool.execute(sql, params || []);
     return results;
   } catch (error) {
     console.error('Database query error:', error);

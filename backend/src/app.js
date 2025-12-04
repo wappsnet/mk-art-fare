@@ -20,7 +20,19 @@ import categoryRoutes from './routes/categoryRoutes.js';
 const app = express();
 
 // Security middleware
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'https:', 'http:'],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+      },
+    },
+  })
+);
 app.use(
   cors({
     origin: config.frontendUrl,

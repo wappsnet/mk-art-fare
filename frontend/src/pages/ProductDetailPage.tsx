@@ -135,7 +135,7 @@ export const ProductDetailPage = () => {
     if (!product) return;
 
     try {
-      await addToCart({ product_id: product.id, quantity }).unwrap();
+      await addToCart({ productId: product.id, quantity }).unwrap();
       message.success('Added to cart!');
     } catch (error) {
       message.error('Failed to add to cart');
@@ -230,9 +230,9 @@ export const ProductDetailPage = () => {
 
             <PriceSection>
               <Price>
-                ${product.price.toFixed(2)}
-                {product.compare_at_price && product.compare_at_price > product.price && (
-                  <ComparePrice>${product.compare_at_price.toFixed(2)}</ComparePrice>
+                ${parseFloat(product.price).toFixed(2)}
+                {product.compare_at_price && parseFloat(product.compare_at_price) > parseFloat(product.price) && (
+                  <ComparePrice>${parseFloat(product.compare_at_price).toFixed(2)}</ComparePrice>
                 )}
               </Price>
               {product.stock_quantity > 0 ? (

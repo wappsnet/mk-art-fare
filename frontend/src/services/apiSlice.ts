@@ -1,9 +1,19 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
-import { ApiResponse, User, Product, CartItem, Order, BlogPost, Event, Organization, Category } from '../types';
+import {
+  ApiResponse,
+  User,
+  Product,
+  CartItem,
+  Order,
+  BlogPost,
+  Event,
+  Organization,
+  Category,
+} from '@/types';
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  baseUrl: import.meta.env.VITE_API_URL,
   prepareHeaders: (headers) => {
     const token = localStorage.getItem('accessToken');
     if (token) {
@@ -35,7 +45,10 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
       );
 
       if (refreshResult.data) {
-        const data = refreshResult.data as ApiResponse<{ accessToken: string; refreshToken: string }>;
+        const data = refreshResult.data as ApiResponse<{
+          accessToken: string;
+          refreshToken: string;
+        }>;
         if (data.success && data.data) {
           localStorage.setItem('accessToken', data.data.accessToken);
           localStorage.setItem('refreshToken', data.data.refreshToken);
@@ -57,10 +70,23 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['User', 'Product', 'Cart', 'Order', 'Blog', 'Event', 'Organization', 'Address', 'Category'],
+  tagTypes: [
+    'User',
+    'Product',
+    'Cart',
+    'Order',
+    'Blog',
+    'Event',
+    'Organization',
+    'Address',
+    'Category',
+  ],
   endpoints: (builder) => ({
     // Auth endpoints
-    login: builder.mutation<ApiResponse<{ user: User; accessToken: string; refreshToken: string }>, { email: string; password: string }>({
+    login: builder.mutation<
+      ApiResponse<{ user: User; accessToken: string; refreshToken: string }>,
+      { email: string; password: string }
+    >({
       query: (credentials) => ({
         url: '/auth/login',
         method: 'POST',
@@ -68,7 +94,10 @@ export const api = createApi({
       }),
       invalidatesTags: ['User', 'Cart'],
     }),
-    register: builder.mutation<ApiResponse<{ user: User; accessToken: string; refreshToken: string }>, { email: string; password: string; first_name: string; last_name: string }>({
+    register: builder.mutation<
+      ApiResponse<{ user: User; accessToken: string; refreshToken: string }>,
+      { email: string; password: string; first_name: string; last_name: string }
+    >({
       query: (data) => ({
         url: '/auth/register',
         method: 'POST',
@@ -88,7 +117,17 @@ export const api = createApi({
     }),
 
     // Product endpoints
-    getProducts: builder.query<ApiResponse<{ products: Product[]; total: number; page: number; limit: number }>, { search?: string; minPrice?: number; maxPrice?: number; category?: string; page?: number; limit?: number }>({
+    getProducts: builder.query<
+      ApiResponse<{ products: Product[]; total: number; page: number; limit: number }>,
+      {
+        search?: string;
+        minPrice?: number;
+        maxPrice?: number;
+        category?: string;
+        page?: number;
+        limit?: number;
+      }
+    >({
       query: (params) => {
         const queryParams = new URLSearchParams();
         if (params.search) queryParams.append('search', params.search);
@@ -134,32 +173,39 @@ export const api = createApi({
       query: () => '/cart',
       providesTags: ['Cart'],
     }),
-    addToCart: builder.mutation<ApiResponse<void>, { product_id: number; quantity: number }>({
+    addToCart: builder.mutation<
+      ApiResponse<void>,
+      { productId: number; quantity: number; sessionId?: string }
+    >({
       query: (data) => ({
-        url: '/cart',
+        url: '/cart/items',
         method: 'POST',
         body: data,
       }),
       invalidatesTags: ['Cart'],
     }),
-    updateCartItem: builder.mutation<ApiResponse<void>, { product_id: number; quantity: number }>({
-      query: (data) => ({
-        url: '/cart',
-        method: 'PUT',
-        body: data,
+    updateCartItem: builder.mutation<
+      ApiResponse<void>,
+      { productId: number; quantity: number; sessionId?: string }
+    >({
+      query: ({ productId, quantity, sessionId }) => ({
+        url: `/cart/items/${productId}${sessionId ? `?sessionId=${sessionId}` : ''}`,
+        method: 'PATCH',
+        body: { quantity },
       }),
       invalidatesTags: ['Cart'],
     }),
-    removeFromCart: builder.mutation<ApiResponse<void>, number>({
-      query: (product_id) => ({
-        url: `/cart/${product_id}`,
-        method: 'DELETE',
+    removeFromCart: builder.mutation<ApiResponse<void>, { productId: number; sessionId?: string }>({
+      query: ({ productId, sessionId }) => ({
+        url: `/cart/items/${productId}${sessionId ? `?sessionId=${sessionId}` : ''}`,
+        method: 'PATCH',
+        body: { quantity: 0 },
       }),
       invalidatesTags: ['Cart'],
     }),
-    clearCart: builder.mutation<ApiResponse<void>, void>({
-      query: () => ({
-        url: '/cart',
+    clearCart: builder.mutation<ApiResponse<void>, string | undefined>({
+      query: (sessionId) => ({
+        url: `/cart${sessionId ? `?sessionId=${sessionId}` : ''}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Cart'],
@@ -174,7 +220,10 @@ export const api = createApi({
       query: (id) => `/orders/${id}`,
       providesTags: ['Order'],
     }),
-    createOrder: builder.mutation<ApiResponse<Order>, { shipping_address_id: number; payment_method: string; notes?: string }>({
+    createOrder: builder.mutation<
+      ApiResponse<Order>,
+      { shipping_address_id: number; payment_method: string; notes?: string }
+    >({
       query: (data) => ({
         url: '/orders',
         method: 'POST',
@@ -182,9 +231,31 @@ export const api = createApi({
       }),
       invalidatesTags: ['Order', 'Cart'],
     }),
+    getOrganizationOrders: builder.query<
+      ApiResponse<{ data: Order[]; total: number; page: number; limit: number }>,
+      { organizationId: number; page?: number; limit?: number }
+    >({
+      query: ({ organizationId, page, limit }) => {
+        const queryParams = new URLSearchParams();
+        if (page) queryParams.append('page', page.toString());
+        if (limit) queryParams.append('limit', limit.toString());
+        return `/orders/organization/${organizationId}?${queryParams.toString()}`;
+      },
+      providesTags: ['Order'],
+    }),
+    getOrganizationStats: builder.query<
+      ApiResponse<{ total: any; byStatus: any[]; recentRevenue: any[]; topProducts: any[] }>,
+      number
+    >({
+      query: (organizationId) => `/orders/organization/${organizationId}/stats`,
+      providesTags: ['Order'],
+    }),
 
     // Blog endpoints
-    getBlogPosts: builder.query<ApiResponse<{ posts: BlogPost[]; total: number; page: number; limit: number }>, { search?: string; page?: number; limit?: number }>({
+    getBlogPosts: builder.query<
+      ApiResponse<{ posts: BlogPost[]; total: number; page: number; limit: number }>,
+      { search?: string; page?: number; limit?: number }
+    >({
       query: (params) => {
         const queryParams = new URLSearchParams();
         if (params.search) queryParams.append('search', params.search);
@@ -208,7 +279,10 @@ export const api = createApi({
     }),
 
     // Event endpoints
-    getEvents: builder.query<ApiResponse<Event[]>, { type?: string; city?: string; startDate?: string; endDate?: string }>({
+    getEvents: builder.query<
+      ApiResponse<Event[]>,
+      { type?: string; city?: string; startDate?: string; endDate?: string }
+    >({
       query: (params) => {
         const queryParams = new URLSearchParams();
         if (params.type) queryParams.append('type', params.type);
@@ -223,7 +297,10 @@ export const api = createApi({
       query: (slug) => `/events/${slug}`,
       providesTags: ['Event'],
     }),
-    bookEvent: builder.mutation<ApiResponse<any>, { eventId: number; ticketId: number; quantity: number; attendeeInfo: any }>({
+    bookEvent: builder.mutation<
+      ApiResponse<any>,
+      { eventId: number; ticketId: number; quantity: number; attendeeInfo: any }
+    >({
       query: ({ eventId, ...data }) => ({
         url: `/events/${eventId}/book`,
         method: 'POST',
@@ -261,12 +338,53 @@ export const api = createApi({
       }),
       invalidatesTags: ['Organization'],
     }),
-    updateOrganization: builder.mutation<ApiResponse<Organization>, { id: number; data: Partial<Organization> }>({
+    updateOrganization: builder.mutation<
+      ApiResponse<Organization>,
+      { id: number; data: Partial<Organization> }
+    >({
       query: ({ id, data }) => ({
         url: `/organizations/${id}`,
         method: 'PATCH',
         body: data,
       }),
+      invalidatesTags: ['Organization'],
+    }),
+    updateOrganizationTheme: builder.mutation<ApiResponse<any>, { id: number; theme: any }>({
+      query: ({ id, theme }) => ({
+        url: `/organizations/${id}/theme`,
+        method: 'PATCH',
+        body: theme,
+      }),
+      invalidatesTags: ['Organization'],
+    }),
+    uploadOrganizationLogo: builder.mutation<
+      ApiResponse<{ logo_url: string }>,
+      { id: number; file: File }
+    >({
+      query: ({ id, file }) => {
+        const formData = new FormData();
+        formData.append('logo', file);
+        return {
+          url: `/organizations/${id}/upload-logo`,
+          method: 'POST',
+          body: formData,
+        };
+      },
+      invalidatesTags: ['Organization'],
+    }),
+    uploadOrganizationBanner: builder.mutation<
+      ApiResponse<{ banner_url: string }>,
+      { id: number; file: File }
+    >({
+      query: ({ id, file }) => {
+        const formData = new FormData();
+        formData.append('banner', file);
+        return {
+          url: `/organizations/${id}/upload-banner`,
+          method: 'POST',
+          body: formData,
+        };
+      },
       invalidatesTags: ['Organization'],
     }),
 
@@ -323,7 +441,10 @@ export const api = createApi({
       }),
       invalidatesTags: ['Category'],
     }),
-    updateCategory: builder.mutation<ApiResponse<Category>, { id: number; data: Partial<Category> }>({
+    updateCategory: builder.mutation<
+      ApiResponse<Category>,
+      { id: number; data: Partial<Category> }
+    >({
       query: ({ id, data }) => ({
         url: `/categories/${id}`,
         method: 'PATCH',
@@ -340,7 +461,10 @@ export const api = createApi({
     }),
 
     // Product Image endpoints
-    addProductImage: builder.mutation<ApiResponse<any>, { productId: number; data: { url: string; alt_text?: string; is_thumbnail?: boolean } }>({
+    addProductImage: builder.mutation<
+      ApiResponse<any>,
+      { productId: number; data: { url: string; alt_text?: string; is_thumbnail?: boolean } }
+    >({
       query: ({ productId, data }) => ({
         url: `/products/${productId}/images`,
         method: 'POST',
@@ -348,7 +472,14 @@ export const api = createApi({
       }),
       invalidatesTags: ['Product'],
     }),
-    updateProductImage: builder.mutation<ApiResponse<any>, { productId: number; imageId: number; data: { url?: string; alt_text?: string; sort_order?: number; is_thumbnail?: boolean } }>({
+    updateProductImage: builder.mutation<
+      ApiResponse<any>,
+      {
+        productId: number;
+        imageId: number;
+        data: { url?: string; alt_text?: string; sort_order?: number; is_thumbnail?: boolean };
+      }
+    >({
       query: ({ productId, imageId, data }) => ({
         url: `/products/${productId}/images/${imageId}`,
         method: 'PATCH',
@@ -356,14 +487,19 @@ export const api = createApi({
       }),
       invalidatesTags: ['Product'],
     }),
-    deleteProductImage: builder.mutation<ApiResponse<void>, { productId: number; imageId: number }>({
-      query: ({ productId, imageId }) => ({
-        url: `/products/${productId}/images/${imageId}`,
-        method: 'DELETE',
-      }),
-      invalidatesTags: ['Product'],
-    }),
-    reorderProductImages: builder.mutation<ApiResponse<any>, { productId: number; imageOrders: { id: number; sort_order: number }[] }>({
+    deleteProductImage: builder.mutation<ApiResponse<void>, { productId: number; imageId: number }>(
+      {
+        query: ({ productId, imageId }) => ({
+          url: `/products/${productId}/images/${imageId}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: ['Product'],
+      }
+    ),
+    reorderProductImages: builder.mutation<
+      ApiResponse<any>,
+      { productId: number; imageOrders: { id: number; sort_order: number }[] }
+    >({
       query: ({ productId, imageOrders }) => ({
         url: `/products/${productId}/images/reorder`,
         method: 'PUT',
@@ -392,6 +528,8 @@ export const {
   useGetOrdersQuery,
   useGetOrderQuery,
   useCreateOrderMutation,
+  useGetOrganizationOrdersQuery,
+  useGetOrganizationStatsQuery,
   useGetBlogPostsQuery,
   useGetBlogPostQuery,
   useCreateBlogPostMutation,
@@ -405,6 +543,9 @@ export const {
   useGetMyOrganizationsQuery,
   useCreateOrganizationMutation,
   useUpdateOrganizationMutation,
+  useUpdateOrganizationThemeMutation,
+  useUploadOrganizationLogoMutation,
+  useUploadOrganizationBannerMutation,
   useGetUsersQuery,
   useUpdateUserMutation,
   useGetUserAddressesQuery,

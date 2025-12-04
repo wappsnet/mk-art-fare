@@ -102,6 +102,7 @@ Create a `.env` file in the frontend directory:
 
 ```
 VITE_API_URL=http://localhost:5000/api
+VITE_API_HOST=http://localhost:5001
 VITE_GOOGLE_CLIENT_ID=your-google-client-id
 ```
 

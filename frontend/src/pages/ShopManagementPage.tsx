@@ -17,6 +17,8 @@ import {
   Select,
   Table,
   Tag,
+  ColorPicker,
+  Upload,
 } from 'antd';
 import {
   PlusOutlined,
@@ -32,17 +34,21 @@ import { useAppSelector } from '../hooks/useRedux';
 import {
   useGetOrganizationByIdQuery,
   useUpdateOrganizationMutation,
+  useUpdateOrganizationThemeMutation,
+  useUploadOrganizationLogoMutation,
+  useUploadOrganizationBannerMutation,
   useGetOrganizationProductsQuery,
   useCreateProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,
   useGetOrganizationCategoriesQuery,
-  useGetShopCategoriesQuery,
   useCreateCategoryMutation,
   useUpdateCategoryMutation,
   useDeleteCategoryMutation,
+  useGetOrganizationOrdersQuery,
+  useGetOrganizationStatsQuery,
 } from '@/services/apiSlice';
-import type { Category } from '../types';
+import type { Category } from '@/types';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -66,13 +72,17 @@ export const ShopManagementPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const [isShopModalOpen, setIsShopModalOpen] = useState(false);
+  const [isBrandingModalOpen, setIsBrandingModalOpen] = useState(false);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [isImageManagerOpen, setIsImageManagerOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [managingImagesProduct, setManagingImagesProduct] = useState<any>(null);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [shopForm] = Form.useForm();
+  const [brandingForm] = Form.useForm();
   const [productForm] = Form.useForm();
   const [categoryForm] = Form.useForm();
 
@@ -93,14 +103,21 @@ export const ShopManagementPage = () => {
   const { data: allCategoriesData } = useGetOrganizationCategoriesQuery(parseInt(id || '0'), {
     skip: !id,
   });
-  const { data: shopCategoriesData, refetch: refetchCategories } = useGetShopCategoriesQuery(
-    parseInt(id || '0'),
+  const { data: ordersData } = useGetOrganizationOrdersQuery(
+    { organizationId: parseInt(id || '0'), page: 1, limit: 10 },
     {
       skip: !id,
     }
   );
+  const { data: statsData } = useGetOrganizationStatsQuery(parseInt(id || '0'), {
+    skip: !id,
+  });
 
   const [updateOrganization, { isLoading: isUpdating }] = useUpdateOrganizationMutation();
+  const [updateOrganizationTheme, { isLoading: isUpdatingTheme }] =
+    useUpdateOrganizationThemeMutation();
+  const [uploadLogo, { isLoading: isUploadingLogo }] = useUploadOrganizationLogoMutation();
+  const [uploadBanner, { isLoading: isUploadingBanner }] = useUploadOrganizationBannerMutation();
   const [createProduct, { isLoading: isCreatingProduct }] = useCreateProductMutation();
   const [updateProduct, { isLoading: isUpdatingProduct }] = useUpdateProductMutation();
   const [deleteProduct] = useDeleteProductMutation();
@@ -110,12 +127,12 @@ export const ShopManagementPage = () => {
 
   const products = productsData?.data || [];
   const allCategories = allCategoriesData?.data || [];
-  const shopCategories = shopCategoriesData?.data || [];
+  const orders = ordersData?.data?.data || [];
+  const stats = statsData?.data;
 
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
-      return;
     }
   }, [isAuthenticated, navigate]);
 
@@ -147,6 +164,59 @@ export const ShopManagementPage = () => {
       setIsShopModalOpen(false);
     } catch (error: any) {
       message.error(error?.data?.message || 'Failed to update shop');
+    }
+  };
+
+  const handleUpdateBranding = async (values: any) => {
+    if (!organization) return;
+
+    try {
+      // Upload logo if provided
+      if (logoFile) {
+        await uploadLogo({ id: organization.id, file: logoFile }).unwrap();
+        setLogoFile(null);
+      }
+
+      // Upload banner if provided
+      if (bannerFile) {
+        await uploadBanner({ id: organization.id, file: bannerFile }).unwrap();
+        setBannerFile(null);
+      }
+
+      // Update theme colors
+      if (
+        values.primaryColor ||
+        values.secondaryColor ||
+        values.backgroundColor ||
+        values.textColor
+      ) {
+        await updateOrganizationTheme({
+          id: organization.id,
+          theme: {
+            primaryColor:
+              typeof values.primaryColor === 'object'
+                ? values.primaryColor.toHexString()
+                : values.primaryColor,
+            secondaryColor:
+              typeof values.secondaryColor === 'object'
+                ? values.secondaryColor.toHexString()
+                : values.secondaryColor,
+            backgroundColor:
+              typeof values.backgroundColor === 'object'
+                ? values.backgroundColor.toHexString()
+                : values.backgroundColor,
+            textColor:
+              typeof values.textColor === 'object'
+                ? values.textColor.toHexString()
+                : values.textColor,
+          },
+        }).unwrap();
+      }
+
+      message.success('Branding updated successfully!');
+      setIsBrandingModalOpen(false);
+    } catch (error: any) {
+      message.error(error?.data?.message || 'Failed to update branding');
     }
   };
 
@@ -225,7 +295,6 @@ export const ShopManagementPage = () => {
       message.success('Category created successfully!');
       setIsCategoryModalOpen(false);
       categoryForm.resetFields();
-      refetchCategories();
     } catch (error: any) {
       message.error(error?.data?.message || 'Failed to create category');
     }
@@ -240,7 +309,6 @@ export const ShopManagementPage = () => {
       setIsCategoryModalOpen(false);
       setEditingCategory(null);
       categoryForm.resetFields();
-      refetchCategories();
     } catch (error: any) {
       message.error(error?.data?.message || 'Failed to update category');
     }
@@ -250,7 +318,6 @@ export const ShopManagementPage = () => {
     try {
       await deleteCategory(categoryId).unwrap();
       message.success('Category deleted successfully!');
-      refetchCategories();
     } catch (error: any) {
       message.error(error?.data?.message || 'Failed to delete category');
     }
@@ -349,10 +416,13 @@ export const ShopManagementPage = () => {
                   <Card
                     hoverable
                     cover={
-                      product.image_url ? (
+                      product.images && product.images.length > 0 ? (
                         <img
                           alt={product.name}
-                          src={product.image_url}
+                          src={
+                            product.images.find((img: any) => img.is_thumbnail)?.url ||
+                            product.images[0].url
+                          }
                           style={{ height: 200, objectFit: 'cover' }}
                         />
                       ) : (
@@ -386,7 +456,7 @@ export const ShopManagementPage = () => {
                         </>
                       }
                     />
-                    <Space style={{ marginTop: 16 }} direction="vertical" style={{ width: '100%' }}>
+                    <Space style={{ marginTop: 16, width: '100%' }} direction="vertical">
                       <Space>
                         <Button size="small" onClick={() => openProductModal(product)}>
                           Edit
@@ -432,7 +502,7 @@ export const ShopManagementPage = () => {
       label: 'Categories',
       children: (
         <div>
-          <Space style={{ marginBottom: 16 }} direction="vertical" style={{ width: '100%' }}>
+          <Space style={{ marginBottom: 16, width: '100%' }} direction="vertical">
             <Button type="primary" icon={<PlusOutlined />} onClick={() => openCategoryModal()}>
               Create Custom Category
             </Button>
@@ -448,6 +518,171 @@ export const ShopManagementPage = () => {
             rowKey="id"
             pagination={false}
           />
+        </div>
+      ),
+    },
+    {
+      key: 'orders',
+      label: `Orders (${orders.length})`,
+      children: (
+        <div>
+          <Title level={4}>Recent Orders</Title>
+          <Table
+            dataSource={orders}
+            rowKey="id"
+            columns={[
+              {
+                title: 'Order #',
+                dataIndex: 'order_number',
+                key: 'order_number',
+              },
+              {
+                title: 'Products',
+                dataIndex: 'products',
+                key: 'products',
+                ellipsis: true,
+              },
+              {
+                title: 'Items',
+                dataIndex: 'total_items',
+                key: 'total_items',
+              },
+              {
+                title: 'Total',
+                dataIndex: 'total',
+                key: 'total',
+                render: (total: string) => `$${parseFloat(total).toFixed(2)}`,
+              },
+              {
+                title: 'Status',
+                dataIndex: 'status',
+                key: 'status',
+                render: (status: string) => (
+                  <Tag
+                    color={
+                      status === 'completed'
+                        ? 'green'
+                        : status === 'pending'
+                          ? 'gold'
+                          : status === 'cancelled'
+                            ? 'red'
+                            : 'blue'
+                    }
+                  >
+                    {status.toUpperCase()}
+                  </Tag>
+                ),
+              },
+              {
+                title: 'Date',
+                dataIndex: 'created_at',
+                key: 'created_at',
+                render: (date: string) => new Date(date).toLocaleDateString(),
+              },
+            ]}
+            pagination={{ pageSize: 10 }}
+          />
+        </div>
+      ),
+    },
+    {
+      key: 'analytics',
+      label: 'Analytics',
+      children: (
+        <div>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} sm={12} lg={6}>
+              <Card>
+                <Title level={4}>{stats?.total?.total_orders || 0}</Title>
+                <Text type="secondary">Total Orders</Text>
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} lg={6}>
+              <Card>
+                <Title level={4}>
+                  ${parseFloat(stats?.total?.total_revenue || '0').toFixed(2)}
+                </Title>
+                <Text type="secondary">Total Revenue</Text>
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} lg={6}>
+              <Card>
+                <Title level={4}>{stats?.total?.total_items_sold || 0}</Title>
+                <Text type="secondary">Items Sold</Text>
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} lg={6}>
+              <Card>
+                <Title level={4}>
+                  $
+                  {stats?.total?.total_orders > 0
+                    ? (
+                        parseFloat(stats?.total?.total_revenue || '0') / stats?.total?.total_orders
+                      ).toFixed(2)
+                    : '0.00'}
+                </Title>
+                <Text type="secondary">Avg Order Value</Text>
+              </Card>
+            </Col>
+          </Row>
+
+          <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
+            <Col xs={24} lg={12}>
+              <Card title="Orders by Status">
+                {stats?.byStatus && stats.byStatus.length > 0 ? (
+                  <Space direction="vertical" style={{ width: '100%' }}>
+                    {stats.byStatus.map((item: any) => (
+                      <div
+                        key={item.status}
+                        style={{ display: 'flex', justifyContent: 'space-between' }}
+                      >
+                        <Tag
+                          color={
+                            item.status === 'completed'
+                              ? 'green'
+                              : item.status === 'pending'
+                                ? 'gold'
+                                : item.status === 'cancelled'
+                                  ? 'red'
+                                  : 'blue'
+                          }
+                        >
+                          {item.status.toUpperCase()}
+                        </Tag>
+                        <Text>
+                          {item.count} orders (${Number.parseFloat(item.revenue).toFixed(2)})
+                        </Text>
+                      </div>
+                    ))}
+                  </Space>
+                ) : (
+                  <Text type="secondary">No data available</Text>
+                )}
+              </Card>
+            </Col>
+            <Col xs={24} lg={12}>
+              <Card title="Top Selling Products">
+                {stats?.topProducts && stats.topProducts.length > 0 ? (
+                  <Space direction="vertical" style={{ width: '100%' }}>
+                    {stats.topProducts.map((product: any) => (
+                      <div
+                        key={product.product_name}
+                        style={{ display: 'flex', justifyContent: 'space-between' }}
+                      >
+                        <Text strong>{product.product_name}</Text>
+                        <Text>
+                          {product.total_sold} sold ($
+                          {Number.parseFloat(product.revenue).toFixed(2)})
+                        </Text>
+                      </div>
+                    ))}
+                  </Space>
+                ) : (
+                  <Text type="secondary">No data available</Text>
+                )}
+              </Card>
+            </Col>
+          </Row>
         </div>
       ),
     },
@@ -476,6 +711,65 @@ export const ShopManagementPage = () => {
                 <Text>
                   <strong>Description:</strong> {organization.description || 'No description'}
                 </Text>
+              </Space>
+            </div>
+
+            <div>
+              <Title level={4}>Branding & Theme</Title>
+              <Button type="primary" onClick={() => setIsBrandingModalOpen(true)}>
+                Customize Branding
+              </Button>
+            </div>
+            <div>
+              <Space direction="vertical" style={{ marginTop: 16, width: '100%' }}>
+                <Title level={4}>Branding Configurations</Title>
+                {organization.logo_url && (
+                  <div>
+                    <Text strong>Logo:</Text>
+                    <div style={{ marginTop: 8 }}>
+                      <img
+                        src={`${import.meta.env.VITE_API_HOST}${organization.logo_url}`}
+                        alt="Shop logo"
+                        style={{
+                          maxWidth: 150,
+                          maxHeight: 150,
+                          objectFit: 'contain',
+                          border: '1px solid #d9d9d9',
+                          borderRadius: 4,
+                          padding: 8,
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+                {!organization.logo_url && (
+                  <Text>
+                    <strong>Logo:</strong> Not set
+                  </Text>
+                )}
+                {organization.banner_url && (
+                  <div>
+                    <Text strong>Banner:</Text>
+                    <div style={{ marginTop: 8 }}>
+                      <img
+                        src={`${import.meta.env.VITE_API_HOST}${organization.banner_url}`}
+                        alt="Shop banner"
+                        style={{
+                          maxWidth: '100%',
+                          maxHeight: 200,
+                          objectFit: 'cover',
+                          border: '1px solid #d9d9d9',
+                          borderRadius: 4,
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+                {!organization.banner_url && (
+                  <Text>
+                    <strong>Banner:</strong> Not set
+                  </Text>
+                )}
               </Space>
             </div>
           </Space>
@@ -530,6 +824,118 @@ export const ShopManagementPage = () => {
                   Update Shop
                 </Button>
                 <Button onClick={() => setIsShopModalOpen(false)}>Cancel</Button>
+              </Space>
+            </Form.Item>
+          </Form>
+        </Modal>
+
+        {/* Branding Modal */}
+        <Modal
+          title="Customize Branding & Theme"
+          open={isBrandingModalOpen}
+          onCancel={() => setIsBrandingModalOpen(false)}
+          footer={null}
+          width={700}
+        >
+          <Form form={brandingForm} layout="vertical" onFinish={handleUpdateBranding}>
+            <Title level={5}>Logo & Images</Title>
+            <Form.Item label="Logo Image">
+              <Upload
+                listType="picture-card"
+                maxCount={1}
+                beforeUpload={(file) => {
+                  setLogoFile(file);
+                  return false;
+                }}
+                onRemove={() => setLogoFile(null)}
+              >
+                {!logoFile && (
+                  <div>
+                    <PlusOutlined />
+                    <div style={{ marginTop: 8 }}>Upload Logo</div>
+                  </div>
+                )}
+              </Upload>
+              {organization?.logo_url && !logoFile && (
+                <div style={{ marginTop: 8 }}>
+                  <Text type="secondary">Current: </Text>
+                  <img
+                    src={`${import.meta.env.VITE_API_HOST}${organization.logo_url}`}
+                    alt="Current logo"
+                    style={{ maxWidth: 100, maxHeight: 100, objectFit: 'contain' }}
+                  />
+                </div>
+              )}
+            </Form.Item>
+
+            <Form.Item label="Banner Image">
+              <Upload
+                listType="picture-card"
+                maxCount={1}
+                beforeUpload={(file) => {
+                  setBannerFile(file);
+                  return false;
+                }}
+                onRemove={() => setBannerFile(null)}
+              >
+                {!bannerFile && (
+                  <div>
+                    <PlusOutlined />
+                    <div style={{ marginTop: 8 }}>Upload Banner</div>
+                  </div>
+                )}
+              </Upload>
+              {organization?.banner_url && !bannerFile && (
+                <div style={{ marginTop: 8 }}>
+                  <Text type="secondary">Current: </Text>
+                  <img
+                    src={`${import.meta.env.VITE_API_HOST}${organization.banner_url}`}
+                    alt="Current banner"
+                    style={{ maxWidth: 200, maxHeight: 100, objectFit: 'contain' }}
+                  />
+                </div>
+              )}
+            </Form.Item>
+
+            <Title level={5} style={{ marginTop: 24 }}>
+              Theme Colors
+            </Title>
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item name="primaryColor" label="Primary Color">
+                  <ColorPicker showText format="hex" />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item name="secondaryColor" label="Secondary Color">
+                  <ColorPicker showText format="hex" />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item name="backgroundColor" label="Background Color">
+                  <ColorPicker showText format="hex" />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item name="textColor" label="Text Color">
+                  <ColorPicker showText format="hex" />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Form.Item style={{ marginTop: 16 }}>
+              <Space>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={isUpdatingTheme || isUpdating || isUploadingLogo || isUploadingBanner}
+                >
+                  Save Branding
+                </Button>
+                <Button onClick={() => setIsBrandingModalOpen(false)}>Cancel</Button>
               </Space>
             </Form.Item>
           </Form>

@@ -152,6 +152,7 @@ router.get(
   authorize(UserRole.ARTIST, UserRole.ADMIN),
   asyncHandler(async (req, res) => {
     const orgId = parseInt(req.params.orgId);
+    const { page, limit, offset } = getPaginationParams(req.query.page, req.query.limit);
 
     const org = await query('SELECT * FROM organizations WHERE id = ? AND owner_id = ?', [
       orgId,
@@ -162,15 +163,105 @@ router.get(
     }
 
     const orders = await query(
-      `SELECT DISTINCT o.*, oi.product_name, oi.quantity, oi.subtotal
-     FROM orders o
-     INNER JOIN order_items oi ON o.id = oi.order_id
-     WHERE oi.organization_id = ?
-     ORDER BY o.created_at DESC`,
+      `SELECT o.id, o.order_number, o.status, o.total, o.created_at,
+              GROUP_CONCAT(DISTINCT oi.product_name SEPARATOR ', ') as products,
+              SUM(oi.quantity) as total_items
+       FROM orders o
+       INNER JOIN order_items oi ON o.id = oi.order_id
+       WHERE oi.organization_id = ?
+       GROUP BY o.id
+       ORDER BY o.created_at DESC
+       LIMIT ? OFFSET ?`,
+      [orgId, limit, offset]
+    );
+
+    const countResult = await query(
+      `SELECT COUNT(DISTINCT o.id) as total
+       FROM orders o
+       INNER JOIN order_items oi ON o.id = oi.order_id
+       WHERE oi.organization_id = ?`,
       [orgId]
     );
 
-    sendSuccess(res, orders);
+    sendPaginated(res, orders, page, limit, countResult[0].total);
+  })
+);
+
+// Get organization sales statistics
+router.get(
+  '/organization/:orgId/stats',
+  authenticate,
+  authorize(UserRole.ARTIST, UserRole.ADMIN),
+  asyncHandler(async (req, res) => {
+    const orgId = parseInt(req.params.orgId);
+
+    const org = await query('SELECT * FROM organizations WHERE id = ? AND owner_id = ?', [
+      orgId,
+      req.user.userId,
+    ]);
+    if (org.length === 0) {
+      throw new AppError('Organization not found', 404);
+    }
+
+    // Total sales and orders
+    const totalStats = await query(
+      `SELECT
+        COUNT(DISTINCT o.id) as total_orders,
+        COALESCE(SUM(oi.subtotal), 0) as total_revenue,
+        COALESCE(SUM(oi.quantity), 0) as total_items_sold
+       FROM orders o
+       INNER JOIN order_items oi ON o.id = oi.order_id
+       WHERE oi.organization_id = ?`,
+      [orgId]
+    );
+
+    // Orders by status
+    const statusStats = await query(
+      `SELECT
+        o.status,
+        COUNT(DISTINCT o.id) as count,
+        COALESCE(SUM(oi.subtotal), 0) as revenue
+       FROM orders o
+       INNER JOIN order_items oi ON o.id = oi.order_id
+       WHERE oi.organization_id = ?
+       GROUP BY o.status`,
+      [orgId]
+    );
+
+    // Recent 30 days revenue
+    const recentRevenue = await query(
+      `SELECT
+        DATE(o.created_at) as date,
+        COALESCE(SUM(oi.subtotal), 0) as revenue,
+        COUNT(DISTINCT o.id) as orders
+       FROM orders o
+       INNER JOIN order_items oi ON o.id = oi.order_id
+       WHERE oi.organization_id = ? AND o.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+       GROUP BY DATE(o.created_at)
+       ORDER BY date DESC`,
+      [orgId]
+    );
+
+    // Top selling products
+    const topProducts = await query(
+      `SELECT
+        oi.product_name,
+        SUM(oi.quantity) as total_sold,
+        COALESCE(SUM(oi.subtotal), 0) as revenue
+       FROM order_items oi
+       WHERE oi.organization_id = ?
+       GROUP BY oi.product_id, oi.product_name
+       ORDER BY total_sold DESC
+       LIMIT 5`,
+      [orgId]
+    );
+
+    sendSuccess(res, {
+      total: totalStats[0],
+      byStatus: statusStats,
+      recentRevenue,
+      topProducts,
+    });
   })
 );
 

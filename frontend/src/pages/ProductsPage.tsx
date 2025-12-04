@@ -292,7 +292,7 @@ export const ProductsPage = () => {
                           <Title level={5} ellipsis={{ rows: 2 }}>
                             {product.name}
                           </Title>
-                          <ProductPrice>${product.price.toFixed(2)}</ProductPrice>
+                          <ProductPrice>${parseFloat(product.price).toFixed(2)}</ProductPrice>
                           <Button type="primary" icon={<ShoppingCartOutlined />} block>
                             Add to Cart
                           </Button>

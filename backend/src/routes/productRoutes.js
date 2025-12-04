@@ -34,8 +34,7 @@ router.get(
       params.push(`%${search}%`, `%${search}%`);
     }
 
-    queryStr += ' ORDER BY p.created_at DESC LIMIT ? OFFSET ?';
-    params.push(limit, offset);
+    queryStr += ` ORDER BY p.created_at DESC LIMIT ${limit} OFFSET ${offset}`;
 
     const products = await query(queryStr, params);
 
