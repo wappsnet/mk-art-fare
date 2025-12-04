@@ -20,11 +20,9 @@ import { BlogPostPage } from './pages/BlogPostPage';
 import { EventsPage } from './pages/EventsPage';
 import { EventDetailPage } from './pages/EventDetailPage';
 import { DashboardPage } from './pages/DashboardPage';
-
-// Placeholder components - to be implemented
-const ShopPage = () => <div>Shop Page</div>;
-const CheckoutPage = () => <div>Checkout Page</div>;
-const AdminPage = () => <div>Admin Page</div>;
+import { ShopPage } from './pages/ShopPage';
+import { CheckoutPage } from './pages/CheckoutPage';
+import { AdminPage } from './pages/AdminPage';
 
 function AppContent() {
   const dispatch = useAppDispatch();
