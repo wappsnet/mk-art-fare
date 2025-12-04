@@ -151,7 +151,7 @@ FRONTEND_URL=http://localhost:5173
 
 ```bash
 # Using npm
-npm run dev
+yarn dev
 
 # OR using yarn
 yarn dev
@@ -195,7 +195,7 @@ VITE_API_URL=http://localhost:5000/api
 
 ```bash
 # Using npm
-npm run dev
+yarn dev
 
 # OR using yarn
 yarn dev
@@ -233,11 +233,11 @@ If you imported the seed data, you can use these accounts:
 
 ```bash
 # Using npm
-npm run dev          # Start development server with hot reload
-npm run build        # Build TypeScript to JavaScript
+yarn dev          # Start development server with hot reload
+yarn build        # Build TypeScript to JavaScript
 npm start            # Start production server
-npm run lint         # Run ESLint
-npm run format       # Format code with Prettier
+yarn lint         # Run ESLint
+yarn format       # Format code with Prettier
 
 # Using yarn
 yarn dev            # Start development server with hot reload
@@ -251,11 +251,11 @@ yarn format         # Format code with Prettier
 
 ```bash
 # Using npm
-npm run dev          # Start Vite development server
-npm run build        # Build for production
-npm run preview      # Preview production build
-npm run lint         # Run ESLint
-npm run format       # Format code with Prettier
+yarn dev          # Start Vite development server
+yarn build        # Build for production
+yarn preview      # Preview production build
+yarn lint         # Run ESLint
+yarn format       # Format code with Prettier
 
 # Using yarn
 yarn dev            # Start Vite development server

@@ -3,13 +3,13 @@ import { Row, Col, Card, Typography, Button, Tabs, Spin, Empty, Tag, Avatar } fr
 import { ShoppingCartOutlined, UserOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import { Layout } from '../components/Layout';
-import { useGetOrganizationQuery, useGetOrganizationProductsQuery } from '../services/apiSlice';
+import { useGetOrganizationQuery, useGetOrganizationProductsQuery } from '@/services/apiSlice';
 
 const { Title, Paragraph, Text } = Typography;
 
 const ShopHeader = styled.div<{ bgColor?: string; textColor?: string }>`
-  background: ${props => props.bgColor || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
-  color: ${props => props.textColor || '#fff'};
+  background: ${(props) => props.bgColor || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
+  color: ${(props) => props.textColor || '#fff'};
   padding: 80px 50px;
   text-align: center;
   position: relative;
@@ -26,7 +26,7 @@ const BannerImage = styled.div<{ url?: string }>`
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url(${props => props.url});
+  background-image: url(${(props) => props.url});
   background-size: cover;
   background-position: center;
   opacity: 0.3;
@@ -57,7 +57,9 @@ const ShopLogo = styled.img`
 
 const ProductCard = styled(Card)`
   height: 100%;
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
   cursor: pointer;
 
   &:hover {
@@ -89,11 +91,14 @@ export const ShopPage = () => {
   const { slug } = useParams<{ slug: string }>();
 
   const { data: shopData, isLoading: shopLoading } = useGetOrganizationQuery(slug || '', {
-    skip: !slug
+    skip: !slug,
   });
-  const { data: productsData, isLoading: productsLoading } = useGetOrganizationProductsQuery(slug || '', {
-    skip: !slug
-  });
+  const { data: productsData, isLoading: productsLoading } = useGetOrganizationProductsQuery(
+    slug || '',
+    {
+      skip: !slug,
+    }
+  );
 
   const shop = shopData?.data;
   const products = productsData?.data || [];
@@ -135,7 +140,14 @@ export const ShopPage = () => {
                         product.images && product.images[0] ? (
                           <img alt={product.name} src={product.images[0].url} />
                         ) : (
-                          <div style={{ height: 250, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <div
+                            style={{
+                              height: 250,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
                             <Text type="secondary">No Image</Text>
                           </div>
                         )
@@ -168,7 +180,7 @@ export const ShopPage = () => {
             <Empty description="No products available in this shop yet" />
           )}
         </>
-      )
+      ),
     },
     {
       key: 'about',
@@ -189,16 +201,13 @@ export const ShopPage = () => {
             </div>
           </div>
         </Card>
-      )
-    }
+      ),
+    },
   ];
 
   return (
     <Layout>
-      <ShopHeader
-        bgColor={shop.primary_color}
-        textColor={shop.text_color}
-      >
+      <ShopHeader bgColor={shop.primary_color} textColor={shop.text_color}>
         {shop.banner_url && <BannerImage url={shop.banner_url} />}
         <ShopContent>
           {shop.logo_url && <ShopLogo src={shop.logo_url} alt={shop.name} />}

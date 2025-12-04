@@ -1,10 +1,22 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Typography, Avatar, Divider, Button, Input, List, Comment as AntComment, Form, message, Spin, Breadcrumb } from 'antd';
+import {
+  Typography,
+  Avatar,
+  Divider,
+  Button,
+  Input,
+  List,
+  Form,
+  message,
+  Spin,
+  Breadcrumb,
+} from 'antd';
+import { Comment as AntComment } from '@ant-design/compatible';
 import { UserOutlined, CalendarOutlined, EyeOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import { Layout } from '../components/Layout';
-import { useGetBlogPostQuery } from '../services/apiSlice';
+import { useGetBlogPostQuery } from '@/services/apiSlice';
 import { useAppSelector } from '../hooks/useRedux';
 
 const { Title, Paragraph, Text } = Typography;
@@ -63,8 +75,12 @@ export const BlogPostPage = () => {
   const [form] = Form.useForm();
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
 
-  const { data: postData, isLoading: loading, refetch } = useGetBlogPostQuery(slug || '', {
-    skip: !slug
+  const {
+    data: postData,
+    isLoading: loading,
+    refetch,
+  } = useGetBlogPostQuery(slug || '', {
+    skip: !slug,
   });
 
   const post = postData?.data;
@@ -76,14 +92,17 @@ export const BlogPostPage = () => {
     try {
       // Note: This would need a separate mutation endpoint for blog comments
       // For now, keeping the direct API call
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/blog/${post.id}/comments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        },
-        body: JSON.stringify(values)
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/blog/${post.id}/comments`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          },
+          body: JSON.stringify(values),
+        }
+      );
 
       if (response.ok) {
         message.success('Comment added successfully!');
@@ -103,7 +122,7 @@ export const BlogPostPage = () => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
@@ -136,7 +155,7 @@ export const BlogPostPage = () => {
           items={[
             { title: <Link to="/">Home</Link> },
             { title: <Link to="/blog">Blog</Link> },
-            { title: post.title }
+            { title: post.title },
           ]}
           style={{ marginBottom: 24 }}
         />
@@ -149,11 +168,7 @@ export const BlogPostPage = () => {
           <Title level={1}>{post.title}</Title>
 
           <AuthorInfo>
-            <Avatar
-              size={48}
-              src={post.avatar_url}
-              icon={<UserOutlined />}
-            />
+            <Avatar size={48} src={post.avatar_url} icon={<UserOutlined />} />
             <div>
               <Text strong>
                 {post.first_name} {post.last_name}
@@ -186,31 +201,18 @@ export const BlogPostPage = () => {
         <Divider />
 
         <CommentSection>
-          <Title level={3}>
-            Comments ({post.comments?.length || 0})
-          </Title>
+          <Title level={3}>Comments ({post.comments?.length || 0})</Title>
 
           {isAuthenticated ? (
-            <Form
-              form={form}
-              onFinish={handleSubmitComment}
-              style={{ marginBottom: 32 }}
-            >
+            <Form form={form} onFinish={handleSubmitComment} style={{ marginBottom: 32 }}>
               <Form.Item
                 name="content"
                 rules={[{ required: true, message: 'Please enter your comment' }]}
               >
-                <TextArea
-                  rows={4}
-                  placeholder="Write your comment..."
-                />
+                <TextArea rows={4} placeholder="Write your comment..." />
               </Form.Item>
               <Form.Item>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  loading={submitting}
-                >
+                <Button type="primary" htmlType="submit" loading={submitting}>
                   Post Comment
                 </Button>
               </Form.Item>
@@ -227,12 +229,7 @@ export const BlogPostPage = () => {
               renderItem={(comment) => (
                 <AntComment
                   author={`${comment.first_name} ${comment.last_name}`}
-                  avatar={
-                    <Avatar
-                      src={comment.avatar_url}
-                      icon={<UserOutlined />}
-                    />
-                  }
+                  avatar={<Avatar src={comment.avatar_url} icon={<UserOutlined />} />}
                   content={<Paragraph>{comment.content}</Paragraph>}
                   datetime={
                     <Text type="secondary" style={{ fontSize: 12 }}>

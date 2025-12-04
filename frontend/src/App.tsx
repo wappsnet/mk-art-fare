@@ -21,6 +21,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { ShopPage } from './pages/ShopPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { AdminPage } from './pages/AdminPage';
+import { ShopManagementPage } from './pages/ShopManagementPage';
 
 function AppContent() {
   const token = localStorage.getItem('accessToken');
@@ -51,6 +52,7 @@ function AppContent() {
         {/* Protected Routes */}
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/admin/shop/:id" element={<ShopManagementPage />} />
       </Routes>
     </BrowserRouter>
   );

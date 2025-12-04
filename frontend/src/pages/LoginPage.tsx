@@ -4,7 +4,7 @@ import { MailOutlined, LockOutlined, GoogleOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { useAppSelector } from '../hooks/useRedux';
-import { useLoginMutation } from '../services/apiSlice';
+import { useLoginMutation } from '@/services/apiSlice';
 import { Layout } from '../components/Layout';
 
 const { Title, Text } = Typography;
@@ -73,49 +73,34 @@ export const LoginPage = () => {
               <Text type="secondary">Sign in to your Art Fare account</Text>
             </div>
 
-            <GoogleButton
-              icon={<GoogleOutlined />}
-              size="large"
-              onClick={handleGoogleLogin}
-            >
+            <GoogleButton icon={<GoogleOutlined />} size="large" onClick={handleGoogleLogin}>
               Continue with Google
             </GoogleButton>
 
             <Divider>Or sign in with email</Divider>
 
-            <StyledForm
-              name="login"
-              layout="vertical"
-              onFinish={onFinish}
-              autoComplete="off"
-            >
+            <StyledForm name="login" layout="vertical" onFinish={onFinish} autoComplete="off">
               <Form.Item
                 name="email"
                 rules={[
                   { required: true, message: 'Please input your email!' },
-                  { type: 'email', message: 'Please enter a valid email!' }
+                  { type: 'email', message: 'Please enter a valid email!' },
                 ]}
               >
-                <Input
-                  prefix={<MailOutlined />}
-                  placeholder="Email"
-                  size="large"
-                />
+                <Input prefix={<MailOutlined />} placeholder="Email" size="large" />
               </Form.Item>
 
               <Form.Item
                 name="password"
                 rules={[{ required: true, message: 'Please input your password!' }]}
               >
-                <Input.Password
-                  prefix={<LockOutlined />}
-                  placeholder="Password"
-                  size="large"
-                />
+                <Input.Password prefix={<LockOutlined />} placeholder="Password" size="large" />
               </Form.Item>
 
               <Form.Item>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                >
                   <Link to="/forgot-password">
                     <Text type="secondary">Forgot password?</Text>
                   </Link>
@@ -130,8 +115,7 @@ export const LoginPage = () => {
 
               <div style={{ textAlign: 'center' }}>
                 <Text type="secondary">
-                  Don't have an account?{' '}
-                  <Link to="/register">Sign up</Link>
+                  Don't have an account? <Link to="/register">Sign up</Link>
                 </Text>
               </div>
             </StyledForm>

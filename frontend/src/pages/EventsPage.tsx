@@ -1,11 +1,23 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Row, Col, Card, Typography, Button, Select, DatePicker, Spin, Empty, Tag, Space } from 'antd';
+import {
+  Row,
+  Col,
+  Card,
+  Typography,
+  Button,
+  Select,
+  DatePicker,
+  Spin,
+  Empty,
+  Tag,
+  Space,
+} from 'antd';
 import { CalendarOutlined, EnvironmentOutlined, UserOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import dayjs from 'dayjs';
 import { Layout } from '../components/Layout';
-import { useGetEventsQuery } from '../services/apiSlice';
+import { useGetEventsQuery } from '@/services/apiSlice';
 import { Event } from '../types';
 
 const { Title, Text, Paragraph } = Typography;
@@ -35,7 +47,9 @@ const FilterSection = styled.div`
 
 const EventCard = styled(Card)`
   height: 100%;
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
   cursor: pointer;
 
   &:hover {
@@ -73,7 +87,7 @@ export const EventsPage = () => {
   const { data: eventsData, isLoading: loading } = useGetEventsQuery({
     type: eventType,
     city,
-    startDate
+    startDate,
   });
 
   const events = eventsData?.data || [];
@@ -95,7 +109,14 @@ export const EventsPage = () => {
           <Title level={1} style={{ color: 'white', marginBottom: 16 }}>
             Art Events
           </Title>
-          <Paragraph style={{ color: 'rgba(255,255,255,0.9)', fontSize: 18, maxWidth: 600, margin: '0 auto' }}>
+          <Paragraph
+            style={{
+              color: 'rgba(255,255,255,0.9)',
+              fontSize: 18,
+              maxWidth: 600,
+              margin: '0 auto',
+            }}
+          >
             Discover and attend amazing art exhibitions, workshops, and events
           </Paragraph>
         </HeroSection>
@@ -158,12 +179,16 @@ export const EventsPage = () => {
                   <EventCard
                     cover={
                       event.featured_image_url ? (
-                        <img
-                          alt={event.title}
-                          src={event.featured_image_url}
-                        />
+                        <img alt={event.title} src={event.featured_image_url} />
                       ) : (
-                        <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div
+                          style={{
+                            height: 200,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
                           <Text type="secondary">No Image</Text>
                         </div>
                       )
@@ -194,7 +219,9 @@ export const EventsPage = () => {
                       {event.city && (
                         <Space>
                           <EnvironmentOutlined />
-                          <Text>{event.city}, {event.state || event.country}</Text>
+                          <Text>
+                            {event.city}, {event.state || event.country}
+                          </Text>
                         </Space>
                       )}
 
@@ -206,11 +233,7 @@ export const EventsPage = () => {
                       )}
                     </EventMeta>
 
-                    <Button
-                      type="primary"
-                      block
-                      style={{ marginTop: 16 }}
-                    >
+                    <Button type="primary" block style={{ marginTop: 16 }}>
                       View Details
                     </Button>
                   </EventCard>

@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
-import { ApiResponse, User, Product, CartItem, Order, BlogPost, Event, Organization } from '../types';
+import { ApiResponse, User, Product, CartItem, Order, BlogPost, Event, Organization, Category } from '../types';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
@@ -57,7 +57,7 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['User', 'Product', 'Cart', 'Order', 'Blog', 'Event', 'Organization', 'Address'],
+  tagTypes: ['User', 'Product', 'Cart', 'Order', 'Blog', 'Event', 'Organization', 'Address', 'Category'],
   endpoints: (builder) => ({
     // Auth endpoints
     login: builder.mutation<ApiResponse<{ user: User; accessToken: string; refreshToken: string }>, { email: string; password: string }>({
@@ -241,9 +241,17 @@ export const api = createApi({
       query: (slug) => `/organizations/${slug}`,
       providesTags: ['Organization'],
     }),
+    getOrganizationById: builder.query<ApiResponse<Organization>, number>({
+      query: (id) => `/organizations/id/${id}`,
+      providesTags: ['Organization'],
+    }),
     getOrganizationProducts: builder.query<ApiResponse<Product[]>, string>({
       query: (slug) => `/organizations/${slug}/products`,
       providesTags: ['Product', 'Organization'],
+    }),
+    getMyOrganizations: builder.query<ApiResponse<Organization[]>, void>({
+      query: () => '/organizations/my',
+      providesTags: ['Organization'],
     }),
     createOrganization: builder.mutation<ApiResponse<Organization>, Partial<Organization>>({
       query: (data) => ({
@@ -256,7 +264,7 @@ export const api = createApi({
     updateOrganization: builder.mutation<ApiResponse<Organization>, { id: number; data: Partial<Organization> }>({
       query: ({ id, data }) => ({
         url: `/organizations/${id}`,
-        method: 'PUT',
+        method: 'PATCH',
         body: data,
       }),
       invalidatesTags: ['Organization'],
@@ -293,6 +301,76 @@ export const api = createApi({
       query: () => '/users/dashboard/stats',
       providesTags: ['Order', 'Product', 'Organization'],
     }),
+
+    // Category endpoints
+    getGlobalCategories: builder.query<ApiResponse<Category[]>, void>({
+      query: () => '/categories/global',
+      providesTags: ['Category'],
+    }),
+    getOrganizationCategories: builder.query<ApiResponse<Category[]>, number>({
+      query: (organizationId) => `/categories/organization/${organizationId}`,
+      providesTags: ['Category'],
+    }),
+    getShopCategories: builder.query<ApiResponse<Category[]>, number>({
+      query: (organizationId) => `/categories/organization/${organizationId}/shop`,
+      providesTags: ['Category'],
+    }),
+    createCategory: builder.mutation<ApiResponse<Category>, Partial<Category>>({
+      query: (data) => ({
+        url: '/categories',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Category'],
+    }),
+    updateCategory: builder.mutation<ApiResponse<Category>, { id: number; data: Partial<Category> }>({
+      query: ({ id, data }) => ({
+        url: `/categories/${id}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: ['Category'],
+    }),
+    deleteCategory: builder.mutation<ApiResponse<void>, number>({
+      query: (id) => ({
+        url: `/categories/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Category'],
+    }),
+
+    // Product Image endpoints
+    addProductImage: builder.mutation<ApiResponse<any>, { productId: number; data: { url: string; alt_text?: string; is_thumbnail?: boolean } }>({
+      query: ({ productId, data }) => ({
+        url: `/products/${productId}/images`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Product'],
+    }),
+    updateProductImage: builder.mutation<ApiResponse<any>, { productId: number; imageId: number; data: { url?: string; alt_text?: string; sort_order?: number; is_thumbnail?: boolean } }>({
+      query: ({ productId, imageId, data }) => ({
+        url: `/products/${productId}/images/${imageId}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: ['Product'],
+    }),
+    deleteProductImage: builder.mutation<ApiResponse<void>, { productId: number; imageId: number }>({
+      query: ({ productId, imageId }) => ({
+        url: `/products/${productId}/images/${imageId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Product'],
+    }),
+    reorderProductImages: builder.mutation<ApiResponse<any>, { productId: number; imageOrders: { id: number; sort_order: number }[] }>({
+      query: ({ productId, imageOrders }) => ({
+        url: `/products/${productId}/images/reorder`,
+        method: 'PUT',
+        body: { imageOrders },
+      }),
+      invalidatesTags: ['Product'],
+    }),
   }),
 });
 
@@ -322,7 +400,9 @@ export const {
   useBookEventMutation,
   useGetOrganizationsQuery,
   useGetOrganizationQuery,
+  useGetOrganizationByIdQuery,
   useGetOrganizationProductsQuery,
+  useGetMyOrganizationsQuery,
   useCreateOrganizationMutation,
   useUpdateOrganizationMutation,
   useGetUsersQuery,
@@ -330,4 +410,14 @@ export const {
   useGetUserAddressesQuery,
   useCreateUserAddressMutation,
   useGetDashboardStatsQuery,
+  useGetGlobalCategoriesQuery,
+  useGetOrganizationCategoriesQuery,
+  useGetShopCategoriesQuery,
+  useCreateCategoryMutation,
+  useUpdateCategoryMutation,
+  useDeleteCategoryMutation,
+  useAddProductImageMutation,
+  useUpdateProductImageMutation,
+  useDeleteProductImageMutation,
+  useReorderProductImagesMutation,
 } = api;

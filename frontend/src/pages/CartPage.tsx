@@ -1,10 +1,27 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Row, Col, Card, Typography, Button, InputNumber, List, Empty, Divider, Space, message } from 'antd';
+import {
+  Row,
+  Col,
+  Card,
+  Typography,
+  Button,
+  InputNumber,
+  List,
+  Empty,
+  Divider,
+  Space,
+  message,
+} from 'antd';
 import { DeleteOutlined, ShoppingOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import { Layout } from '../components/Layout';
 import { useAppSelector } from '../hooks/useRedux';
-import { useGetCartQuery, useUpdateCartItemMutation, useRemoveFromCartMutation, useClearCartMutation } from '../services/apiSlice';
+import {
+  useGetCartQuery,
+  useUpdateCartItemMutation,
+  useRemoveFromCartMutation,
+  useClearCartMutation,
+} from '@/services/apiSlice';
 
 const { Title, Text } = Typography;
 
@@ -104,10 +121,7 @@ export const CartPage = () => {
     return (
       <Layout>
         <Container>
-          <Empty
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description="Your cart is empty"
-          >
+          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Your cart is empty">
             <Link to="/products">
               <Button type="primary" icon={<ShoppingOutlined />}>
                 Start Shopping
@@ -119,7 +133,7 @@ export const CartPage = () => {
     );
   }
 
-  const subtotal = cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const tax = subtotal * 0.1;
   const shipping = 9.99;
   const total = subtotal + tax + shipping;

@@ -53,24 +53,24 @@ cp .env.example .env
 
 ```bash
 # Run migrations
-npm run migrate
+yarn migrate
 
 # Seed database (optional)
-npm run seed
+yarn seed
 ```
 
 ### Development
 
 ```bash
 # Start development server with hot reload
-npm run dev
+yarn dev
 ```
 
 ### Production
 
 ```bash
 # Build TypeScript
-npm run build
+yarn build
 
 # Start production server
 npm start
@@ -119,10 +119,10 @@ See `.env.example` for required configuration.
 
 ## Scripts
 
-- `npm run dev` - Start development server
-- `npm run build` - Build TypeScript
+- `yarn dev` - Start development server
+- `yarn build` - Build TypeScript
 - `npm start` - Start production server
-- `npm run migrate` - Run database migrations
-- `npm run seed` - Seed database
-- `npm run lint` - Run ESLint
+- `yarn migrate` - Run database migrations
+- `yarn seed` - Seed database
+- `yarn lint` - Run ESLint
 - `npm test` - Run tests

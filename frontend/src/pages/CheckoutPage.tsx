@@ -1,11 +1,30 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Row, Col, Card, Typography, Form, Input, Button, Radio, Divider, message, Select, Space, Modal } from 'antd';
+import {
+  Row,
+  Col,
+  Card,
+  Typography,
+  Form,
+  Input,
+  Button,
+  Radio,
+  Divider,
+  message,
+  Select,
+  Space,
+  Modal,
+} from 'antd';
 import { CreditCardOutlined, EnvironmentOutlined, ShoppingOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import { Layout } from '../components/Layout';
 import { useAppSelector } from '../hooks/useRedux';
-import { useGetUserAddressesQuery, useCreateUserAddressMutation, useCreateOrderMutation, useClearCartMutation } from '../services/apiSlice';
+import {
+  useGetUserAddressesQuery,
+  useCreateUserAddressMutation,
+  useCreateOrderMutation,
+  useClearCartMutation,
+} from '@/services/apiSlice';
 
 const { Title, Text } = Typography;
 
@@ -94,7 +113,7 @@ export const CheckoutPage = () => {
           state: values.state,
           postal_code: values.postal_code,
           country: values.country || 'USA',
-          address_type: 'shipping'
+          address_type: 'shipping',
         }).unwrap();
 
         if (addressResponse.data) {
@@ -111,7 +130,7 @@ export const CheckoutPage = () => {
       const orderResponse = await createOrder({
         shipping_address_id: shippingAddressId,
         payment_method: paymentMethod,
-        notes: values.notes
+        notes: values.notes,
       }).unwrap();
 
       if (orderResponse.data) {
@@ -123,12 +142,16 @@ export const CheckoutPage = () => {
           title: 'Order Placed Successfully!',
           content: (
             <div>
-              <p>Order Number: <strong>{orderResponse.data.order_number}</strong></p>
-              <p>Total: <strong>${orderResponse.data.total.toFixed(2)}</strong></p>
+              <p>
+                Order Number: <strong>{orderResponse.data.order_number}</strong>
+              </p>
+              <p>
+                Total: <strong>${orderResponse.data.total.toFixed(2)}</strong>
+              </p>
               <p>We'll send you an email confirmation shortly.</p>
             </div>
           ),
-          onOk: () => navigate('/dashboard')
+          onOk: () => navigate('/dashboard'),
         });
       }
     } catch (error: any) {
@@ -137,7 +160,7 @@ export const CheckoutPage = () => {
   };
 
   const subtotal = total;
-  const shipping = 10.00; // Flat rate for now
+  const shipping = 10.0; // Flat rate for now
   const tax = subtotal * 0.08; // 8% tax
   const orderTotal = subtotal + shipping + tax;
 
@@ -152,7 +175,14 @@ export const CheckoutPage = () => {
           <Row gutter={[48, 24]}>
             <Col xs={24} lg={14}>
               {/* Shipping Address Section */}
-              <Card title={<><EnvironmentOutlined /> Shipping Address</>} style={{ marginBottom: 24 }}>
+              <Card
+                title={
+                  <>
+                    <EnvironmentOutlined /> Shipping Address
+                  </>
+                }
+                style={{ marginBottom: 24 }}
+              >
                 {addresses.length > 0 && !useNewAddress && (
                   <>
                     <Radio.Group
@@ -240,11 +270,7 @@ export const CheckoutPage = () => {
                         </Form.Item>
                       </Col>
                       <Col span={12}>
-                        <Form.Item
-                          name="country"
-                          label="Country"
-                          initialValue="USA"
-                        >
+                        <Form.Item name="country" label="Country" initialValue="USA">
                           <Select>
                             <Select.Option value="USA">United States</Select.Option>
                             <Select.Option value="Canada">Canada</Select.Option>
@@ -258,7 +284,14 @@ export const CheckoutPage = () => {
               </Card>
 
               {/* Payment Method Section */}
-              <Card title={<><CreditCardOutlined /> Payment Method</>} style={{ marginBottom: 24 }}>
+              <Card
+                title={
+                  <>
+                    <CreditCardOutlined /> Payment Method
+                  </>
+                }
+                style={{ marginBottom: 24 }}
+              >
                 <Radio.Group
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
@@ -285,10 +318,12 @@ export const CheckoutPage = () => {
                 </Radio.Group>
 
                 {paymentMethod === 'credit_card' && (
-                  <div style={{ marginTop: 24, padding: 16, background: '#f5f5f5', borderRadius: 4 }}>
+                  <div
+                    style={{ marginTop: 24, padding: 16, background: '#f5f5f5', borderRadius: 4 }}
+                  >
                     <Text type="secondary">
-                      Payment processing will be integrated with Stripe or PayPal in production.
-                      For now, orders will be created with pending payment status.
+                      Payment processing will be integrated with Stripe or PayPal in production. For
+                      now, orders will be created with pending payment status.
                     </Text>
                   </div>
                 )}
@@ -341,7 +376,9 @@ export const CheckoutPage = () => {
                 <Divider />
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
-                  <Title level={4} style={{ margin: 0 }}>Total:</Title>
+                  <Title level={4} style={{ margin: 0 }}>
+                    Total:
+                  </Title>
                   <Title level={4} style={{ margin: 0, color: '#1890ff' }}>
                     ${orderTotal.toFixed(2)}
                   </Title>

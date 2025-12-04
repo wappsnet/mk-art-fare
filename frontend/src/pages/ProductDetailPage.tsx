@@ -1,10 +1,23 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Row, Col, Typography, Button, InputNumber, Divider, Tag, Spin, message, Breadcrumb, Image } from 'antd';
-import { ShoppingCartOutlined, ShopOutlined } from '@ant-design/icons';
+import {
+  Row,
+  Col,
+  Typography,
+  Button,
+  InputNumber,
+  Divider,
+  Tag,
+  Spin,
+  message,
+  Breadcrumb,
+} from 'antd';
+import { ShoppingCartOutlined, ShopOutlined, ZoomInOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
+import Zoom from 'react-medium-image-zoom';
+import 'react-medium-image-zoom/dist/styles.css';
 import { Layout } from '../components/Layout';
-import { useGetProductQuery, useAddToCartMutation } from '../services/apiSlice';
+import { useGetProductQuery, useAddToCartMutation } from '@/services/apiSlice';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -14,7 +27,14 @@ const Container = styled.div`
   padding: 40px 20px;
 `;
 
-const ProductImage = styled.div`
+const ImageGallery = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+const MainImageContainer = styled.div`
+  position: relative;
   width: 100%;
   height: 500px;
   background: #f5f5f5;
@@ -23,6 +43,54 @@ const ProductImage = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: zoom-in;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  &:hover .zoom-hint {
+    opacity: 1;
+  }
+`;
+
+const ZoomHint = styled.div`
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+const ThumbnailsContainer = styled.div`
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+`;
+
+const Thumbnail = styled.div<{ active: boolean }>`
+  width: 80px;
+  height: 80px;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid ${(props) => (props.active ? '#1890ff' : 'transparent')};
+  transition: all 0.3s;
+
+  &:hover {
+    border-color: #1890ff;
+    transform: scale(1.05);
+  }
 
   img {
     width: 100%;
@@ -54,9 +122,10 @@ const ComparePrice = styled.span`
 export const ProductDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const [quantity, setQuantity] = useState(1);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
-  const { data: productData, isLoading: loading, error } = useGetProductQuery(slug || '', {
-    skip: !slug
+  const { data: productData, isLoading: loading } = useGetProductQuery(slug || '', {
+    skip: !slug,
   });
   const [addToCart, { isLoading: adding }] = useAddToCartMutation();
 
@@ -95,6 +164,9 @@ export const ProductDetailPage = () => {
     );
   }
 
+  const images = product.images || [];
+  const currentImage = images[selectedImageIndex];
+
   return (
     <Layout>
       <Container>
@@ -102,40 +174,42 @@ export const ProductDetailPage = () => {
           items={[
             { title: <Link to="/">Home</Link> },
             { title: <Link to="/products">Products</Link> },
-            { title: product.name }
+            { title: product.name },
           ]}
           style={{ marginBottom: 24 }}
         />
 
         <Row gutter={[48, 48]}>
           <Col xs={24} md={12}>
-            {product.images && product.images.length > 0 ? (
-              <Image.PreviewGroup>
-                <ProductImage>
-                  <Image
-                    src={product.images[0].url}
-                    alt={product.name}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                </ProductImage>
-                {product.images.length > 1 && (
-                  <Row gutter={[8, 8]} style={{ marginTop: 16 }}>
-                    {product.images.slice(1, 5).map((img, index) => (
-                      <Col span={6} key={index}>
-                        <Image
-                          src={img.url}
-                          alt={`${product.name} ${index + 2}`}
-                          style={{ width: '100%', height: 100, objectFit: 'cover', borderRadius: 4 }}
-                        />
-                      </Col>
+            {images.length > 0 ? (
+              <ImageGallery>
+                <Zoom>
+                  <MainImageContainer>
+                    <img src={currentImage?.url} alt={currentImage?.alt_text || product.name} />
+                    <ZoomHint className="zoom-hint">
+                      <ZoomInOutlined /> Click to zoom
+                    </ZoomHint>
+                  </MainImageContainer>
+                </Zoom>
+
+                {images.length > 1 && (
+                  <ThumbnailsContainer>
+                    {images.map((img, index) => (
+                      <Thumbnail
+                        key={img.id}
+                        active={index === selectedImageIndex}
+                        onClick={() => setSelectedImageIndex(index)}
+                      >
+                        <img src={img.url} alt={img.alt_text || `${product.name} ${index + 1}`} />
+                      </Thumbnail>
                     ))}
-                  </Row>
+                  </ThumbnailsContainer>
                 )}
-              </Image.PreviewGroup>
+              </ImageGallery>
             ) : (
-              <ProductImage>
+              <MainImageContainer>
                 <Text type="secondary">No Image Available</Text>
-              </ProductImage>
+              </MainImageContainer>
             )}
           </Col>
 

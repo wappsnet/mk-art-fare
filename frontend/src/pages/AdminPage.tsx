@@ -1,12 +1,42 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Row, Col, Card, Statistic, Typography, Table, Tag, Button, Space, Tabs, message, Modal, Form, Select, Input } from 'antd';
-import { UserOutlined, ShopOutlined, ShoppingOutlined, DollarOutlined, TeamOutlined, FileTextOutlined, CalendarOutlined } from '@ant-design/icons';
+import {
+  Row,
+  Col,
+  Card,
+  Statistic,
+  Typography,
+  Table,
+  Tag,
+  Button,
+  Space,
+  Tabs,
+  message,
+  Modal,
+  Form,
+  Select,
+  Input,
+} from 'antd';
+import {
+  UserOutlined,
+  ShopOutlined,
+  ShoppingOutlined,
+  DollarOutlined,
+  TeamOutlined,
+  FileTextOutlined,
+  CalendarOutlined,
+} from '@ant-design/icons';
 import styled from '@emotion/styled';
 import dayjs from 'dayjs';
 import { Layout } from '../components/Layout';
 import { useAppSelector } from '../hooks/useRedux';
-import { useGetUsersQuery, useUpdateUserMutation, useGetOrganizationsQuery, useGetBlogPostsQuery, useGetEventsQuery } from '../services/apiSlice';
+import {
+  useGetUsersQuery,
+  useUpdateUserMutation,
+  useGetOrganizationsQuery,
+  useGetBlogPostsQuery,
+  useGetEventsQuery,
+} from '@/services/apiSlice';
 
 const { Title, Text } = Typography;
 
@@ -105,7 +135,7 @@ export const AdminPage = () => {
     totalOrders: 0,
     totalRevenue: 0,
     totalBlogPosts: blogPosts.length,
-    totalEvents: events.length
+    totalEvents: events.length,
   };
 
   useEffect(() => {
@@ -125,7 +155,7 @@ export const AdminPage = () => {
     setSelectedUser(user);
     form.setFieldsValue({
       role: user.role,
-      is_active: user.is_active ? 'active' : 'inactive'
+      is_active: user.is_active ? 'active' : 'inactive',
     });
     setEditUserModal(true);
   };
@@ -138,8 +168,8 @@ export const AdminPage = () => {
         id: selectedUser.id,
         data: {
           role: values.role,
-          is_active: values.is_active === 'active'
-        }
+          is_active: values.is_active === 'active',
+        },
       }).unwrap();
 
       message.success('User updated successfully');
@@ -155,18 +185,22 @@ export const AdminPage = () => {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
-      width: 80
+      width: 80,
     },
     {
       title: 'Name',
       key: 'name',
       render: (record: User) => (
         <div>
-          <Text strong>{record.first_name} {record.last_name}</Text>
+          <Text strong>
+            {record.first_name} {record.last_name}
+          </Text>
           <br />
-          <Text type="secondary" style={{ fontSize: 12 }}>{record.email}</Text>
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            {record.email}
+          </Text>
         </div>
-      )
+      ),
     },
     {
       title: 'Role',
@@ -176,26 +210,24 @@ export const AdminPage = () => {
         const colorMap: Record<string, string> = {
           admin: 'red',
           artist: 'blue',
-          customer: 'green'
+          customer: 'green',
         };
         return <Tag color={colorMap[role]}>{role.toUpperCase()}</Tag>;
-      }
+      },
     },
     {
       title: 'Status',
       dataIndex: 'is_active',
       key: 'is_active',
       render: (isActive: boolean) => (
-        <Tag color={isActive ? 'success' : 'error'}>
-          {isActive ? 'Active' : 'Inactive'}
-        </Tag>
-      )
+        <Tag color={isActive ? 'success' : 'error'}>{isActive ? 'Active' : 'Inactive'}</Tag>
+      ),
     },
     {
       title: 'Joined',
       dataIndex: 'created_at',
       key: 'created_at',
-      render: (date: string) => dayjs(date).format('MMM DD, YYYY')
+      render: (date: string) => dayjs(date).format('MMM DD, YYYY'),
     },
     {
       title: 'Actions',
@@ -206,8 +238,8 @@ export const AdminPage = () => {
             Edit
           </Button>
         </Space>
-      )
-    }
+      ),
+    },
   ];
 
   const organizationColumns = [
@@ -215,7 +247,7 @@ export const AdminPage = () => {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
-      width: 80
+      width: 80,
     },
     {
       title: 'Shop Name',
@@ -225,20 +257,22 @@ export const AdminPage = () => {
         <div>
           <Text strong>{name}</Text>
           <br />
-          <Text type="secondary" style={{ fontSize: 12 }}>/{record.slug}</Text>
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            /{record.slug}
+          </Text>
         </div>
-      )
+      ),
     },
     {
       title: 'Owner',
       dataIndex: 'owner_first_name',
-      key: 'owner_first_name'
+      key: 'owner_first_name',
     },
     {
       title: 'Created',
       dataIndex: 'created_at',
       key: 'created_at',
-      render: (date: string) => dayjs(date).format('MMM DD, YYYY')
+      render: (date: string) => dayjs(date).format('MMM DD, YYYY'),
     },
     {
       title: 'Actions',
@@ -249,8 +283,8 @@ export const AdminPage = () => {
             View
           </Button>
         </Space>
-      )
-    }
+      ),
+    },
   ];
 
   const blogColumns = [
@@ -262,30 +296,30 @@ export const AdminPage = () => {
         <div>
           <Text strong>{title}</Text>
           <br />
-          <Text type="secondary" style={{ fontSize: 12 }}>/{record.slug}</Text>
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            /{record.slug}
+          </Text>
         </div>
-      )
+      ),
     },
     {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => (
-        <Tag color={status === 'published' ? 'success' : 'warning'}>
-          {status.toUpperCase()}
-        </Tag>
-      )
+        <Tag color={status === 'published' ? 'success' : 'warning'}>{status.toUpperCase()}</Tag>
+      ),
     },
     {
       title: 'Views',
       dataIndex: 'view_count',
-      key: 'view_count'
+      key: 'view_count',
     },
     {
       title: 'Created',
       dataIndex: 'created_at',
       key: 'created_at',
-      render: (date: string) => dayjs(date).format('MMM DD, YYYY')
+      render: (date: string) => dayjs(date).format('MMM DD, YYYY'),
     },
     {
       title: 'Actions',
@@ -296,8 +330,8 @@ export const AdminPage = () => {
             View
           </Button>
         </Space>
-      )
-    }
+      ),
+    },
   ];
 
   const eventColumns = [
@@ -309,27 +343,29 @@ export const AdminPage = () => {
         <div>
           <Text strong>{title}</Text>
           <br />
-          <Text type="secondary" style={{ fontSize: 12 }}>/{record.slug}</Text>
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            /{record.slug}
+          </Text>
         </div>
-      )
+      ),
     },
     {
       title: 'Type',
       dataIndex: 'event_type',
       key: 'event_type',
-      render: (type: string) => <Tag>{type}</Tag>
+      render: (type: string) => <Tag>{type}</Tag>,
     },
     {
       title: 'Start Date',
       dataIndex: 'start_date',
       key: 'start_date',
-      render: (date: string) => dayjs(date).format('MMM DD, YYYY')
+      render: (date: string) => dayjs(date).format('MMM DD, YYYY'),
     },
     {
       title: 'Created',
       dataIndex: 'created_at',
       key: 'created_at',
-      render: (date: string) => dayjs(date).format('MMM DD, YYYY')
+      render: (date: string) => dayjs(date).format('MMM DD, YYYY'),
     },
     {
       title: 'Actions',
@@ -340,8 +376,8 @@ export const AdminPage = () => {
             View
           </Button>
         </Space>
-      )
-    }
+      ),
+    },
   ];
 
   const tabItems = [
@@ -414,7 +450,7 @@ export const AdminPage = () => {
             </Col>
           </Row>
         </>
-      )
+      ),
     },
     {
       key: 'users',
@@ -429,7 +465,7 @@ export const AdminPage = () => {
             pagination={{ pageSize: 10 }}
           />
         </Card>
-      )
+      ),
     },
     {
       key: 'organizations',
@@ -444,7 +480,7 @@ export const AdminPage = () => {
             pagination={{ pageSize: 10 }}
           />
         </Card>
-      )
+      ),
     },
     {
       key: 'blog',
@@ -459,7 +495,7 @@ export const AdminPage = () => {
             pagination={{ pageSize: 10 }}
           />
         </Card>
-      )
+      ),
     },
     {
       key: 'events',
@@ -474,8 +510,8 @@ export const AdminPage = () => {
             pagination={{ pageSize: 10 }}
           />
         </Card>
-      )
-    }
+      ),
+    },
   ];
 
   if (!user || user.role !== 'admin') {
@@ -489,9 +525,7 @@ export const AdminPage = () => {
           <Title level={2}>
             <UserOutlined /> Admin Dashboard
           </Title>
-          <Text type="secondary">
-            Platform management and analytics
-          </Text>
+          <Text type="secondary">Platform management and analytics</Text>
         </div>
 
         <Tabs items={tabItems} />
@@ -506,11 +540,7 @@ export const AdminPage = () => {
           }}
           footer={null}
         >
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={handleUpdateUser}
-          >
+          <Form form={form} layout="vertical" onFinish={handleUpdateUser}>
             <Form.Item
               name="role"
               label="Role"

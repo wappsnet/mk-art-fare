@@ -1,9 +1,15 @@
 import { Layout as AntLayout, Menu, Badge, Avatar, Dropdown, Button, Space } from 'antd';
-import { ShoppingCartOutlined, UserOutlined, LoginOutlined, LogoutOutlined, DashboardOutlined } from '@ant-design/icons';
+import {
+  ShoppingCartOutlined,
+  UserOutlined,
+  LoginOutlined,
+  LogoutOutlined,
+  DashboardOutlined,
+} from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { useAppSelector } from '../hooks/useRedux';
-import { useGetCartQuery, useLogoutMutation } from '../services/apiSlice';
+import { useGetCartQuery, useLogoutMutation } from '@/services/apiSlice';
 
 const { Header: AntHeader } = AntLayout;
 
@@ -60,33 +66,33 @@ export const Header = () => {
     {
       key: 'profile',
       icon: <UserOutlined />,
-      label: <Link to="/dashboard">My Dashboard</Link>
+      label: <Link to="/dashboard">My Dashboard</Link>,
     },
     {
       key: 'logout',
       icon: <LogoutOutlined />,
       label: 'Logout',
-      onClick: handleLogout
-    }
+      onClick: handleLogout,
+    },
   ];
 
   const menuItems = [
     {
       key: 'home',
-      label: <Link to="/">Home</Link>
+      label: <Link to="/">Home</Link>,
     },
     {
       key: 'products',
-      label: <Link to="/products">Products</Link>
+      label: <Link to="/products">Products</Link>,
     },
     {
       key: 'blog',
-      label: <Link to="/blog">Blog</Link>
+      label: <Link to="/blog">Blog</Link>,
     },
     {
       key: 'events',
-      label: <Link to="/events">Events</Link>
-    }
+      label: <Link to="/events">Events</Link>,
+    },
   ];
 
   return (

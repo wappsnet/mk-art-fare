@@ -4,7 +4,7 @@ import { MailOutlined, LockOutlined, UserOutlined, GoogleOutlined } from '@ant-d
 import { Link, useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { useAppSelector } from '../hooks/useRedux';
-import { useRegisterMutation } from '../services/apiSlice';
+import { useRegisterMutation } from '@/services/apiSlice';
 import { Layout } from '../components/Layout';
 
 const { Title, Text } = Typography;
@@ -78,57 +78,30 @@ export const RegisterPage = () => {
               <Text type="secondary">Join Art Fare and start your journey</Text>
             </div>
 
-            <GoogleButton
-              icon={<GoogleOutlined />}
-              size="large"
-              onClick={handleGoogleLogin}
-            >
+            <GoogleButton icon={<GoogleOutlined />} size="large" onClick={handleGoogleLogin}>
               Continue with Google
             </GoogleButton>
 
             <Divider>Or register with email</Divider>
 
-            <StyledForm
-              name="register"
-              layout="vertical"
-              onFinish={onFinish}
-              autoComplete="off"
-            >
+            <StyledForm name="register" layout="vertical" onFinish={onFinish} autoComplete="off">
               <Form.Item
                 name="email"
                 label="Email"
                 rules={[
                   { required: true, message: 'Please input your email!' },
-                  { type: 'email', message: 'Please enter a valid email!' }
+                  { type: 'email', message: 'Please enter a valid email!' },
                 ]}
               >
-                <Input
-                  prefix={<MailOutlined />}
-                  placeholder="your@email.com"
-                  size="large"
-                />
+                <Input prefix={<MailOutlined />} placeholder="your@email.com" size="large" />
               </Form.Item>
 
-              <Form.Item
-                name="first_name"
-                label="First Name"
-              >
-                <Input
-                  prefix={<UserOutlined />}
-                  placeholder="John"
-                  size="large"
-                />
+              <Form.Item name="first_name" label="First Name">
+                <Input prefix={<UserOutlined />} placeholder="John" size="large" />
               </Form.Item>
 
-              <Form.Item
-                name="last_name"
-                label="Last Name"
-              >
-                <Input
-                  prefix={<UserOutlined />}
-                  placeholder="Doe"
-                  size="large"
-                />
+              <Form.Item name="last_name" label="Last Name">
+                <Input prefix={<UserOutlined />} placeholder="Doe" size="large" />
               </Form.Item>
 
               <Form.Item
@@ -139,15 +112,11 @@ export const RegisterPage = () => {
                   { min: 8, message: 'Password must be at least 8 characters!' },
                   {
                     pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-                    message: 'Password must contain uppercase, lowercase, and number!'
-                  }
+                    message: 'Password must contain uppercase, lowercase, and number!',
+                  },
                 ]}
               >
-                <Input.Password
-                  prefix={<LockOutlined />}
-                  placeholder="••••••••"
-                  size="large"
-                />
+                <Input.Password prefix={<LockOutlined />} placeholder="••••••••" size="large" />
               </Form.Item>
 
               <Form.Item
@@ -166,11 +135,7 @@ export const RegisterPage = () => {
                   }),
                 ]}
               >
-                <Input.Password
-                  prefix={<LockOutlined />}
-                  placeholder="••••••••"
-                  size="large"
-                />
+                <Input.Password prefix={<LockOutlined />} placeholder="••••••••" size="large" />
               </Form.Item>
 
               <Form.Item>
@@ -181,8 +146,7 @@ export const RegisterPage = () => {
 
               <div style={{ textAlign: 'center' }}>
                 <Text type="secondary">
-                  Already have an account?{' '}
-                  <Link to="/login">Sign in</Link>
+                  Already have an account? <Link to="/login">Sign in</Link>
                 </Text>
               </div>
             </StyledForm>

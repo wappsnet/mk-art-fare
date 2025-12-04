@@ -2,7 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import authReducer from './authSlice';
 import cartReducer from './cartSlice';
-import { api } from '../services/apiSlice';
+import { api } from '@/services/apiSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,8 +10,7 @@ export const store = configureStore({
     cart: cartReducer,
     [api.reducerPath]: api.reducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(api.middleware),
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
 });
 
 // Enable refetchOnFocus/refetchOnReconnect behaviors

@@ -43,6 +43,18 @@ export interface Organization {
   text_color?: string;
 }
 
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string;
+  parent_id?: number;
+  organization_id?: number;
+  is_global: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Product {
   id: number;
   organization_id: number;
@@ -60,6 +72,7 @@ export interface Product {
   images?: ProductImage[];
   organization_name?: string;
   organization_slug?: string;
+  category_name?: string;
 }
 
 export interface ProductImage {
@@ -68,6 +81,7 @@ export interface ProductImage {
   url: string;
   alt_text?: string;
   sort_order: number;
+  is_thumbnail?: boolean;
 }
 
 export interface CartItem {

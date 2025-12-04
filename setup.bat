@@ -128,11 +128,11 @@ echo To start the application:
 echo.
 echo 1. Start the backend (in one terminal):
 echo    cd backend
-echo    npm run dev
+echo    yarn dev
 echo.
 echo 2. Start the frontend (in another terminal):
 echo    cd frontend
-echo    npm run dev
+echo    yarn dev
 echo.
 echo 3. Open your browser to:
 echo    http://localhost:5173

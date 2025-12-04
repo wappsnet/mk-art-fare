@@ -81,7 +81,7 @@ cp .env.example .env
 
 ```bash
 # Start development server
-npm run dev
+yarn dev
 
 # Server will run on http://localhost:3000
 ```
@@ -90,10 +90,10 @@ npm run dev
 
 ```bash
 # Build for production
-npm run build
+yarn build
 
 # Preview production build
-npm run preview
+yarn preview
 ```
 
 ## Environment Variables
@@ -107,10 +107,10 @@ VITE_GOOGLE_CLIENT_ID=your-google-client-id
 
 ## Available Scripts
 
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
+- `yarn dev` - Start development server with hot reload
+- `yarn build` - Build for production
+- `yarn preview` - Preview production build
+- `yarn lint` - Run ESLint
 
 ## State Management
 

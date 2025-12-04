@@ -1,11 +1,31 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Row, Col, Typography, Card, Button, InputNumber, Divider, Tag, Spin, message, Breadcrumb, Space, Modal, Form } from 'antd';
-import { CalendarOutlined, EnvironmentOutlined, UserOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import {
+  Row,
+  Col,
+  Typography,
+  Card,
+  Button,
+  InputNumber,
+  Divider,
+  Tag,
+  Spin,
+  message,
+  Breadcrumb,
+  Space,
+  Modal,
+  Form,
+} from 'antd';
+import {
+  CalendarOutlined,
+  EnvironmentOutlined,
+  UserOutlined,
+  ClockCircleOutlined,
+} from '@ant-design/icons';
 import styled from '@emotion/styled';
 import dayjs from 'dayjs';
 import { Layout } from '../components/Layout';
-import { useGetEventQuery, useBookEventMutation } from '../services/apiSlice';
+import { useGetEventQuery, useBookEventMutation } from '@/services/apiSlice';
 import { Event, EventTicket } from '../types';
 import { useAppSelector } from '../hooks/useRedux';
 
@@ -42,7 +62,9 @@ const TicketCard = styled.div`
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
   cursor: pointer;
 
   &:hover {
@@ -65,8 +87,12 @@ export const EventDetailPage = () => {
   const [form] = Form.useForm();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
-  const { data: eventData, isLoading: loading, refetch } = useGetEventQuery(slug || '', {
-    skip: !slug
+  const {
+    data: eventData,
+    isLoading: loading,
+    refetch,
+  } = useGetEventQuery(slug || '', {
+    skip: !slug,
   });
   const [bookEvent, { isLoading: booking }] = useBookEventMutation();
 
@@ -95,7 +121,7 @@ export const EventDetailPage = () => {
         eventId: event.id,
         ticketId: selectedTicket.id,
         quantity,
-        attendeeInfo: values
+        attendeeInfo: values,
       }).unwrap();
 
       message.success('Booking confirmed!');
@@ -114,12 +140,12 @@ export const EventDetailPage = () => {
     if (start.isSame(end, 'day')) {
       return {
         date: start.format('MMMM DD, YYYY'),
-        time: `${start.format('h:mm A')} - ${end.format('h:mm A')}`
+        time: `${start.format('h:mm A')} - ${end.format('h:mm A')}`,
       };
     }
     return {
       date: `${start.format('MMM DD')} - ${end.format('MMM DD, YYYY')}`,
-      time: 'Multiple days'
+      time: 'Multiple days',
     };
   };
 
@@ -155,7 +181,7 @@ export const EventDetailPage = () => {
           items={[
             { title: <Link to="/">Home</Link> },
             { title: <Link to="/events">Events</Link> },
-            { title: event.title }
+            { title: event.title },
           ]}
           style={{ marginBottom: 24 }}
         />
@@ -167,7 +193,9 @@ export const EventDetailPage = () => {
                 <img src={event.featured_image_url} alt={event.title} />
               </EventImage>
             ) : (
-              <EventImage style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <EventImage
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
                 <Text type="secondary">No Image Available</Text>
               </EventImage>
             )}
@@ -252,7 +280,13 @@ export const EventDetailPage = () => {
                         className={isSelected ? 'selected' : ''}
                         onClick={() => setSelectedTicket(ticket)}
                       >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            marginBottom: 8,
+                          }}
+                        >
                           <Text strong>{ticket.ticket_type}</Text>
                           <Text strong style={{ color: '#1890ff' }}>
                             ${ticket.price.toFixed(2)}
@@ -288,7 +322,13 @@ export const EventDetailPage = () => {
                         />
                       </div>
 
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          marginBottom: 16,
+                        }}
+                      >
                         <Text>Subtotal:</Text>
                         <Text strong style={{ fontSize: 18 }}>
                           ${totalPrice.toFixed(2)}
@@ -300,7 +340,9 @@ export const EventDetailPage = () => {
                         size="large"
                         block
                         onClick={handleBookTicket}
-                        disabled={selectedTicket.quantity_available - selectedTicket.quantity_sold === 0}
+                        disabled={
+                          selectedTicket.quantity_available - selectedTicket.quantity_sold === 0
+                        }
                       >
                         Book Now
                       </Button>
@@ -320,11 +362,7 @@ export const EventDetailPage = () => {
           onCancel={() => setModalVisible(false)}
           footer={null}
         >
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={handleConfirmBooking}
-          >
+          <Form form={form} layout="vertical" onFinish={handleConfirmBooking}>
             <Form.Item
               name="name"
               label="Full Name"
@@ -338,16 +376,13 @@ export const EventDetailPage = () => {
               label="Email"
               rules={[
                 { required: true, message: 'Please enter your email' },
-                { type: 'email', message: 'Please enter a valid email' }
+                { type: 'email', message: 'Please enter a valid email' },
               ]}
             >
               <input placeholder="john@example.com" />
             </Form.Item>
 
-            <Form.Item
-              name="phone"
-              label="Phone Number"
-            >
+            <Form.Item name="phone" label="Phone Number">
               <input placeholder="+1 234 567 8900" />
             </Form.Item>
 

@@ -244,9 +244,9 @@ cd backend
 npm install
 cp .env.example .env
 # Configure MySQL database credentials in .env
-npm run migrate    # Run database migrations
-npm run seed       # Seed initial data
-npm run dev        # Start development server (port 5000)
+yarn migrate    # Run database migrations
+yarn seed       # Seed initial data
+yarn dev        # Start development server (port 5000)
 ```
 
 ### Frontend Setup
@@ -256,15 +256,15 @@ cd frontend
 npm install
 cp .env.example .env
 # Configure API_URL in .env
-npm run dev        # Start development server (port 3000)
+yarn dev        # Start development server (port 3000)
 ```
 
 ### Database Setup
 
 1. Create MySQL database: `art_fare`
 2. Update backend `.env` with database credentials
-3. Run migrations: `cd backend && npm run migrate`
-4. Seed data: `npm run seed`
+3. Run migrations: `cd backend && yarn migrate`
+4. Seed data: `yarn seed`
 
 ### Default Credentials (After Seeding)
 
