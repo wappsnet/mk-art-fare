@@ -10,6 +10,9 @@
     "migrate": "ts-node src/database/migrate.ts",
     "seed": "ts-node src/database/seed.ts",
     "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.{ts,js,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,js,json}\"",
     "test": "jest"
   },
   "keywords": ["ecommerce", "art", "api"],
@@ -47,6 +50,8 @@
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
     "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.1.1",
     "nodemon": "^3.0.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3",

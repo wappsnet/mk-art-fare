@@ -1,0 +1,38 @@
+# Dependencies
+node_modules
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist
+build
+*.tsbuildinfo
+
+# Environment
+.env
+.env.*
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories
+.vscode
+.idea
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Database
+*.sql
+database/
+
+# Coverage reports
+coverage
+
+# Misc
+*.min.js
+*.min.css
