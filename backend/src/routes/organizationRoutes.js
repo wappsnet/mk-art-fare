@@ -6,6 +6,7 @@ import { UserRole } from '../types/index.js';
 import { organizationUpload } from '../config/organizationMulter.js';
 import { sendSuccess } from '../utils/response.js';
 import { query } from '../config/database.js';
+import { toFullImageUrl } from '../utils/helpers.js';
 
 const router = Router();
 
@@ -68,11 +69,13 @@ router.post(
       throw new AppError('No file uploaded', 400);
     }
 
-    const logoUrl = `/uploads/organizations/${req.file.filename}`;
+    // Store only the filename in the database
+    const filename = req.file.filename;
 
-    await query('UPDATE organizations SET logo_url = ? WHERE id = ?', [logoUrl, orgId]);
+    await query('UPDATE organizations SET logo_url = ? WHERE id = ?', [filename, orgId]);
 
-    sendSuccess(res, { logo_url: logoUrl }, 'Logo uploaded successfully');
+    // Return full URL in response
+    sendSuccess(res, { logo_url: toFullImageUrl(filename, 'organizations') }, 'Logo uploaded successfully');
   })
 );
 
@@ -89,11 +92,13 @@ router.post(
       throw new AppError('No file uploaded', 400);
     }
 
-    const bannerUrl = `/uploads/organizations/${req.file.filename}`;
+    // Store only the filename in the database
+    const filename = req.file.filename;
 
-    await query('UPDATE organizations SET banner_url = ? WHERE id = ?', [bannerUrl, orgId]);
+    await query('UPDATE organizations SET banner_url = ? WHERE id = ?', [filename, orgId]);
 
-    sendSuccess(res, { banner_url: bannerUrl }, 'Banner uploaded successfully');
+    // Return full URL in response
+    sendSuccess(res, { banner_url: toFullImageUrl(filename, 'organizations') }, 'Banner uploaded successfully');
   })
 );
 

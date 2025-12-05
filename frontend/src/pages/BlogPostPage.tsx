@@ -106,9 +106,9 @@ export const BlogPostPage = () => {
         form.resetFields();
         refetch(); // Refresh to get new comments
       } else {
-        throw new Error('Failed to add comment');
+        message.error('Failed to add comment');
       }
-    } catch (error) {
+    } catch {
       message.error('Failed to add comment');
     } finally {
       setSubmitting(false);

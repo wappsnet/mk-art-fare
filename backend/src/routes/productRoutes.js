@@ -4,7 +4,7 @@ import { authenticate, authorize } from '../middleware/auth.js';
 import { sendSuccess, sendPaginated } from '../utils/response.js';
 import { UserRole } from '../types/index.js';
 import { AppError, asyncHandler } from '../middleware/errorHandler.js';
-import { generateSlug, getPaginationParams } from '../utils/helpers.js';
+import { generateSlug, getPaginationParams, transformImageUrls } from '../utils/helpers.js';
 import { upload } from '../config/multer.js';
 import { config } from '../config/index.js';
 
@@ -15,7 +15,7 @@ router.get(
   '/',
   asyncHandler(async (req, res) => {
     const { page, limit, offset } = getPaginationParams(req.query.page, req.query.limit);
-    const { organizationId, categoryId, search } = req.query;
+    const { organizationId, category, search, minPrice, maxPrice } = req.query;
 
     let queryStr =
       'SELECT p.*, o.name as organization_name, o.slug as organization_slug FROM products p LEFT JOIN organizations o ON p.organization_id = o.id WHERE p.is_active = TRUE';
@@ -25,32 +25,113 @@ router.get(
       queryStr += ' AND p.organization_id = ?';
       params.push(organizationId);
     }
-    if (categoryId) {
-      queryStr += ' AND p.category_id = ?';
-      params.push(categoryId);
+
+    // Handle multiple categories (comma-separated)
+    if (category) {
+      const categories = category.split(',').map(c => c.trim()).filter(Boolean);
+      if (categories.length > 0) {
+        // Get category IDs from slugs
+        const categoryPlaceholders = categories.map(() => '?').join(',');
+        const categoryResults = await query(
+          `SELECT id FROM categories WHERE slug IN (${categoryPlaceholders})`,
+          categories
+        );
+        const categoryIds = categoryResults.map(c => c.id);
+
+        if (categoryIds.length > 0) {
+          const placeholders = categoryIds.map(() => '?').join(',');
+          queryStr += ` AND p.category_id IN (${placeholders})`;
+          params.push(...categoryIds);
+        }
+      }
     }
+
     if (search) {
       queryStr += ' AND (p.name LIKE ? OR p.description LIKE ?)';
       params.push(`%${search}%`, `%${search}%`);
     }
 
+    // Price filtering
+    if (minPrice !== undefined && minPrice !== null && minPrice !== '') {
+      queryStr += ' AND p.price >= ?';
+      params.push(parseFloat(minPrice));
+    }
+    if (maxPrice !== undefined && maxPrice !== null && maxPrice !== '') {
+      queryStr += ' AND p.price <= ?';
+      params.push(parseFloat(maxPrice));
+    }
+
     queryStr += ` ORDER BY p.created_at DESC LIMIT ${limit} OFFSET ${offset}`;
 
-    const products = await query(queryStr, params);
+    let products = await query(queryStr, params);
 
-    let countQuery = 'SELECT COUNT(*) as total FROM products WHERE is_active = TRUE';
+    // Fetch images for each product
+    for (let product of products) {
+      let images = await query(
+        'SELECT * FROM product_images WHERE product_id = ? ORDER BY sort_order',
+        [product.id]
+      );
+      // Transform image URLs to full URLs
+      product.images = transformImageUrls(images, 'url', 'products');
+    }
+
+    // Transform product image URLs to full URLs for response
+    products = products.map(product => transformImageUrls(product, 'featured_image_url', 'products'));
+
+    // Build count query with same filters
+    let countQuery = 'SELECT COUNT(*) as total FROM products p WHERE p.is_active = TRUE';
     const countParams = [];
+
     if (organizationId) {
-      countQuery += ' AND organization_id = ?';
+      countQuery += ' AND p.organization_id = ?';
       countParams.push(organizationId);
     }
-    if (categoryId) {
-      countQuery += ' AND category_id = ?';
-      countParams.push(categoryId);
+
+    // Handle multiple categories in count query
+    if (category) {
+      const categories = category.split(',').map(c => c.trim()).filter(Boolean);
+      if (categories.length > 0) {
+        const categoryPlaceholders = categories.map(() => '?').join(',');
+        const categoryResults = await query(
+          `SELECT id FROM categories WHERE slug IN (${categoryPlaceholders})`,
+          categories
+        );
+        const categoryIds = categoryResults.map(c => c.id);
+
+        if (categoryIds.length > 0) {
+          const placeholders = categoryIds.map(() => '?').join(',');
+          countQuery += ` AND p.category_id IN (${placeholders})`;
+          countParams.push(...categoryIds);
+        }
+      }
+    }
+
+    if (search) {
+      countQuery += ' AND (p.name LIKE ? OR p.description LIKE ?)';
+      countParams.push(`%${search}%`, `%${search}%`);
+    }
+
+    // Price filtering in count query
+    if (minPrice !== undefined && minPrice !== null && minPrice !== '') {
+      countQuery += ' AND p.price >= ?';
+      countParams.push(parseFloat(minPrice));
+    }
+    if (maxPrice !== undefined && maxPrice !== null && maxPrice !== '') {
+      countQuery += ' AND p.price <= ?';
+      countParams.push(parseFloat(maxPrice));
     }
 
     const countResult = await query(countQuery, countParams);
-    sendPaginated(res, products, page, limit, countResult[0].total);
+
+    // Format response to match frontend expectations
+    const responseData = {
+      products,
+      total: countResult[0].total,
+      page,
+      limit
+    };
+
+    sendSuccess(res, responseData);
   })
 );
 
@@ -70,12 +151,16 @@ router.get(
       throw new AppError('Product not found', 404);
     }
 
-    const images = await query(
+    let images = await query(
       'SELECT * FROM product_images WHERE product_id = ? ORDER BY sort_order',
       [results[0].id]
     );
 
-    sendSuccess(res, { ...results[0], images });
+    // Transform image URLs to full URLs
+    images = transformImageUrls(images, 'url', 'products');
+    const product = transformImageUrls(results[0], 'featured_image_url', 'products');
+
+    sendSuccess(res, { ...product, images });
   })
 );
 
@@ -121,8 +206,9 @@ router.post(
       ]
     );
 
-    const product = await query('SELECT * FROM products WHERE id = ?', [result.insertId]);
-    sendSuccess(res, product[0], 'Product created successfully', 201);
+    let product = await query('SELECT * FROM products WHERE id = ?', [result.insertId]);
+    product = transformImageUrls(product[0], 'featured_image_url', 'products');
+    sendSuccess(res, product, 'Product created successfully', 201);
   })
 );
 
@@ -183,8 +269,9 @@ router.patch(
       await query(`UPDATE products SET ${updates.join(', ')} WHERE id = ?`, values);
     }
 
-    const updated = await query('SELECT * FROM products WHERE id = ?', [productId]);
-    sendSuccess(res, updated[0], 'Product updated successfully');
+    let updated = await query('SELECT * FROM products WHERE id = ?', [productId]);
+    updated = transformImageUrls(updated[0], 'featured_image_url', 'products');
+    sendSuccess(res, updated, 'Product updated successfully');
   })
 );
 
@@ -252,8 +339,9 @@ router.post(
       [productId, url, alt_text || null, sortOrder, is_thumbnail || false]
     );
 
-    const image = await query('SELECT * FROM product_images WHERE id = ?', [result.insertId]);
-    sendSuccess(res, image[0], 'Image added successfully', 201);
+    let image = await query('SELECT * FROM product_images WHERE id = ?', [result.insertId]);
+    image = transformImageUrls(image[0], 'url', 'products');
+    sendSuccess(res, image, 'Image added successfully', 201);
   })
 );
 
@@ -320,8 +408,9 @@ router.patch(
       await query(`UPDATE product_images SET ${updates.join(', ')} WHERE id = ?`, values);
     }
 
-    const updated = await query('SELECT * FROM product_images WHERE id = ?', [imageId]);
-    sendSuccess(res, updated[0], 'Image updated successfully');
+    let updated = await query('SELECT * FROM product_images WHERE id = ?', [imageId]);
+    updated = transformImageUrls(updated[0], 'url', 'products');
+    sendSuccess(res, updated, 'Image updated successfully');
   })
 );
 
@@ -381,10 +470,11 @@ router.put(
       ]);
     }
 
-    const images = await query(
+    let images = await query(
       'SELECT * FROM product_images WHERE product_id = ? ORDER BY sort_order',
       [productId]
     );
+    images = transformImageUrls(images, 'url', 'products');
     sendSuccess(res, images, 'Images reordered successfully');
   })
 );
@@ -423,8 +513,6 @@ router.post(
       throw new AppError('No file uploaded', 400);
     }
 
-    const baseUrl = config.apiUrl || `http://localhost:${config.port}`;
-
     // Get current max sort order once
     const maxOrder = await query(
       'SELECT MAX(sort_order) as max_order FROM product_images WHERE product_id = ?',
@@ -443,7 +531,8 @@ router.post(
     const created = [];
     for (let i = 0; i < files.length; i++) {
       const f = files[i];
-      const imageUrl = `${baseUrl}/uploads/products/${f.filename}`;
+      // Store only the filename without path or host
+      const filename = f.filename;
       const isThumb = firstIsThumbnail && i === 0;
       let altForThis = null;
       if (Array.isArray(altPayload)) {
@@ -454,14 +543,16 @@ router.post(
 
       const result = await query(
         'INSERT INTO product_images (product_id, url, alt_text, sort_order, is_thumbnail) VALUES (?, ?, ?, ?, ?)',
-        [productId, imageUrl, altForThis, nextOrder++, isThumb]
+        [productId, filename, altForThis, nextOrder++, isThumb]
       );
 
       const rows = await query('SELECT * FROM product_images WHERE id = ?', [result.insertId]);
       created.push(rows[0]);
     }
 
-    sendSuccess(res, created.length === 1 ? created[0] : created, 'Image(s) uploaded successfully', 201);
+    // Transform image URLs to full URLs for response
+    const transformedImages = transformImageUrls(created, 'url', 'products');
+    sendSuccess(res, transformedImages.length === 1 ? transformedImages[0] : transformedImages, 'Image(s) uploaded successfully', 201);
   })
 );
 

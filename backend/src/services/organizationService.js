@@ -1,6 +1,6 @@
 import { query, getConnection } from '../config/database.js';
 import { AppError } from '../middleware/errorHandler.js';
-import { generateSlug } from '../utils/helpers.js';
+import { generateSlug, transformImageUrls } from '../utils/helpers.js';
 
 export class OrganizationService {
   async createOrganization(ownerId, data) {
@@ -45,7 +45,7 @@ export class OrganizationService {
 
       const results = await query('SELECT * FROM organizations WHERE id = ?', [orgId]);
 
-      return results[0];
+      return transformImageUrls(results[0], ['logo_url', 'banner_url'], 'organizations');
     } catch (error) {
       await connection.rollback();
       throw error;
@@ -66,13 +66,17 @@ export class OrganizationService {
       [slug]
     );
 
-    return results.length > 0 ? results[0] : null;
+    return results.length > 0
+      ? transformImageUrls(results[0], ['logo_url', 'banner_url'], 'organizations')
+      : null;
   }
 
   async getOrganizationById(id) {
     const results = await query('SELECT * FROM organizations WHERE id = ?', [id]);
 
-    return results.length > 0 ? results[0] : null;
+    return results.length > 0
+      ? transformImageUrls(results[0], ['logo_url', 'banner_url'], 'organizations')
+      : null;
   }
 
   async getOrganizationsByOwner(ownerId) {
@@ -81,7 +85,7 @@ export class OrganizationService {
       [ownerId]
     );
 
-    return results;
+    return transformImageUrls(results, ['logo_url', 'banner_url'], 'organizations');
   }
 
   async updateOrganization(orgId, ownerId, data) {
@@ -201,7 +205,8 @@ export class OrganizationService {
     queryStr += ' ORDER BY o.created_at DESC LIMIT ? OFFSET ?';
     params.push(limit, offset);
 
-    const organizations = await query(queryStr, params);
+    let organizations = await query(queryStr, params);
+    organizations = transformImageUrls(organizations, ['logo_url', 'banner_url'], 'organizations');
 
     let countQuery = 'SELECT COUNT(*) as total FROM organizations WHERE is_active = TRUE';
     const countParams = [];
@@ -249,14 +254,18 @@ export class OrganizationService {
       [org.id]
     );
 
-    return products.map((p) => ({
-      ...p,
-      images: Array.isArray(p.images)
+    return products.map((p) => {
+      const parsedImages = Array.isArray(p.images)
         ? p.images
         : typeof p.images === 'string' && p.images.length
         ? JSON.parse(p.images)
-        : [],
-    }));
+        : [];
+
+      return {
+        ...transformImageUrls(p, 'featured_image_url', 'products'),
+        images: transformImageUrls(parsedImages, 'url', 'products'),
+      };
+    });
   }
 }
 

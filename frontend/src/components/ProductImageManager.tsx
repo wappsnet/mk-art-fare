@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Upload, Button, List, Image, Space, Input, Switch, message, Modal, Tabs } from 'antd';
+import { Upload, Button, Space, Input, Switch, message, Modal, Tabs } from 'antd';
 import {
   UploadOutlined,
   DeleteOutlined,
@@ -18,25 +18,64 @@ import {
 } from '@/services/apiSlice';
 import axios from 'axios';
 
-const ImageItem = styled.div`
+const ImageCard = styled.div`
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #1890ff;
+  }
+`;
+
+const ImageCardContent = styled.div`
+  position: relative;
+  width: 100%;
+  height: 200px;
+  background: #fafafa;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px;
-  border: 1px solid #f0f0f0;
-  border-radius: 4px;
-  margin-bottom: 8px;
+  justify-content: center;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 `;
 
 const ThumbnailBadge = styled.div`
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 8px;
+  right: 8px;
   background: #1890ff;
   color: white;
-  padding: 2px 6px;
-  border-radius: 2px;
-  font-size: 10px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+`;
+
+const ImageCardFooter = styled.div`
+  padding: 12px;
+  background: white;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const ImageCardActions = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
 `;
 
 interface ProductImageManagerProps {
@@ -254,27 +293,6 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
                     >
                       <Button icon={<UploadOutlined />}>Select Image File</Button>
                     </Upload>
-                    {fileList.length > 0 && (
-                      <div>
-                        {fileList.map((f) => (
-                          <div
-                            key={f.uid}
-                            style={{ display: 'flex', gap: 8, alignItems: 'center' }}
-                          >
-                            <span style={{ minWidth: 120, fontSize: 12, color: '#666' }}>
-                              {f.name}
-                            </span>
-                            <Input
-                              placeholder="Alt text for this image (optional)"
-                              value={altTexts[f.uid] || ''}
-                              onChange={(e) =>
-                                setAltTexts((prev) => ({ ...prev, [f.uid]: e.target.value }))
-                              }
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    )}
                     <Space>
                       <Switch checked={isThumbnail} onChange={setIsThumbnail} />
                       <span>Set as thumbnail</span>
@@ -332,40 +350,41 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
         {localImages.length > 0 && (
           <div>
             <h4>Current Images ({localImages.length})</h4>
-            <List
-              dataSource={localImages}
-              renderItem={(img) => (
-                <ImageItem>
-                  <div style={{ position: 'relative', flexShrink: 0 }}>
-                    <Image
-                      src={img.url}
-                      alt={img.alt_text}
-                      width={100}
-                      height={100}
-                      style={{ objectFit: 'cover', borderRadius: 4 }}
-                    />
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                gap: '16px',
+              }}
+            >
+              {localImages.map((img) => (
+                <ImageCard key={img.id}>
+                  <ImageCardContent>
+                    <img src={img.url} alt={img.alt_text || 'Product image'} />
                     {img.is_thumbnail && <ThumbnailBadge>Thumbnail</ThumbnailBadge>}
-                  </div>
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    <div style={{ fontSize: 12, color: '#999' }}>{img.url.substring(0, 60)}...</div>
-                    <div>
-                      {editingAltId === img.id ? (
-                        <Space.Compact style={{ width: '100%' }}>
-                          <Input
-                            placeholder="Alt text"
-                            value={editingAltText}
-                            onChange={(e) => setEditingAltText(e.target.value)}
-                            onPressEnter={() => handleUpdateAltText(img.id)}
-                            autoFocus
-                          />
+                  </ImageCardContent>
+                  <ImageCardFooter>
+                    {editingAltId === img.id ? (
+                      <div>
+                        <Input
+                          placeholder="Enter alt text"
+                          value={editingAltText}
+                          onChange={(e) => setEditingAltText(e.target.value)}
+                          onPressEnter={() => handleUpdateAltText(img.id)}
+                          autoFocus
+                          style={{ marginBottom: 8 }}
+                        />
+                        <Space>
                           <Button
                             type="primary"
+                            size="small"
                             onClick={() => handleUpdateAltText(img.id)}
                             loading={updating}
                           >
                             Save
                           </Button>
                           <Button
+                            size="small"
                             onClick={() => {
                               setEditingAltId(null);
                               setEditingAltText('');
@@ -373,52 +392,56 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
                           >
                             Cancel
                           </Button>
-                        </Space.Compact>
-                      ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <Input
-                            value={img.alt_text || ''}
-                            placeholder="No alt text - click Edit to add"
-                            readOnly
-                            style={{ flex: 1 }}
-                          />
-                          <Button
-                            size="small"
-                            onClick={() => {
-                              setEditingAltId(img.id);
-                              setEditingAltText(img.alt_text || '');
-                            }}
-                          >
-                            Edit Alt
-                          </Button>
+                        </Space>
+                      </div>
+                    ) : (
+                      <>
+                        <div
+                          style={{
+                            fontSize: 13,
+                            color: img.alt_text ? '#333' : '#999',
+                            minHeight: 40,
+                            fontStyle: img.alt_text ? 'normal' : 'italic',
+                          }}
+                        >
+                          {img.alt_text || 'No alt text'}
                         </div>
-                      )}
-                    </div>
-                  </div>
-                  <Space direction="vertical">
-                    <Button
-                      icon={img.is_thumbnail ? <StarFilled /> : <StarOutlined />}
-                      onClick={() => handleSetThumbnail(img.id, img.is_thumbnail || false)}
-                      loading={updating && editingAltId !== img.id}
-                      type={img.is_thumbnail ? 'primary' : 'default'}
-                      size="small"
-                      block
-                    >
-                      {img.is_thumbnail ? 'Thumbnail' : 'Set Thumbnail'}
-                    </Button>
-                    <Button
-                      danger
-                      icon={<DeleteOutlined />}
-                      onClick={() => handleDeleteImage(img.id)}
-                      size="small"
-                      block
-                    >
-                      Delete
-                    </Button>
-                  </Space>
-                </ImageItem>
-              )}
-            />
+                        <Button
+                          size="small"
+                          block
+                          onClick={() => {
+                            setEditingAltId(img.id);
+                            setEditingAltText(img.alt_text || '');
+                          }}
+                        >
+                          Edit Alt Text
+                        </Button>
+                      </>
+                    )}
+                    <ImageCardActions>
+                      <Button
+                        icon={img.is_thumbnail ? <StarFilled /> : <StarOutlined />}
+                        onClick={() => handleSetThumbnail(img.id, img.is_thumbnail || false)}
+                        loading={updating && editingAltId !== img.id}
+                        type={img.is_thumbnail ? 'primary' : 'default'}
+                        size="small"
+                        style={{ flex: 1 }}
+                      >
+                        {img.is_thumbnail ? 'Thumbnail' : 'Set as Thumbnail'}
+                      </Button>
+                      <Button
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={() => handleDeleteImage(img.id)}
+                        size="small"
+                      >
+                        Delete
+                      </Button>
+                    </ImageCardActions>
+                  </ImageCardFooter>
+                </ImageCard>
+              ))}
+            </div>
           </div>
         )}
       </Space>

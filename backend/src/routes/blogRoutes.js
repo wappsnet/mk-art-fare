@@ -5,7 +5,7 @@ import { asyncHandler } from '../middleware/errorHandler.js';
 import { sendSuccess, sendPaginated } from '../utils/response.js';
 import { BlogPostStatus } from '../types/index.js';
 import { AppError } from '../middleware/errorHandler.js';
-import { generateSlug, getPaginationParams } from '../utils/helpers.js';
+import { generateSlug, getPaginationParams, transformImageUrls } from '../utils/helpers.js';
 
 const router = Router();
 
@@ -15,13 +15,16 @@ router.get(
   asyncHandler(async (req, res) => {
     const { page, limit, offset } = getPaginationParams(req.query.page, req.query.limit);
 
-    const posts = await query(
+    let posts = await query(
       `SELECT bp.*, u.first_name, u.last_name, u.avatar_url
      FROM blog_posts bp
      LEFT JOIN users u ON bp.author_id = u.id
      WHERE bp.status = ? ORDER BY bp.published_at DESC LIMIT ? OFFSET ?`,
       [BlogPostStatus.PUBLISHED, limit, offset]
     );
+
+    // Transform image URLs
+    posts = transformImageUrls(posts, { featured_image_url: 'blog', avatar_url: 'users' });
 
     const countResult = await query('SELECT COUNT(*) as total FROM blog_posts WHERE status = ?', [
       BlogPostStatus.PUBLISHED,
@@ -49,7 +52,7 @@ router.get(
 
     await query('UPDATE blog_posts SET view_count = view_count + 1 WHERE id = ?', [post[0].id]);
 
-    const comments = await query(
+    let comments = await query(
       `SELECT bc.*, u.first_name, u.last_name, u.avatar_url
      FROM blog_comments bc
      LEFT JOIN users u ON bc.user_id = u.id
@@ -57,7 +60,11 @@ router.get(
       [post[0].id]
     );
 
-    sendSuccess(res, { ...post[0], comments });
+    // Transform image URLs
+    const transformedPost = transformImageUrls(post[0], { featured_image_url: 'blog', avatar_url: 'users' });
+    comments = transformImageUrls(comments, 'avatar_url', 'users');
+
+    sendSuccess(res, { ...transformedPost, comments });
   })
 );
 
@@ -85,8 +92,9 @@ router.post(
       ]
     );
 
-    const post = await query('SELECT * FROM blog_posts WHERE id = ?', [result.insertId]);
-    sendSuccess(res, post[0], 'Post created successfully', 201);
+    let post = await query('SELECT * FROM blog_posts WHERE id = ?', [result.insertId]);
+    post = transformImageUrls(post[0], 'featured_image_url', 'blog');
+    sendSuccess(res, post, 'Post created successfully', 201);
   })
 );
 
@@ -140,8 +148,9 @@ router.patch(
       await query(`UPDATE blog_posts SET ${updates.join(', ')} WHERE id = ?`, values);
     }
 
-    const updated = await query('SELECT * FROM blog_posts WHERE id = ?', [postId]);
-    sendSuccess(res, updated[0], 'Post updated successfully');
+    let updated = await query('SELECT * FROM blog_posts WHERE id = ?', [postId]);
+    updated = transformImageUrls(updated[0], 'featured_image_url', 'blog');
+    sendSuccess(res, updated, 'Post updated successfully');
   })
 );
 

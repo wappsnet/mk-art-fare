@@ -156,7 +156,7 @@ export const ShopPage = () => {
                       <Title level={5} ellipsis={{ rows: 2 }}>
                         {product.name}
                       </Title>
-                      <ProductPrice>${product.price.toFixed(2)}</ProductPrice>
+                      <ProductPrice>${Number.parseFloat(product.price).toFixed(2)}</ProductPrice>
                       {product.stock_quantity > 0 ? (
                         <Tag color="success">In Stock</Tag>
                       ) : (
@@ -207,13 +207,9 @@ export const ShopPage = () => {
   return (
     <Layout>
       <ShopHeader bgColor={shop.primary_color} textColor={shop.text_color}>
-        {shop.banner_url && (
-          <BannerImage url={`${import.meta.env.VITE_API_HOST}${shop.banner_url}`} />
-        )}
+        {shop.banner_url && <BannerImage url={shop.banner_url} />}
         <ShopContent>
-          {shop.logo_url && (
-            <ShopLogo src={`${import.meta.env.VITE_API_HOST}${shop.logo_url}`} alt={shop.name} />
-          )}
+          {shop.logo_url && <ShopLogo src={shop.logo_url} alt={shop.name} />}
           <Title level={1} style={{ color: 'inherit', marginBottom: 16 }}>
             {shop.name}
           </Title>

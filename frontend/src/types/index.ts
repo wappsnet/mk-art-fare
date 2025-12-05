@@ -1,7 +1,7 @@
 export enum UserRole {
   CUSTOMER = 'customer',
   ARTIST = 'artist',
-  ADMIN = 'admin'
+  ADMIN = 'admin',
 }
 
 export enum OrderStatus {
@@ -9,7 +9,7 @@ export enum OrderStatus {
   PROCESSING = 'processing',
   SHIPPED = 'shipped',
   DELIVERED = 'delivered',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled',
 }
 
 export interface User {
@@ -62,8 +62,8 @@ export interface Product {
   name: string;
   slug: string;
   description?: string;
-  price: number;
-  compare_at_price?: number;
+  price: string;
+  compare_at_price?: string;
   stock_quantity: number;
   sku?: string;
   is_active: boolean;

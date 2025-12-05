@@ -728,7 +728,7 @@ export const ShopManagementPage = () => {
                     <Text strong>Logo:</Text>
                     <div style={{ marginTop: 8 }}>
                       <img
-                        src={`${import.meta.env.VITE_API_HOST}${organization.logo_url}`}
+                        src={organization.logo_url}
                         alt="Shop logo"
                         style={{
                           maxWidth: 150,
@@ -752,7 +752,7 @@ export const ShopManagementPage = () => {
                     <Text strong>Banner:</Text>
                     <div style={{ marginTop: 8 }}>
                       <img
-                        src={`${import.meta.env.VITE_API_HOST}${organization.banner_url}`}
+                        src={organization.banner_url}
                         alt="Shop banner"
                         style={{
                           maxWidth: '100%',
@@ -860,7 +860,7 @@ export const ShopManagementPage = () => {
                 <div style={{ marginTop: 8 }}>
                   <Text type="secondary">Current: </Text>
                   <img
-                    src={`${import.meta.env.VITE_API_HOST}${organization.logo_url}`}
+                    src={organization.logo_url}
                     alt="Current logo"
                     style={{ maxWidth: 100, maxHeight: 100, objectFit: 'contain' }}
                   />
@@ -889,7 +889,7 @@ export const ShopManagementPage = () => {
                 <div style={{ marginTop: 8 }}>
                   <Text type="secondary">Current: </Text>
                   <img
-                    src={`${import.meta.env.VITE_API_HOST}${organization.banner_url}`}
+                    src={organization.banner_url}
                     alt="Current banner"
                     style={{ maxWidth: 200, maxHeight: 100, objectFit: 'contain' }}
                   />

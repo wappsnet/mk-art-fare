@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Row,
   Col,
@@ -115,8 +115,9 @@ const ProductShop = styled(Text)`
 `;
 
 export const ProductsPage = () => {
+  const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [page, setPage] = useState(1);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -125,9 +126,19 @@ export const ProductsPage = () => {
   const { data: categoriesData } = useGetGlobalCategoriesQuery();
   const categories = categoriesData?.data || [];
 
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(searchInput);
+      setPage(1);
+    }, 500); // Wait 500ms after user stops typing
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
   const { data: productsData, isLoading: loading } = useGetProductsQuery({
     search,
-    category: selectedCategory,
+    category: selectedCategories.length > 0 ? selectedCategories.join(',') : undefined,
     minPrice: priceRange[0],
     maxPrice: priceRange[1],
     page,
@@ -138,12 +149,11 @@ export const ProductsPage = () => {
   const total = productsData?.data?.total || 0;
 
   const handleSearch = (value: string) => {
-    setSearch(value);
-    setPage(1);
+    setSearchInput(value);
   };
 
-  const handleCategoryChange = (value: string | undefined) => {
-    setSelectedCategory(value);
+  const handleCategoryChange = (values: string[]) => {
+    setSelectedCategories(values);
     setPage(1);
   };
 
@@ -153,8 +163,9 @@ export const ProductsPage = () => {
   };
 
   const handleClearFilters = () => {
+    setSearchInput('');
     setSearch('');
-    setSelectedCategory(undefined);
+    setSelectedCategories([]);
     setPriceRange([0, 10000]);
     setPage(1);
   };
@@ -166,21 +177,23 @@ export const ProductsPage = () => {
         <Search
           placeholder="Search artworks..."
           allowClear
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
           onSearch={handleSearch}
           enterButton={<SearchOutlined />}
         />
       </FilterSection>
 
       <FilterSection>
-        <Title level={5}>Category</Title>
+        <Title level={5}>Categories</Title>
         <Select
+          mode="multiple"
           style={{ width: '100%' }}
-          placeholder="All Categories"
+          placeholder="Select categories"
           allowClear
-          value={selectedCategory}
+          value={selectedCategories}
           onChange={handleCategoryChange}
+          maxTagCount="responsive"
         >
           {categories.map((cat) => (
             <Select.Option key={cat.id} value={cat.slug}>

@@ -5,7 +5,7 @@ import { asyncHandler } from '../middleware/errorHandler.js';
 import { sendSuccess, sendPaginated } from '../utils/response.js';
 import { UserRole, EventBookingStatus } from '../types/index.js';
 import { AppError } from '../middleware/errorHandler.js';
-import { generateSlug, generateBookingNumber, getPaginationParams } from '../utils/helpers.js';
+import { generateSlug, generateBookingNumber, getPaginationParams, transformImageUrls } from '../utils/helpers.js';
 
 const router = Router();
 
@@ -36,7 +36,8 @@ router.get(
     queryStr += ' ORDER BY e.start_date ASC LIMIT ? OFFSET ?';
     params.push(limit, offset);
 
-    const events = await query(queryStr, params);
+    let events = await query(queryStr, params);
+    events = transformImageUrls(events, 'featured_image_url', 'events');
 
     let countQuery = 'SELECT COUNT(*) as total FROM events WHERE is_active = TRUE';
     const countParams = [];
@@ -70,8 +71,9 @@ router.get(
     }
 
     const tickets = await query('SELECT * FROM event_tickets WHERE event_id = ?', [event[0].id]);
+    const transformedEvent = transformImageUrls(event[0], 'featured_image_url', 'events');
 
-    sendSuccess(res, { ...event[0], tickets });
+    sendSuccess(res, { ...transformedEvent, tickets });
   })
 );
 
@@ -150,8 +152,9 @@ router.post(
 
       await connection.commit();
 
-      const event = await query('SELECT * FROM events WHERE id = ?', [eventId]);
-      sendSuccess(res, event[0], 'Event created successfully', 201);
+      let event = await query('SELECT * FROM events WHERE id = ?', [eventId]);
+      event = transformImageUrls(event[0], 'featured_image_url', 'events');
+      sendSuccess(res, event, 'Event created successfully', 201);
     } catch (error) {
       await connection.rollback();
       throw error;
