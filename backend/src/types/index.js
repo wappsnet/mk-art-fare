@@ -24,6 +24,25 @@ export const EventBookingStatus = {
   CANCELLED: 'cancelled',
 };
 
+export const EventModerationStatus = {
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  DECLINED: 'declined',
+  REMOVED: 'removed',
+};
+
+export const EventMediaType = {
+  IMAGE: 'image',
+  VIDEO: 'video',
+};
+
+export const TicketDeliveryMethod = {
+  VIRTUAL: 'virtual',
+  PHYSICAL_DELIVERY: 'physical_delivery',
+  PICKUP: 'pickup',
+  ALL: 'all',
+};
+
 export const AddressType = {
   SHIPPING: 'shipping',
   BILLING: 'billing',

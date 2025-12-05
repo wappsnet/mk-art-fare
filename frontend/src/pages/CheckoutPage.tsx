@@ -17,8 +17,8 @@ import {
 } from 'antd';
 import { CreditCardOutlined, EnvironmentOutlined, ShoppingOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
-import { Layout } from '../components/Layout';
-import { useAppSelector } from '../hooks/useRedux';
+import { Layout } from '@/components/Layout';
+import { useAppSelector } from '@/hooks/useRedux';
 import {
   useGetCartQuery,
   useGetUserAddressesQuery,

@@ -4,12 +4,12 @@ import {
   ApiResponse,
   User,
   Product,
-  CartItem,
   Order,
   BlogPost,
   Event,
   Organization,
   Category,
+  Cart,
 } from '@/types';
 
 const baseQuery = fetchBaseQuery({
@@ -30,7 +30,7 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 ) => {
   let result = await baseQuery(args, api, extraOptions);
 
-  if (result.error && result.error.status === 401) {
+  if (result.error?.status === 401) {
     // Try to refresh token
     const refreshToken = localStorage.getItem('refreshToken');
     if (refreshToken) {
@@ -59,7 +59,7 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
         // Refresh failed, logout
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
+        globalThis.location.href = '/login';
       }
     }
   }
@@ -169,7 +169,7 @@ export const api = createApi({
     }),
 
     // Cart endpoints
-    getCart: builder.query<ApiResponse<{ items: CartItem[]; total: number }>, void>({
+    getCart: builder.query<ApiResponse<Cart>, void>({
       query: () => '/cart',
       providesTags: ['Cart'],
     }),
@@ -189,24 +189,33 @@ export const api = createApi({
       { productId: number; quantity: number; sessionId?: string }
     >({
       query: ({ productId, quantity, sessionId }) => ({
-        url: `/cart/items/${productId}${sessionId ? `?sessionId=${sessionId}` : ''}`,
+        url: `/cart/items/${productId}`,
         method: 'PATCH',
         body: { quantity },
+        params: {
+          sessionId,
+        },
       }),
       invalidatesTags: ['Cart'],
     }),
     removeFromCart: builder.mutation<ApiResponse<void>, { productId: number; sessionId?: string }>({
       query: ({ productId, sessionId }) => ({
-        url: `/cart/items/${productId}${sessionId ? `?sessionId=${sessionId}` : ''}`,
+        url: `/cart/items/${productId}`,
         method: 'PATCH',
         body: { quantity: 0 },
+        params: {
+          sessionId,
+        },
       }),
       invalidatesTags: ['Cart'],
     }),
     clearCart: builder.mutation<ApiResponse<void>, string | undefined>({
       query: (sessionId) => ({
-        url: `/cart${sessionId ? `?sessionId=${sessionId}` : ''}`,
+        url: `/cart`,
         method: 'DELETE',
+        params: {
+          sessionId,
+        },
       }),
       invalidatesTags: ['Cart'],
     }),
@@ -324,6 +333,10 @@ export const api = createApi({
     }),
     getOrganizationProducts: builder.query<ApiResponse<Product[]>, string>({
       query: (slug) => `/organizations/${slug}/products`,
+      providesTags: ['Product', 'Organization'],
+    }),
+    getOrganizationProductsById: builder.query<ApiResponse<Product[]>, number>({
+      query: (id) => `/organizations/id/${id}/products`,
       providesTags: ['Product', 'Organization'],
     }),
     getMyOrganizations: builder.query<ApiResponse<Organization[]>, void>({
@@ -540,6 +553,7 @@ export const {
   useGetOrganizationQuery,
   useGetOrganizationByIdQuery,
   useGetOrganizationProductsQuery,
+  useGetOrganizationProductsByIdQuery,
   useGetMyOrganizationsQuery,
   useCreateOrganizationMutation,
   useUpdateOrganizationMutation,

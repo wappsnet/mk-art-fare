@@ -89,7 +89,7 @@ export interface CartItem {
   product_id: number;
   quantity: number;
   name: string;
-  price: number;
+  price: string;
   slug: string;
   organization_name: string;
   organization_slug: string;
@@ -98,6 +98,7 @@ export interface CartItem {
 export interface Cart {
   id: number;
   items: CartItem[];
+  eventTicketItems?: EventTicketCartItem[];
   total: number;
 }
 
@@ -155,33 +156,114 @@ export interface BlogComment {
   avatar_url?: string;
 }
 
+export enum EventModerationStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  DECLINED = 'declined',
+  REMOVED = 'removed',
+}
+
+export enum EventMediaType {
+  IMAGE = 'image',
+  VIDEO = 'video',
+}
+
+export enum TicketDeliveryMethod {
+  VIRTUAL = 'virtual',
+  PHYSICAL_DELIVERY = 'physical_delivery',
+  PICKUP = 'pickup',
+  ALL = 'all',
+}
+
+export enum EventBookingStatus {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  CANCELLED = 'cancelled',
+}
+
 export interface Event {
   id: number;
   organization_id?: number;
+  created_by: number;
   title: string;
   slug: string;
   description?: string;
   event_type?: string;
   venue_name?: string;
+  address_line1?: string;
+  address_line2?: string;
   city?: string;
   state?: string;
   country?: string;
+  postal_code?: string;
+  latitude?: number;
+  longitude?: number;
   start_date: string;
   end_date: string;
   featured_image_url?: string;
+  video_url?: string;
+  video_file?: string;
+  moderation_status: EventModerationStatus;
+  moderation_comment?: string;
+  moderated_by?: number;
+  moderated_at?: string;
   is_active: boolean;
+  created_at: string;
+  updated_at: string;
   tickets?: EventTicket[];
+  media?: EventMedia[];
   organization_name?: string;
+  creator_email?: string;
+  creator_first_name?: string;
+  creator_last_name?: string;
+  moderator_first_name?: string;
+  moderator_last_name?: string;
+}
+
+export interface EventMedia {
+  id: number;
+  event_id: number;
+  media_type: EventMediaType;
+  url?: string;
+  file_path?: string;
+  alt_text?: string;
+  sort_order: number;
+  created_at: string;
 }
 
 export interface EventTicket {
   id: number;
   event_id: number;
   ticket_type: string;
-  price: number;
+  price: string;
+  is_free: boolean;
   quantity_available: number;
   quantity_sold: number;
   description?: string;
+  delivery_method: TicketDeliveryMethod;
+  pickup_location?: string;
+  pickup_instructions?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EventTicketCartItem {
+  id: number;
+  cart_id: number;
+  ticket_id: number;
+  quantity: number;
+  ticket_type: string;
+  price: string;
+  is_free: boolean;
+  quantity_available: number;
+  quantity_sold: number;
+  delivery_method: TicketDeliveryMethod;
+  event_title: string;
+  event_slug: string;
+  start_date: string;
+  venue_name?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface EventBooking {
@@ -192,10 +274,79 @@ export interface EventBooking {
   user_id: number;
   quantity: number;
   total_price: number;
-  status: string;
+  status: EventBookingStatus;
+  attendee_name: string;
+  attendee_email: string;
+  attendee_phone?: string;
+  delivery_method: TicketDeliveryMethod;
+  delivery_address_line1?: string;
+  delivery_address_line2?: string;
+  delivery_city?: string;
+  delivery_state?: string;
+  delivery_country?: string;
+  delivery_postal_code?: string;
+  pickup_location?: string;
+  virtual_ticket_code?: string;
+  qr_code_url?: string;
+  email_sent: boolean;
+  email_sent_at?: string;
   created_at: string;
+  updated_at: string;
   event_title?: string;
+  start_date?: string;
+  venue_name?: string;
   ticket_type?: string;
+}
+
+export interface EventModerationLog {
+  id: number;
+  event_id: number;
+  moderator_id: number;
+  action: EventModerationStatus;
+  comment?: string;
+  created_at: string;
+  first_name?: string;
+  last_name?: string;
+  moderator_email?: string;
+}
+
+export interface CreateEventData {
+  organizationId?: number;
+  title: string;
+  description?: string;
+  eventType?: string;
+  venue?: {
+    name?: string;
+  };
+  address?: {
+    line1?: string;
+    line2?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    postalCode?: string;
+    latitude?: number;
+    longitude?: number;
+  };
+  startDate: string;
+  endDate: string;
+  featuredImageUrl?: string;
+  videoUrl?: string;
+  tickets?: Array<{
+    type: string;
+    price?: number;
+    quantity: number;
+    description?: string;
+    deliveryMethod?: TicketDeliveryMethod;
+    pickupLocation?: string;
+    pickupInstructions?: string;
+  }>;
+  mediaUrls?: Array<{
+    url: string;
+    type?: EventMediaType;
+    altText?: string;
+    order?: number;
+  }>;
 }
 
 export interface Address {

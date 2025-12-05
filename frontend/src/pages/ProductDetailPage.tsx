@@ -16,7 +16,7 @@ import { ShoppingCartOutlined, ShopOutlined, ZoomInOutlined } from '@ant-design/
 import styled from '@emotion/styled';
 import Zoom from 'react-medium-image-zoom';
 import 'react-medium-image-zoom/dist/styles.css';
-import { Layout } from '../components/Layout';
+import { Layout } from '@/components/Layout';
 import { useGetProductQuery, useAddToCartMutation } from '@/services/apiSlice';
 
 const { Title, Paragraph, Text } = Typography;

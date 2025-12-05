@@ -24,10 +24,10 @@ import {
 } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import dayjs from 'dayjs';
-import { Layout } from '../components/Layout';
+import { Layout } from '@/components/Layout';
 import { useGetEventQuery, useBookEventMutation } from '@/services/apiSlice';
-import { Event, EventTicket } from '../types';
-import { useAppSelector } from '../hooks/useRedux';
+import { EventTicket } from '@/types';
+import { useAppSelector } from '@/hooks/useRedux';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -172,7 +172,7 @@ export const EventDetailPage = () => {
   }
 
   const { date, time } = formatEventDate(event.start_date, event.end_date);
-  const totalPrice = selectedTicket ? selectedTicket.price * quantity : 0;
+  const totalPrice = selectedTicket ? Number.parseFloat(selectedTicket.price) * quantity : 0;
 
   return (
     <Layout>
@@ -289,7 +289,7 @@ export const EventDetailPage = () => {
                         >
                           <Text strong>{ticket.ticket_type}</Text>
                           <Text strong style={{ color: '#1890ff' }}>
-                            ${parseFloat(ticket.price).toFixed(2)}
+                            ${Number.parseFloat(ticket.price).toFixed(2)}
                           </Text>
                         </div>
                         {ticket.description && (

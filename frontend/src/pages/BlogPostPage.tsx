@@ -15,9 +15,9 @@ import {
 import { Comment as AntComment } from '@ant-design/compatible';
 import { UserOutlined, CalendarOutlined, EyeOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
-import { Layout } from '../components/Layout';
+import { Layout } from '@/components/Layout';
 import { useGetBlogPostQuery } from '@/services/apiSlice';
-import { useAppSelector } from '../hooks/useRedux';
+import { useAppSelector } from '@/hooks/useRedux';
 
 const { Title, Paragraph, Text } = Typography;
 const { TextArea } = Input;

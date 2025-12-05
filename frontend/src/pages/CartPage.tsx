@@ -14,8 +14,8 @@ import {
 } from 'antd';
 import { DeleteOutlined, ShoppingOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
-import { Layout } from '../components/Layout';
-import { useAppSelector } from '../hooks/useRedux';
+import { Layout } from '@/components/Layout';
+import { useAppSelector } from '@/hooks/useRedux';
 import {
   useGetCartQuery,
   useUpdateCartItemMutation,
@@ -71,9 +71,9 @@ export const CartPage = () => {
 
   const handleUpdateQuantity = async (productId: number, quantity: number) => {
     try {
-      await updateCartItem({ product_id: productId, quantity }).unwrap();
+      await updateCartItem({ productId: productId, quantity }).unwrap();
       message.success('Cart updated');
-    } catch (error) {
+    } catch {
       message.error('Failed to update cart');
     }
   };
@@ -82,16 +82,16 @@ export const CartPage = () => {
     try {
       await removeFromCart({ productId }).unwrap();
       message.success('Item removed from cart');
-    } catch (error) {
+    } catch {
       message.error('Failed to remove item');
     }
   };
 
   const handleClearCart = async () => {
     try {
-      await clearCart().unwrap();
+      await clearCart('cart').unwrap();
       message.success('Cart cleared');
-    } catch (error) {
+    } catch {
       message.error('Failed to clear cart');
     }
   };
@@ -117,7 +117,10 @@ export const CartPage = () => {
     );
   }
 
-  if (!cart || cart.items?.length === 0) {
+  const hasProducts = cart?.items && cart.items.length > 0;
+  const hasTickets = cart?.eventTicketItems && cart.eventTicketItems.length > 0;
+
+  if (!cart || (!hasProducts && !hasTickets)) {
     return (
       <Layout>
         <Container>
@@ -133,74 +136,165 @@ export const CartPage = () => {
     );
   }
 
-  const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const tax = subtotal * 0.1;
-  const shipping = 9.99;
+  const productSubtotal = cart.items.reduce(
+    (sum, item) => sum + Number.parseFloat(item.price) * item.quantity,
+    0
+  );
+  const ticketSubtotal =
+    cart.eventTicketItems?.reduce(
+      (sum, item) => sum + Number.parseFloat(item.price) * item.quantity,
+      0
+    ) || 0;
+  const subtotal = productSubtotal + ticketSubtotal;
+  const tax = productSubtotal * 0.1; // Tax only on products
+  const shipping = hasProducts ? 9.99 : 0; // Shipping only for products
   const total = subtotal + tax + shipping;
+
+  const totalItems = cart.items.length + (cart.eventTicketItems?.length || 0);
 
   return (
     <Layout>
       <Container>
         <Title level={2}>Shopping Cart</Title>
-        <Text type="secondary">{cart.items.length} items in your cart</Text>
+        <Text type="secondary">{totalItems} items in your cart</Text>
 
         <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
           <Col xs={24} lg={16}>
-            <List
-              dataSource={cart.items}
-              renderItem={(item) => (
-                <CartItemCard>
-                  <Row gutter={16} align="middle">
-                    <Col xs={6} sm={4}>
-                      <ProductImage
-                        src="/placeholder-image.jpg"
-                        alt={item.name}
-                        onError={(e: any) => {
-                          e.target.src = 'https://via.placeholder.com/100';
-                        }}
-                      />
-                    </Col>
-                    <Col xs={18} sm={12}>
-                      <Link to={`/products/${item.slug}`}>
-                        <Title level={5} style={{ marginBottom: 4 }}>
-                          {item.name}
-                        </Title>
-                      </Link>
-                      <Text type="secondary" style={{ fontSize: 12 }}>
-                        by {item.organization_name}
-                      </Text>
-                      <div style={{ marginTop: 8 }}>
-                        <Text strong style={{ fontSize: 16, color: '#1890ff' }}>
-                          ${parseFloat(item.price).toFixed(2)}
-                        </Text>
-                      </div>
-                    </Col>
-                    <Col xs={12} sm={4}>
-                      <InputNumber
-                        min={1}
-                        value={item.quantity}
-                        onChange={(value) => handleUpdateQuantity(item.product_id, value || 1)}
-                      />
-                    </Col>
-                    <Col xs={12} sm={4} style={{ textAlign: 'right' }}>
-                      <Space direction="vertical" align="end">
-                        <Text strong style={{ fontSize: 18 }}>
-                          ${(item.price * item.quantity).toFixed(2)}
-                        </Text>
-                        <Button
-                          type="text"
-                          danger
-                          icon={<DeleteOutlined />}
-                          onClick={() => handleRemoveItem(item.product_id)}
-                        >
-                          Remove
-                        </Button>
-                      </Space>
-                    </Col>
-                  </Row>
-                </CartItemCard>
-              )}
-            />
+            {/* Product Items */}
+            {hasProducts && (
+              <>
+                <Title level={4}>Products</Title>
+                <List
+                  dataSource={cart.items}
+                  renderItem={(item) => (
+                    <CartItemCard>
+                      <Row gutter={16} align="middle">
+                        <Col xs={6} sm={4}>
+                          <ProductImage
+                            src="/placeholder-image.jpg"
+                            alt={item.name}
+                            onError={(e: any) => {
+                              e.target.src = 'https://via.placeholder.com/100';
+                            }}
+                          />
+                        </Col>
+                        <Col xs={18} sm={12}>
+                          <Link to={`/products/${item.slug}`}>
+                            <Title level={5} style={{ marginBottom: 4 }}>
+                              {item.name}
+                            </Title>
+                          </Link>
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            by {item.organization_name}
+                          </Text>
+                          <div style={{ marginTop: 8 }}>
+                            <Text strong style={{ fontSize: 16, color: '#1890ff' }}>
+                              ${Number.parseFloat(item.price).toFixed(2)}
+                            </Text>
+                          </div>
+                        </Col>
+                        <Col xs={12} sm={4}>
+                          <InputNumber
+                            min={1}
+                            value={item.quantity}
+                            onChange={(value) => handleUpdateQuantity(item.product_id, value || 1)}
+                          />
+                        </Col>
+                        <Col xs={12} sm={4} style={{ textAlign: 'right' }}>
+                          <Space direction="vertical" align="end">
+                            <Text strong style={{ fontSize: 18 }}>
+                              ${(Number.parseFloat(item.price) * item.quantity).toFixed(2)}
+                            </Text>
+                            <Button
+                              type="text"
+                              danger
+                              icon={<DeleteOutlined />}
+                              onClick={() => handleRemoveItem(item.product_id)}
+                            >
+                              Remove
+                            </Button>
+                          </Space>
+                        </Col>
+                      </Row>
+                    </CartItemCard>
+                  )}
+                />
+              </>
+            )}
+
+            {/* Event Ticket Items */}
+            {hasTickets && (
+              <>
+                <Title level={4} style={{ marginTop: hasProducts ? 32 : 0 }}>
+                  Event Tickets
+                </Title>
+                <List
+                  dataSource={cart.eventTicketItems}
+                  renderItem={(item) => (
+                    <CartItemCard>
+                      <Row gutter={16} align="middle">
+                        <Col xs={24} sm={12}>
+                          <Link to={`/events/${item.event_slug}`}>
+                            <Title level={5} style={{ marginBottom: 4 }}>
+                              {item.event_title}
+                            </Title>
+                          </Link>
+                          <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
+                            {item.ticket_type}
+                          </Text>
+                          {item.start_date && (
+                            <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
+                              {new Date(item.start_date).toLocaleDateString()}
+                            </Text>
+                          )}
+                          {item.venue_name && (
+                            <Text type="secondary" style={{ fontSize: 12, display: 'block' }}>
+                              {item.venue_name}
+                            </Text>
+                          )}
+                          <div style={{ marginTop: 8 }}>
+                            <Text
+                              strong
+                              style={{
+                                fontSize: 16,
+                                color: item.is_free ? '#52c41a' : '#1890ff',
+                              }}
+                            >
+                              {item.is_free
+                                ? 'FREE'
+                                : `$${Number.parseFloat(item.price).toFixed(2)}`}
+                            </Text>
+                          </div>
+                        </Col>
+                        <Col xs={12} sm={6}>
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            Quantity
+                          </Text>
+                          <div>
+                            <Text strong>{item.quantity}</Text>
+                          </div>
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            {item.quantity_available - item.quantity_sold} available
+                          </Text>
+                        </Col>
+                        <Col xs={12} sm={6} style={{ textAlign: 'right' }}>
+                          <Space direction="vertical" align="end">
+                            <Text strong style={{ fontSize: 18 }}>
+                              {item.is_free
+                                ? 'FREE'
+                                : `$${(Number.parseFloat(item.price) * item.quantity).toFixed(2)}`}
+                            </Text>
+                            <Button type="text" danger icon={<DeleteOutlined />}>
+                              Remove
+                            </Button>
+                          </Space>
+                        </Col>
+                      </Row>
+                    </CartItemCard>
+                  )}
+                />
+              </>
+            )}
 
             <Button danger onClick={handleClearCart} style={{ marginTop: 16 }}>
               Clear Cart
@@ -209,18 +303,34 @@ export const CartPage = () => {
 
           <Col xs={24} lg={8}>
             <SummaryCard title="Order Summary">
+              {hasProducts && (
+                <SummaryRow>
+                  <Text>Products:</Text>
+                  <Text strong>${productSubtotal.toFixed(2)}</Text>
+                </SummaryRow>
+              )}
+              {hasTickets && (
+                <SummaryRow>
+                  <Text>Event Tickets:</Text>
+                  <Text strong>${ticketSubtotal.toFixed(2)}</Text>
+                </SummaryRow>
+              )}
               <SummaryRow>
                 <Text>Subtotal:</Text>
                 <Text strong>${subtotal.toFixed(2)}</Text>
               </SummaryRow>
-              <SummaryRow>
-                <Text>Tax (10%):</Text>
-                <Text strong>${tax.toFixed(2)}</Text>
-              </SummaryRow>
-              <SummaryRow>
-                <Text>Shipping:</Text>
-                <Text strong>${shipping.toFixed(2)}</Text>
-              </SummaryRow>
+              {hasProducts && (
+                <>
+                  <SummaryRow>
+                    <Text>Tax (10%):</Text>
+                    <Text strong>${tax.toFixed(2)}</Text>
+                  </SummaryRow>
+                  <SummaryRow>
+                    <Text>Shipping:</Text>
+                    <Text strong>${shipping.toFixed(2)}</Text>
+                  </SummaryRow>
+                </>
+              )}
               <Divider />
               <SummaryRow>
                 <Title level={4}>Total:</Title>

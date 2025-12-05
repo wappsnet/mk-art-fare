@@ -23,7 +23,7 @@ import {
 } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import styled from '@emotion/styled';
-import { Layout } from '../components/Layout';
+import { Layout } from '@/components/Layout';
 import { useGetProductsQuery, useGetGlobalCategoriesQuery } from '@/services/apiSlice';
 import { Product } from '../types';
 

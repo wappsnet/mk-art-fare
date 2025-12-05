@@ -15,7 +15,6 @@ import {
   Modal,
   Form,
   Select,
-  Input,
 } from 'antd';
 import {
   UserOutlined,
@@ -28,8 +27,8 @@ import {
 } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import dayjs from 'dayjs';
-import { Layout } from '../components/Layout';
-import { useAppSelector } from '../hooks/useRedux';
+import { Layout } from '@/components/Layout';
+import { useAppSelector } from '@/hooks/useRedux';
 import {
   useGetUsersQuery,
   useUpdateUserMutation,
@@ -69,15 +68,6 @@ interface Organization {
   slug: string;
   owner_id: number;
   owner_first_name: string;
-  created_at: string;
-}
-
-interface Order {
-  id: number;
-  order_number: string;
-  user_id: number;
-  total: number;
-  status: string;
   created_at: string;
 }
 
@@ -147,7 +137,6 @@ export const AdminPage = () => {
     if (user?.role !== 'admin') {
       message.error('Access denied. Admin privileges required.');
       navigate('/');
-      return;
     }
   }, [isAuthenticated, user, navigate]);
 
@@ -385,71 +374,69 @@ export const AdminPage = () => {
       key: 'overview',
       label: 'Overview',
       children: (
-        <>
-          <Row gutter={[24, 24]}>
-            <Col xs={24} sm={12} lg={8}>
-              <StatCard>
-                <Statistic
-                  title="Total Users"
-                  value={stats.totalUsers}
-                  prefix={<TeamOutlined />}
-                  valueStyle={{ color: '#3f8600' }}
-                />
-              </StatCard>
-            </Col>
-            <Col xs={24} sm={12} lg={8}>
-              <StatCard>
-                <Statistic
-                  title="Total Shops"
-                  value={stats.totalOrganizations}
-                  prefix={<ShopOutlined />}
-                  valueStyle={{ color: '#1890ff' }}
-                />
-              </StatCard>
-            </Col>
-            <Col xs={24} sm={12} lg={8}>
-              <StatCard>
-                <Statistic
-                  title="Total Orders"
-                  value={stats.totalOrders}
-                  prefix={<ShoppingOutlined />}
-                  valueStyle={{ color: '#cf1322' }}
-                />
-              </StatCard>
-            </Col>
-            <Col xs={24} sm={12} lg={8}>
-              <StatCard>
-                <Statistic
-                  title="Total Revenue"
-                  value={stats.totalRevenue}
-                  prefix={<DollarOutlined />}
-                  precision={2}
-                  valueStyle={{ color: '#faad14' }}
-                />
-              </StatCard>
-            </Col>
-            <Col xs={24} sm={12} lg={8}>
-              <StatCard>
-                <Statistic
-                  title="Blog Posts"
-                  value={stats.totalBlogPosts}
-                  prefix={<FileTextOutlined />}
-                  valueStyle={{ color: '#722ed1' }}
-                />
-              </StatCard>
-            </Col>
-            <Col xs={24} sm={12} lg={8}>
-              <StatCard>
-                <Statistic
-                  title="Events"
-                  value={stats.totalEvents}
-                  prefix={<CalendarOutlined />}
-                  valueStyle={{ color: '#eb2f96' }}
-                />
-              </StatCard>
-            </Col>
-          </Row>
-        </>
+        <Row gutter={[24, 24]}>
+          <Col xs={24} sm={12} lg={8}>
+            <StatCard>
+              <Statistic
+                title="Total Users"
+                value={stats.totalUsers}
+                prefix={<TeamOutlined />}
+                valueStyle={{ color: '#3f8600' }}
+              />
+            </StatCard>
+          </Col>
+          <Col xs={24} sm={12} lg={8}>
+            <StatCard>
+              <Statistic
+                title="Total Shops"
+                value={stats.totalOrganizations}
+                prefix={<ShopOutlined />}
+                valueStyle={{ color: '#1890ff' }}
+              />
+            </StatCard>
+          </Col>
+          <Col xs={24} sm={12} lg={8}>
+            <StatCard>
+              <Statistic
+                title="Total Orders"
+                value={stats.totalOrders}
+                prefix={<ShoppingOutlined />}
+                valueStyle={{ color: '#cf1322' }}
+              />
+            </StatCard>
+          </Col>
+          <Col xs={24} sm={12} lg={8}>
+            <StatCard>
+              <Statistic
+                title="Total Revenue"
+                value={stats.totalRevenue}
+                prefix={<DollarOutlined />}
+                precision={2}
+                valueStyle={{ color: '#faad14' }}
+              />
+            </StatCard>
+          </Col>
+          <Col xs={24} sm={12} lg={8}>
+            <StatCard>
+              <Statistic
+                title="Blog Posts"
+                value={stats.totalBlogPosts}
+                prefix={<FileTextOutlined />}
+                valueStyle={{ color: '#722ed1' }}
+              />
+            </StatCard>
+          </Col>
+          <Col xs={24} sm={12} lg={8}>
+            <StatCard>
+              <Statistic
+                title="Events"
+                value={stats.totalEvents}
+                prefix={<CalendarOutlined />}
+                valueStyle={{ color: '#eb2f96' }}
+              />
+            </StatCard>
+          </Col>
+        </Row>
       ),
     },
     {
@@ -514,7 +501,7 @@ export const AdminPage = () => {
     },
   ];
 
-  if (!user || user.role !== 'admin') {
+  if (user?.role !== 'admin') {
     return null;
   }
 

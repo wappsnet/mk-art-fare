@@ -32,6 +32,48 @@ router.get(
   asyncHandler(organizationController.getOrganizationById.bind(organizationController))
 );
 
+// Get products by organization ID (for shop management)
+router.get(
+  '/id/:id/products',
+  authenticate,
+  authorize(UserRole.ARTIST, UserRole.ADMIN),
+  asyncHandler(async (req, res) => {
+    const orgId = parseInt(req.params.id);
+
+    // Verify organization ownership
+    const org = await query('SELECT * FROM organizations WHERE id = ? AND owner_id = ?', [
+      orgId,
+      req.user.userId,
+    ]);
+    if (org.length === 0 && req.user.role !== UserRole.ADMIN) {
+      throw new AppError('Organization not found', 404);
+    }
+
+    const products = await query(
+      `SELECT p.*, c.name as category_name
+       FROM products p
+       LEFT JOIN categories c ON p.category_id = c.id
+       WHERE p.organization_id = ?
+       ORDER BY p.created_at DESC`,
+      [orgId]
+    );
+
+    // Get images for each product
+    for (let product of products) {
+      const images = await query('SELECT * FROM product_images WHERE product_id = ? ORDER BY sort_order', [
+        product.id,
+      ]);
+      // Transform image URLs
+      product.images = images.map(img => ({
+        ...img,
+        image_url: toFullImageUrl(img.image_url, 'products')
+      }));
+    }
+
+    sendSuccess(res, products);
+  })
+);
+
 router.get(
   '/:slug/products',
   asyncHandler(organizationController.getOrganizationProducts.bind(organizationController))

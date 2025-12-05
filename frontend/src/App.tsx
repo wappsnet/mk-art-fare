@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ConfigProvider } from 'antd';
 import { Provider } from 'react-redux';
@@ -22,6 +21,15 @@ import { ShopPage } from './pages/ShopPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { AdminPage } from './pages/AdminPage';
 import { ShopManagementPage } from './pages/ShopManagementPage';
+import { MyEventsPage } from './pages/MyEventsPage';
+import { MyTicketsPage } from './pages/MyTicketsPage';
+import { AdminEventModerationPage } from './pages/AdminEventModerationPage';
+import { ShopProductsPage } from './pages/shop/ShopProductsPage';
+import { ShopEventsPage } from './pages/shop/ShopEventsPage';
+import { ShopOrdersPage } from './pages/shop/ShopOrdersPage';
+import { ShopAnalyticsPage } from './pages/shop/ShopAnalyticsPage';
+import { ShopCategoriesPage } from './pages/shop/ShopCategoriesPage';
+import { ShopSettingsPage } from './pages/shop/ShopSettingsPage';
 
 function AppContent() {
   const token = localStorage.getItem('accessToken');
@@ -51,8 +59,21 @@ function AppContent() {
 
         {/* Protected Routes */}
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/my-events" element={<MyEventsPage />} />
+        <Route path="/my-tickets" element={<MyTicketsPage />} />
         <Route path="/admin" element={<AdminPage />} />
-        <Route path="/admin/shop/:id" element={<ShopManagementPage />} />
+        <Route path="/admin/event-moderation" element={<AdminEventModerationPage />} />
+
+        {/* Shop Management with nested routes */}
+        <Route path="/admin/shop/:id" element={<ShopManagementPage />}>
+          <Route index element={<ShopProductsPage />} />
+          <Route path="products" element={<ShopProductsPage />} />
+          <Route path="categories" element={<ShopCategoriesPage />} />
+          <Route path="events" element={<ShopEventsPage />} />
+          <Route path="orders" element={<ShopOrdersPage />} />
+          <Route path="analytics" element={<ShopAnalyticsPage />} />
+          <Route path="settings" element={<ShopSettingsPage />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );
@@ -66,8 +87,9 @@ function App() {
           token: {
             colorPrimary: '#1890ff',
             borderRadius: 4,
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-          }
+            fontFamily:
+              '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+          },
         }}
       >
         <AppContent />

@@ -2,7 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Row, Col, Card, Typography, Button, Tabs, Spin, Empty, Tag } from 'antd';
 import { ShoppingCartOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
-import { Layout } from '../components/Layout';
+import { Layout } from '@/components/Layout';
 import { useGetOrganizationQuery, useGetOrganizationProductsQuery } from '@/services/apiSlice';
 
 const { Title, Paragraph, Text } = Typography;

@@ -95,7 +95,7 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
   const [uploading, setUploading] = useState(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [altTexts, setAltTexts] = useState<Record<string, string>>({});
-  const [localImages, setLocalImages] = useState<ProductImage[]>(images);
+  const [localImages, setLocalImages] = useState<ProductImage[]>(images || []);
   const [editingAltId, setEditingAltId] = useState<number | null>(null);
   const [editingAltText, setEditingAltText] = useState('');
 

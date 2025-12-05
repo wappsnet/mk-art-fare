@@ -8,7 +8,7 @@ const seedDatabase = async () => {
     const connection = await pool.getConnection();
 
     // Create admin user
-    const adminPassword = await bcrypt.hash('admin123', 10);
+    const adminPassword = await bcrypt.hash('Admin@123', 10);
     await connection.query(
       `INSERT INTO users (email, password_hash, first_name, last_name, role, is_verified, is_active)
        VALUES (?, ?, ?, ?, ?, ?, ?)

@@ -16,9 +16,8 @@ import {
 import { CalendarOutlined, EnvironmentOutlined, UserOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
 import dayjs from 'dayjs';
-import { Layout } from '../components/Layout';
+import { Layout } from '@/components/Layout';
 import { useGetEventsQuery } from '@/services/apiSlice';
-import { Event } from '../types';
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;

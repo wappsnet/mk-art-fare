@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Row, Col, Card, Typography, Button, Space, Modal, Form, Input, message } from 'antd';
 import { ShopOutlined, PlusOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
-import { Layout } from '../components/Layout';
-import { useAppSelector } from '../hooks/useRedux';
+import { Layout } from '@/components/Layout';
+import { useAppSelector } from '@/hooks/useRedux';
 import { useGetMyOrganizationsQuery, useCreateOrganizationMutation } from '@/services/apiSlice';
 
 const { Title, Text } = Typography;
@@ -30,7 +30,6 @@ export const DashboardPage = () => {
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
-      return;
     }
   }, [isAuthenticated, navigate]);
 

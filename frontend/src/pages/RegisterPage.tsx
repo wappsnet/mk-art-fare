@@ -3,9 +3,9 @@ import { Form, Input, Button, Card, Typography, Divider, Space, message } from '
 import { MailOutlined, LockOutlined, UserOutlined, GoogleOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
-import { useAppSelector } from '../hooks/useRedux';
+import { useAppSelector } from '@/hooks/useRedux';
 import { useRegisterMutation } from '@/services/apiSlice';
-import { Layout } from '../components/Layout';
+import { Layout } from '@/components/Layout';
 
 const { Title, Text } = Typography;
 

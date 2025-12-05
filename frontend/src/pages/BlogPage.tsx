@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Row, Col, Card, Typography, Tag, Avatar, Spin, Empty, Pagination, Input } from 'antd';
 import { UserOutlined, EyeOutlined, CalendarOutlined, SearchOutlined } from '@ant-design/icons';
 import styled from '@emotion/styled';
-import { Layout } from '../components/Layout';
+import { Layout } from '@/components/Layout';
 import { useGetBlogPostsQuery } from '@/services/apiSlice';
 import { BlogPost } from '../types';
 

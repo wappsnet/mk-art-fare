@@ -30,10 +30,11 @@ router.get(
     }
 
     if (!cartId) {
-      sendSuccess(res, { items: [], total: 0 });
+      sendSuccess(res, { items: [], eventTicketItems: [], total: 0 });
       return;
     }
 
+    // Get product items
     const items = await query(
       `SELECT ci.*, p.name, p.price, p.stock_quantity, p.slug, o.name as organization_name, o.slug as organization_slug
      FROM cart_items ci
@@ -43,9 +44,22 @@ router.get(
       [cartId]
     );
 
-    const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    // Get event ticket items
+    const eventTicketItems = await query(
+      `SELECT etci.*, et.ticket_type, et.price, et.is_free, et.quantity_available, et.quantity_sold,
+       et.delivery_method, e.title as event_title, e.slug as event_slug, e.start_date, e.venue_name
+       FROM event_ticket_cart_items etci
+       LEFT JOIN event_tickets et ON etci.ticket_id = et.id
+       LEFT JOIN events e ON et.event_id = e.id
+       WHERE etci.cart_id = ?`,
+      [cartId]
+    );
 
-    sendSuccess(res, { id: cartId, items, total });
+    const productTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const ticketTotal = eventTicketItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const total = productTotal + ticketTotal;
+
+    sendSuccess(res, { id: cartId, items, eventTicketItems, total });
   })
 );
 

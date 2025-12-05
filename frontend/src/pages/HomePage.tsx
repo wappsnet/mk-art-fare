@@ -2,7 +2,7 @@ import { Button, Row, Col, Card, Typography, Space } from 'antd';
 import { ShoppingOutlined, BankOutlined, CalendarOutlined, ReadOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import styled from '@emotion/styled';
-import { Layout } from '../components/Layout';
+import { Layout } from '@/components/Layout';
 
 const { Title, Paragraph } = Typography;
 
@@ -48,7 +48,9 @@ const FeatureCard = styled(Card)`
   height: 100%;
   text-align: center;
   border-radius: 8px;
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
 
   &:hover {
     transform: translateY(-8px);
@@ -89,30 +91,34 @@ export const HomePage = () => {
     {
       icon: <ShoppingOutlined />,
       title: 'Browse Art',
-      description: 'Discover unique artworks from talented artists around the world. From paintings to sculptures, find your perfect piece.'
+      description:
+        'Discover unique artworks from talented artists around the world. From paintings to sculptures, find your perfect piece.',
     },
     {
       icon: <BankOutlined />,
       title: 'Artist Shops',
-      description: 'Artists can create custom shop pages with their branding, showcase their work, and connect with art lovers.'
+      description:
+        'Artists can create custom shop pages with their branding, showcase their work, and connect with art lovers.',
     },
     {
       icon: <CalendarOutlined />,
       title: 'Art Events',
-      description: 'Attend virtual and in-person art exhibitions, workshops, and events. Book tickets online with ease.'
+      description:
+        'Attend virtual and in-person art exhibitions, workshops, and events. Book tickets online with ease.',
     },
     {
       icon: <ReadOutlined />,
       title: 'Community Blog',
-      description: 'Read inspiring stories, art techniques, and industry insights from our vibrant community of artists.'
-    }
+      description:
+        'Read inspiring stories, art techniques, and industry insights from our vibrant community of artists.',
+    },
   ];
 
   const stats = [
     { number: '10,000+', label: 'Artworks' },
     { number: '2,500+', label: 'Artists' },
     { number: '50,000+', label: 'Happy Customers' },
-    { number: '500+', label: 'Events Hosted' }
+    { number: '500+', label: 'Events Hosted' },
   ];
 
   return (
@@ -120,8 +126,8 @@ export const HomePage = () => {
       <HeroSection>
         <HeroTitle>Welcome to Art Fare</HeroTitle>
         <HeroText>
-          The premier e-commerce platform connecting artists with art lovers.
-          Discover amazing artworks, support talented artists, and join a vibrant community.
+          The premier e-commerce platform connecting artists with art lovers. Discover amazing
+          artworks, support talented artists, and join a vibrant community.
         </HeroText>
         <Space size="large">
           <Link to="/products">
@@ -159,7 +165,9 @@ export const HomePage = () => {
       </Section>
 
       <StatsSection>
-        <Title level={2} style={{ marginBottom: 48 }}>Our Growing Community</Title>
+        <Title level={2} style={{ marginBottom: 48 }}>
+          Our Growing Community
+        </Title>
         <Row gutter={[32, 32]}>
           {stats.map((stat, index) => (
             <Col xs={12} sm={12} md={6} key={index}>
@@ -183,9 +191,7 @@ export const HomePage = () => {
               </Button>
             </Link>
             <Link to="/products">
-              <Button size="large">
-                Browse Gallery
-              </Button>
+              <Button size="large">Browse Gallery</Button>
             </Link>
           </Space>
         </div>
