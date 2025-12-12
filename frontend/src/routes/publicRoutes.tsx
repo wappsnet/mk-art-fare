@@ -1,4 +1,4 @@
-import { AppRouteObject } from './types';
+import type { AppRouteObject } from '@/types/routes';
 import { RequireGuest } from '@/components/guards';
 import { HomePage } from '@/pages/public/HomePage';
 import { LoginPage } from '@/pages/public/LoginPage';

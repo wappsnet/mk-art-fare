@@ -1,4 +1,5 @@
-@import './variables.scss';
+@use 'sass:color';
+@use './variables' as *;
 
 * {
   box-sizing: border-box;
@@ -35,7 +36,7 @@ a {
   transition: color 0.3s;
 
   &:hover {
-    color: lighten($primary-color, 10%);
+    color: color.adjust($primary-color, $lightness: 10%);
   }
 }
 

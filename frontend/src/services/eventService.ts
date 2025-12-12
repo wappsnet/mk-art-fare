@@ -6,7 +6,7 @@ import {
   EventModerationStatus,
   CreateEventData,
   ApiResponse,
-} from '../types';
+} from '../types/common';
 
 class EventService {
   // Public endpoints

@@ -16,6 +16,7 @@ import orderRoutes from './routes/orderRoutes.js';
 import blogRoutes from './routes/blogRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
+import adminModerationRoutes from './routes/admin/moderationRoutes.js';
 
 const app = express();
 
@@ -83,6 +84,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/admin', adminModerationRoutes);
 
 // Error handling
 app.use(notFoundHandler);

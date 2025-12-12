@@ -8,26 +8,16 @@ import {
   LinkOutlined,
   PictureOutlined,
 } from '@ant-design/icons';
-import type { UploadFile, RcFile } from 'antd/es/upload/interface';
+import type { UploadFile } from 'antd/es/upload/interface';
 import styled from '@emotion/styled';
-import { ProductImage } from '@/types';
+import { ProductImage } from '@/types/common';
 import {
   useAddProductImageMutation,
   useUpdateProductImageMutation,
   useDeleteProductImageMutation,
 } from '@/services/apiSlice';
+import { getErrorMessage } from '@/types/errors';
 import axios from 'axios';
-
-interface ApiError {
-  data?: {
-    message?: string;
-  };
-  message?: string;
-}
-
-interface ApiResponse<T> {
-  data?: T;
-}
 
 const ImageCard = styled.div`
   border: 1px solid #f0f0f0;
@@ -95,6 +85,21 @@ interface ProductImageManagerProps {
   onUpdate: () => void;
 }
 
+function isProductImage(data: unknown): data is ProductImage {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'id' in data &&
+    'product_id' in data &&
+    'url' in data &&
+    'sort_order' in data &&
+    typeof data.id === 'number' &&
+    typeof data.product_id === 'number' &&
+    typeof data.url === 'string' &&
+    typeof data.sort_order === 'number'
+  );
+}
+
 export const ProductImageManager: FC<ProductImageManagerProps> = ({
   productId,
   images,
@@ -135,26 +140,29 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
         },
       }).unwrap();
       message.success('Image added successfully!');
-      const created = (resp as ApiResponse<ProductImage>)?.data;
-      if (created) {
-        setLocalImages((prev) => {
-          const next = [...prev];
-          if (created.is_thumbnail) {
-            for (const img of next) {
-              img.is_thumbnail = false;
+
+      if (resp && typeof resp === 'object' && 'data' in resp) {
+        const created = resp.data;
+        if (isProductImage(created)) {
+          setLocalImages((prev) => {
+            const next = [...prev];
+            if (created.is_thumbnail) {
+              for (const existingImg of next) {
+                existingImg.is_thumbnail = false;
+              }
             }
-          }
-          next.push(created);
-          return next;
-        });
+            next.push(created);
+            return next;
+          });
+        }
       }
+
       setImageUrl('');
       setAltText('');
       setIsThumbnail(false);
       onUpdate();
     } catch (error) {
-      const apiError = error as ApiError;
-      message.error(apiError?.data?.message || 'Failed to add image');
+      message.error(getErrorMessage(error) || 'Failed to add image');
     }
   };
 
@@ -165,11 +173,11 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
         imageId,
         data: { is_thumbnail: !currentStatus },
       }).unwrap();
-      message.success(currentStatus ? 'Thumbnail removed' : 'Thumbnail set!');
+      const successMessage = currentStatus ? 'Thumbnail removed' : 'Thumbnail set!';
+      message.success(successMessage);
       onUpdate();
     } catch (error) {
-      const apiError = error as ApiError;
-      message.error(apiError?.data?.message || 'Failed to update thumbnail');
+      message.error(getErrorMessage(error) || 'Failed to update thumbnail');
     }
   };
 
@@ -185,8 +193,7 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
           setLocalImages((prev) => prev.filter((img) => img.id !== imageId));
           onUpdate();
         } catch (error) {
-          const apiError = error as ApiError;
-          message.error(apiError?.data?.message || 'Failed to delete image');
+          message.error(getErrorMessage(error) || 'Failed to delete image');
         }
       },
     });
@@ -201,14 +208,18 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
       }).unwrap();
       message.success('Alt text updated!');
       setLocalImages((prev) =>
-        prev.map((img) => (img.id === imageId ? { ...img, alt_text: editingAltText } : img))
+        prev.map((img) => {
+          if (img.id === imageId) {
+            return { ...img, alt_text: editingAltText };
+          }
+          return img;
+        })
       );
       setEditingAltId(null);
       setEditingAltText('');
       onUpdate();
     } catch (error) {
-      const apiError = error as ApiError;
-      message.error(apiError?.data?.message || 'Failed to update alt text');
+      message.error(getErrorMessage(error) || 'Failed to update alt text');
     }
   };
 
@@ -221,8 +232,8 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
     const formData = new FormData();
     // Append as multiple under 'images' field to leverage backend multi-upload
     fileList.forEach((f) => {
-      const origin = f.originFileObj as RcFile;
-      if (origin) {
+      const origin = f.originFileObj;
+      if (origin && origin instanceof File) {
         formData.append('images', origin);
         // Append matching alt text per file (backend supports multiple alt_text fields)
         formData.append('alt_text', altTexts[f.uid] || '');
@@ -240,35 +251,39 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
         },
       });
       message.success('Image(s) uploaded successfully!');
-      const payload = resp.data as ApiResponse<ProductImage | ProductImage[]>;
-      const created = payload?.data;
-      if (created) {
-        setLocalImages((prev) => {
-          const next = [...prev];
-          const addOne = (img: ProductImage) => {
-            if (img.is_thumbnail) {
-              for (const existing of next) {
-                existing.is_thumbnail = false;
+
+      if (resp.data && typeof resp.data === 'object' && 'data' in resp.data) {
+        const created = resp.data.data;
+        if (created) {
+          setLocalImages((prev) => {
+            const next = [...prev];
+            const addOne = (img: ProductImage) => {
+              if (img.is_thumbnail) {
+                for (const existing of next) {
+                  existing.is_thumbnail = false;
+                }
               }
+              next.push(img);
+            };
+            if (Array.isArray(created)) {
+              for (const img of created) {
+                addOne(img);
+              }
+            } else if (typeof created === 'object' && 'id' in created) {
+              addOne(created);
             }
-            next.push(img);
-          };
-          if (Array.isArray(created)) {
-            for (const img of created) addOne(img);
-          } else {
-            addOne(created);
-          }
-          return next;
-        });
+            return next;
+          });
+        }
       }
+
       setFileList([]);
       setAltTexts({});
       setAltText('');
       setIsThumbnail(false);
       onUpdate();
     } catch (error) {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      message.error(axiosError?.response?.data?.message || 'Failed to upload image(s)');
+      message.error(getErrorMessage(error) || 'Failed to upload image(s)');
     } finally {
       setUploading(false);
     }

@@ -19,7 +19,7 @@ import { PlusOutlined, MinusCircleOutlined, UploadOutlined } from '@ant-design/i
 import type { UploadFile } from 'antd/es/upload/interface';
 import dayjs from 'dayjs';
 import { eventService } from '@/services/eventService';
-import { Event, TicketDeliveryMethod } from '@/types';
+import { Event, TicketDeliveryMethod } from '@/types/common';
 import { getErrorMessage } from '@/types/errors';
 
 const { TextArea } = Input;
@@ -77,7 +77,7 @@ export const CreateEventModal: FC<CreateEventModalProps> = ({
       // Populate form with event data for editing
       const ticketsData: TicketFormData[] = (event.tickets || []).map((ticket) => ({
         type: ticket.ticket_type,
-        price: parseFloat(ticket.price),
+        price: Number.parseFloat(ticket.price),
         quantity: ticket.quantity_available,
         description: ticket.description,
         deliveryMethod: ticket.delivery_method,
@@ -133,7 +133,12 @@ export const CreateEventModal: FC<CreateEventModalProps> = ({
         tickets: values.tickets || [],
       };
 
-      const files = fileList.map((file) => file.originFileObj as File).filter(Boolean);
+      const files: File[] = [];
+      for (const file of fileList) {
+        if (file.originFileObj) {
+          files.push(file.originFileObj);
+        }
+      }
 
       if (event) {
         await eventService.updateEvent(event.id, formData, files);

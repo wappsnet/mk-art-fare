@@ -42,7 +42,7 @@ export class CategoryService {
 
     const params = data.organization_id ? [slug, data.organization_id] : [slug];
 
-    const existing = await query(whereClause, params);
+    const existing = await query(`SELECT * FROM categories ${whereClause}`, params);
 
     if (existing.length > 0) {
       throw new AppError('Category with this name already exists', 409);

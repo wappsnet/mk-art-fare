@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { Navigate } from 'react-router';
 import { useAppSelector } from '@/hooks/useRedux';
-import { UserRole } from '@/types';
+import { UserRole } from '@/types/common';
 
 interface RequireRoleProps {
   children: ReactNode;

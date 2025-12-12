@@ -13,7 +13,7 @@ import {
   Address,
   CreateAddressInput,
   BookingAttendeeInfo,
-} from '@/types';
+} from '@/types/common';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_URL,
@@ -48,11 +48,20 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
       );
 
       if (refreshResult.data) {
-        const data = refreshResult.data as ApiResponse<{
-          accessToken: string;
-          refreshToken: string;
-        }>;
-        if (data.success && data.data) {
+        const data = refreshResult.data;
+        if (
+          typeof data === 'object' &&
+          data !== null &&
+          'success' in data &&
+          data.success &&
+          'data' in data &&
+          typeof data.data === 'object' &&
+          data.data !== null &&
+          'accessToken' in data.data &&
+          'refreshToken' in data.data &&
+          typeof data.data.accessToken === 'string' &&
+          typeof data.data.refreshToken === 'string'
+        ) {
           localStorage.setItem('accessToken', data.data.accessToken);
           localStorage.setItem('refreshToken', data.data.refreshToken);
           // Retry the original query
@@ -412,6 +421,41 @@ export const api = createApi({
       invalidatesTags: ['Organization'],
     }),
 
+    // Admin Moderation endpoints
+    moderateOrganization: builder.mutation<
+      ApiResponse<Organization>,
+      { id: number; status: 'approved' | 'declined'; note?: string }
+    >({
+      query: ({ id, status, note }) => ({
+        url: `/admin/organizations/${id}/moderate`,
+        method: 'PATCH',
+        body: { status, note },
+      }),
+      invalidatesTags: ['Organization'],
+    }),
+    moderateProduct: builder.mutation<
+      ApiResponse<Product>,
+      { id: number; status: 'approved' | 'declined'; note?: string }
+    >({
+      query: ({ id, status, note }) => ({
+        url: `/admin/products/${id}/moderate`,
+        method: 'PATCH',
+        body: { status, note },
+      }),
+      invalidatesTags: ['Product'],
+    }),
+    moderateEvent: builder.mutation<
+      ApiResponse<Event>,
+      { id: number; status: 'approved' | 'declined'; note?: string }
+    >({
+      query: ({ id, status, note }) => ({
+        url: `/admin/events/${id}/moderate`,
+        method: 'PATCH',
+        body: { status, note },
+      }),
+      invalidatesTags: ['Event'],
+    }),
+
     // User endpoints
     getUsers: builder.query<ApiResponse<User[]>, void>({
       query: () => '/users',
@@ -424,6 +468,27 @@ export const api = createApi({
         body: data,
       }),
       invalidatesTags: ['User'],
+    }),
+    updateProfile: builder.mutation<
+      ApiResponse<User>,
+      { first_name: string; last_name: string; email: string; phone?: string; bio?: string }
+    >({
+      query: (data) => ({
+        url: '/users/profile',
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: ['User'],
+    }),
+    changePassword: builder.mutation<
+      ApiResponse<{ message: string }>,
+      { current_password: string; new_password: string }
+    >({
+      query: (data) => ({
+        url: '/users/password',
+        method: 'PATCH',
+        body: data,
+      }),
     }),
     getUserAddresses: builder.query<ApiResponse<Array<Address>>, void>({
       query: () => '/users/addresses',
@@ -571,8 +636,13 @@ export const {
   useUpdateOrganizationThemeMutation,
   useUploadOrganizationLogoMutation,
   useUploadOrganizationBannerMutation,
+  useModerateOrganizationMutation,
+  useModerateProductMutation,
+  useModerateEventMutation,
   useGetUsersQuery,
   useUpdateUserMutation,
+  useUpdateProfileMutation,
+  useChangePasswordMutation,
   useGetUserAddressesQuery,
   useCreateUserAddressMutation,
   useGetDashboardStatsQuery,

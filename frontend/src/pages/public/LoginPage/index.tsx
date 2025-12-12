@@ -20,6 +20,7 @@ import {
 const { Title, Text } = Typography;
 
 export const LoginPage = () => {
+  const [loginForm] = Form.useForm();
   const navigate = useNavigate();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const [login, { isLoading }] = useLoginMutation();
@@ -30,10 +31,9 @@ export const LoginPage = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const onFinish = async (values: unknown) => {
+  const onFinish = async (values: { email: string; password: string }) => {
     try {
-      const { email, password } = values as { email: string; password: string };
-      const result = await login({ email, password }).unwrap();
+      const result = await login({ email: values.email, password: values.password }).unwrap();
       if (result.success) {
         message.success('Login successful!');
         navigate('/dashboard');
@@ -63,7 +63,13 @@ export const LoginPage = () => {
 
             <Divider>Or sign in with email</Divider>
 
-            <StyledForm name="login" layout="vertical" onFinish={onFinish} autoComplete="off">
+            <StyledForm
+              form={loginForm}
+              name="login"
+              layout="vertical"
+              onFinish={onFinish}
+              autoComplete="off"
+            >
               <Form.Item
                 name="email"
                 rules={[

@@ -6,7 +6,7 @@ import { useAppSelector } from '@/hooks/useRedux';
 import { useRegisterMutation } from '@/services/apiSlice';
 import { Layout } from '@/components/Layout';
 import { getErrorMessage } from '@/types/errors';
-import { RegisterFormData } from '@/types';
+import { RegisterFormData } from '@/types/common';
 import { Container, StyledCard, StyledForm, GoogleButton, CenterText } from './styles';
 
 const { Title, Text } = Typography;
@@ -22,10 +22,25 @@ export const RegisterPage = () => {
     }
   }, [isAuthenticated, navigate]);
 
+  function isRegisterFormData(values: unknown): values is RegisterFormData {
+    return (
+      typeof values === 'object' &&
+      values !== null &&
+      'email' in values &&
+      'password' in values &&
+      'firstName' in values &&
+      'lastName' in values
+    );
+  }
+
   const onFinish = async (values: unknown) => {
-    const formData = values as RegisterFormData;
+    if (!isRegisterFormData(values)) {
+      message.error('Invalid form data');
+      return;
+    }
+
     try {
-      const result = await register(formData).unwrap();
+      const result = await register(values).unwrap();
       if (result.success) {
         message.success('Registration successful!');
         navigate('/dashboard');

@@ -4,6 +4,7 @@ import {
   UserOutlined,
   LoginOutlined,
   LogoutOutlined,
+  ShopOutlined,
 } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router';
 import styled from '@emotion/styled';
@@ -61,19 +62,45 @@ export const Header = () => {
     navigate('/');
   };
 
-  const userMenuItems = [
-    {
-      key: 'profile',
+  // Build user menu items based on role and permissions
+  const userMenuItems = [];
+
+  // Show Dashboard for artists, admins, or users who can create organizations
+  if (
+    user?.role === 'artist' ||
+    user?.role === 'admin' ||
+    user?.role === 'customer' // Customers can also create organizations
+  ) {
+    userMenuItems.push({
+      key: 'dashboard',
+      icon: <ShopOutlined />,
+      label: <Link to="/dashboard">Dashboard</Link>,
+    });
+  }
+
+  // Account is available to all authenticated users
+  userMenuItems.push({
+    key: 'account',
+    icon: <UserOutlined />,
+    label: <Link to="/account">Account</Link>,
+  });
+
+  // Admin menu only for admins
+  if (user?.role === 'admin') {
+    userMenuItems.push({
+      key: 'admin',
       icon: <UserOutlined />,
-      label: <Link to="/dashboard">My Dashboard</Link>,
-    },
-    {
-      key: 'logout',
-      icon: <LogoutOutlined />,
-      label: 'Logout',
-      onClick: handleLogout,
-    },
-  ];
+      label: <Link to="/admin">Admin</Link>,
+    });
+  }
+
+  // Logout for everyone
+  userMenuItems.push({
+    key: 'logout',
+    icon: <LogoutOutlined />,
+    label: 'Logout',
+    onClick: handleLogout,
+  });
 
   const menuItems = [
     {

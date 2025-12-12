@@ -22,24 +22,40 @@ export interface ApiResponse<T> {
   message?: string;
 }
 
+// Type guards
+function isApiError(error: unknown): error is ApiError {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    ('data' in error || 'message' in error)
+  );
+}
+
+function isAxiosError(error: unknown): error is AxiosError {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'response' in error
+  );
+}
+
 // Helper function to extract error message from unknown error
 export function getErrorMessage(error: unknown): string {
   if (typeof error === 'string') {
     return error;
   }
 
-  const apiError = error as ApiError;
-  if (apiError?.data?.message) {
-    return apiError.data.message;
+  if (isApiError(error)) {
+    if (error.data?.message) {
+      return error.data.message;
+    }
+    if (error.message) {
+      return error.message;
+    }
   }
 
-  const axiosError = error as AxiosError;
-  if (axiosError?.response?.data?.message) {
-    return axiosError.response.data.message;
-  }
-
-  if (apiError?.message) {
-    return apiError.message;
+  if (isAxiosError(error) && error.response?.data?.message) {
+    return error.response.data.message;
   }
 
   return 'An unexpected error occurred';

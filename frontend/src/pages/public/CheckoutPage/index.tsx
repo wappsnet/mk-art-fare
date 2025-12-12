@@ -24,7 +24,7 @@ import {
   useCreateOrderMutation,
   useClearCartMutation,
 } from '@/services/apiSlice';
-import { CreateAddressInput } from '@/types';
+import { CreateAddressInput } from '@/types/common';
 import { getErrorMessage } from '@/types/errors';
 import {
   Container,

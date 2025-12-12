@@ -22,7 +22,7 @@ import {
 import dayjs from 'dayjs';
 import { Layout } from '@/components/Layout';
 import { useGetEventQuery, useBookEventMutation } from '@/services/apiSlice';
-import { EventTicket, BookingAttendeeInfo } from '@/types';
+import { BookingAttendeeInfo, EventTicket } from '@/types/common';
 import { useAppSelector } from '@/hooks/useRedux';
 import { getErrorMessage } from '@/types/errors';
 import {
@@ -85,17 +85,32 @@ export const EventDetailPage = () => {
     setModalVisible(true);
   };
 
-  const handleConfirmBooking = async (values: unknown) => {
-    if (!event || !selectedTicket) return;
+  const isBookingAttendeeInfo = (values: unknown) => {
+    return (
+      typeof values === 'object' &&
+      values !== null &&
+      'firstName' in values &&
+      'lastName' in values &&
+      'email' in values
+    );
+  };
 
-    const attendeeInfo = values as BookingAttendeeInfo;
+  const handleConfirmBooking = async (values: BookingAttendeeInfo) => {
+    if (!event || !selectedTicket) {
+      return;
+    }
+
+    if (!isBookingAttendeeInfo(values)) {
+      message.error('Invalid attendee information');
+      return;
+    }
 
     try {
       await bookEvent({
         eventId: event.id,
         ticketId: selectedTicket.id,
         quantity,
-        attendeeInfo,
+        attendeeInfo: values,
       }).unwrap();
 
       message.success('Booking confirmed!');

@@ -25,7 +25,7 @@ import {
 import dayjs from 'dayjs';
 import { Layout } from '@/components/Layout';
 import { eventService } from '@/services/eventService';
-import { Event, EventModerationStatus, EventModerationLog } from '@/types';
+import { Event, EventModerationStatus, EventModerationLog } from '@/types/common';
 import { getErrorMessage } from '@/types/errors';
 import { Container, Header, EventTitleWrapper, CommentWrapper } from './styles';
 
@@ -54,7 +54,9 @@ export const AdminEventModerationPage = () => {
   const [moderationAction, setModerationAction] = useState<EventModerationStatus | null>(null);
   const [moderationComment, setModerationComment] = useState('');
   const [moderationHistory, setModerationHistory] = useState<EventModerationLog[]>([]);
-  const [activeTab, setActiveTab] = useState<string>('pending');
+  const [activeTab, setActiveTab] = useState<EventModerationStatus | 'all'>(
+    EventModerationStatus.PENDING
+  );
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
 
   const loadEvents = async (status?: EventModerationStatus, page = 1, pageSize = 10) => {
@@ -103,7 +105,8 @@ export const AdminEventModerationPage = () => {
       await eventService.moderateEvent(selectedEvent.id, moderationAction, moderationComment);
       message.success(`Event ${moderationAction} successfully`);
       setModerationModalVisible(false);
-      loadEvents(activeTab === 'all' ? undefined : (activeTab as EventModerationStatus));
+      const status: EventModerationStatus | undefined = activeTab === 'all' ? undefined : activeTab;
+      loadEvents(status);
     } catch (error) {
       message.error(getErrorMessage(error) || 'Failed to moderate event');
     }
@@ -235,7 +238,21 @@ export const AdminEventModerationPage = () => {
         </Header>
 
         <Card>
-          <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />
+          <Tabs
+            activeKey={activeTab}
+            onChange={(key) => {
+              if (
+                key === 'all' ||
+                key === EventModerationStatus.PENDING ||
+                key === EventModerationStatus.APPROVED ||
+                key === EventModerationStatus.DECLINED ||
+                key === EventModerationStatus.REMOVED
+              ) {
+                setActiveTab(key);
+              }
+            }}
+            items={tabItems}
+          />
 
           <Table
             columns={columns}
@@ -245,8 +262,8 @@ export const AdminEventModerationPage = () => {
             pagination={{
               ...pagination,
               onChange: (page, pageSize) => {
-                const status =
-                  activeTab === 'all' ? undefined : (activeTab as EventModerationStatus);
+                const status: EventModerationStatus | undefined =
+                  activeTab === 'all' ? undefined : activeTab;
                 loadEvents(status, page, pageSize);
               },
             }}

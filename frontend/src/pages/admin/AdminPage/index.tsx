@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import {
   Row,
@@ -27,7 +27,6 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { Layout } from '@/components/Layout';
-import { useAppSelector } from '@/hooks/useRedux';
 import {
   useGetUsersQuery,
   useUpdateUserMutation,
@@ -36,7 +35,7 @@ import {
   useGetEventsQuery,
 } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
-import { Organization, UserRole } from '@/types';
+import { Organization, UserRole } from '@/types/common';
 import { Container, StatCard, Header } from './styles';
 
 const { Title, Text } = Typography;
@@ -81,7 +80,6 @@ interface PlatformStats {
 
 export const AdminPage = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
   const [editUserModal, setEditUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [form] = Form.useForm();
@@ -107,18 +105,6 @@ export const AdminPage = () => {
     totalBlogPosts: blogPosts.length,
     totalEvents: events.length,
   };
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-
-    if (user?.role !== 'admin') {
-      message.error('Access denied. Admin privileges required.');
-      navigate('/');
-    }
-  }, [isAuthenticated, user, navigate]);
 
   const handleEditUser = (user: User) => {
     setSelectedUser(user);
@@ -475,10 +461,6 @@ export const AdminPage = () => {
       ),
     },
   ];
-
-  if (user?.role !== 'admin') {
-    return null;
-  }
 
   return (
     <Layout>

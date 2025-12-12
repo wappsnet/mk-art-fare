@@ -3,7 +3,12 @@ import { query, getConnection } from '../config/database.js';
 import { authenticate, authorize } from '../middleware/auth.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { sendSuccess, sendPaginated } from '../utils/response.js';
-import { UserRole, EventModerationStatus, EventMediaType, TicketDeliveryMethod } from '../types/index.js';
+import {
+  UserRole,
+  EventModerationStatus,
+  EventMediaType,
+  TicketDeliveryMethod,
+} from '../types/index.js';
 import { AppError } from '../middleware/errorHandler.js';
 import {
   generateSlug,
@@ -110,6 +115,36 @@ router.post(
   authorize(UserRole.ARTIST, UserRole.ADMIN),
   uploadEventMedia.array('media', 10),
   asyncHandler(async (req, res) => {
+    // Parse JSON fields from multipart/form-data
+    if (typeof req.body.venue === 'string') {
+      try {
+        req.body.venue = JSON.parse(req.body.venue);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    if (typeof req.body.address === 'string') {
+      try {
+        req.body.address = JSON.parse(req.body.address);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    if (typeof req.body.tickets === 'string') {
+      try {
+        req.body.tickets = JSON.parse(req.body.tickets);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    if (typeof req.body.mediaUrls === 'string') {
+      try {
+        req.body.mediaUrls = JSON.parse(req.body.mediaUrls);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     const {
       organizationId,
       title,
@@ -269,11 +304,24 @@ router.put(
     }
 
     // Check ownership
-    if (
-      req.user.role !== UserRole.ADMIN &&
-      existingEvent[0].created_by !== req.user.userId
-    ) {
+    if (req.user.role !== UserRole.ADMIN && existingEvent[0].created_by !== req.user.userId) {
       throw new AppError('Not authorized to update this event', 403);
+    }
+
+    // Parse JSON fields from multipart/form-data
+    if (typeof req.body.venue === 'string') {
+      try {
+        req.body.venue = JSON.parse(req.body.venue);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    if (typeof req.body.address === 'string') {
+      try {
+        req.body.address = JSON.parse(req.body.address);
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     const {
@@ -378,9 +426,10 @@ router.get(
 
     const events = await query(queryStr, [orgId]);
 
-    const countResult = await query('SELECT COUNT(*) as total FROM events WHERE organization_id = ?', [
-      orgId,
-    ]);
+    const countResult = await query(
+      'SELECT COUNT(*) as total FROM events WHERE organization_id = ?',
+      [orgId]
+    );
 
     // Get tickets for each event
     for (let event of events) {
@@ -435,10 +484,7 @@ router.delete(
       throw new AppError('Event not found', 404);
     }
 
-    if (
-      req.user.role !== UserRole.ADMIN &&
-      existingEvent[0].created_by !== req.user.userId
-    ) {
+    if (req.user.role !== UserRole.ADMIN && existingEvent[0].created_by !== req.user.userId) {
       throw new AppError('Not authorized to delete this event', 403);
     }
 
@@ -542,7 +588,8 @@ router.post(
       await connection.commit();
 
       // Send notification email to event creator
-      const moderatorName = `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || 'Admin';
+      const moderatorName =
+        `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || 'Admin';
 
       await emailService.sendEventModerationNotification(
         {

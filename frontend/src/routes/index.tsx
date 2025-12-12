@@ -1,15 +1,16 @@
-import { createBrowserRouter, RouterProvider, RouteObject } from 'react-router';
+import { createBrowserRouter, RouterProvider } from 'react-router';
 import { publicRoutes } from './publicRoutes';
-import { userRoutes } from './userRoutes';
+import { dashboardRoutes } from './dashboardRoutes';
+import { accountRoutes } from './accountRoutes';
 import { adminRoutes } from './adminRoutes';
-import { shopRoutes } from './shopRoutes';
+import { convertRoutes } from '@/utils/routeHelpers.ts';
 
 const router = createBrowserRouter(
   [
-    ...(publicRoutes as RouteObject[]),
-    ...(userRoutes as RouteObject[]),
-    ...(adminRoutes as RouteObject[]),
-    ...(shopRoutes as RouteObject[]),
+    ...convertRoutes(publicRoutes),
+    ...convertRoutes(dashboardRoutes),
+    ...convertRoutes(accountRoutes),
+    ...convertRoutes(adminRoutes),
     {
       path: '*',
       element: <div>404 - Page Not Found</div>,
