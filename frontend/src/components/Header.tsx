@@ -5,7 +5,7 @@ import {
   LoginOutlined,
   LogoutOutlined,
 } from '@ant-design/icons';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import styled from '@emotion/styled';
 import { useAppSelector } from '@/hooks/useRedux';
 import { useGetCartQuery, useLogoutMutation } from '@/services/apiSlice';

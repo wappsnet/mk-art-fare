@@ -62,12 +62,12 @@ class ApiService {
     return response.data;
   }
 
-  async post<T>(url: string, data?: any, config?: AxiosRequestConfig) {
+  async post<T>(url: string, data?: unknown, config?: AxiosRequestConfig) {
     const response = await this.api.post<T>(url, data, config);
     return response.data;
   }
 
-  async patch<T>(url: string, data?: any, config?: AxiosRequestConfig) {
+  async patch<T>(url: string, data?: unknown, config?: AxiosRequestConfig) {
     const response = await this.api.patch<T>(url, data, config);
     return response.data;
   }

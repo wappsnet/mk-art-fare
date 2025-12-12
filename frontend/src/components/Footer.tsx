@@ -1,6 +1,6 @@
 import { Layout as AntLayout, Row, Col, Space } from 'antd';
 import { FacebookOutlined, TwitterOutlined, InstagramOutlined, LinkedinOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import styled from '@emotion/styled';
 
 const { Footer: AntFooter } = AntLayout;

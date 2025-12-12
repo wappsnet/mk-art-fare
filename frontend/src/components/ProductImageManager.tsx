@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, FC } from 'react';
 import { Upload, Button, Space, Input, Switch, message, Modal, Tabs } from 'antd';
 import {
   UploadOutlined,
@@ -17,6 +17,17 @@ import {
   useDeleteProductImageMutation,
 } from '@/services/apiSlice';
 import axios from 'axios';
+
+interface ApiError {
+  data?: {
+    message?: string;
+  };
+  message?: string;
+}
+
+interface ApiResponse<T> {
+  data?: T;
+}
 
 const ImageCard = styled.div`
   border: 1px solid #f0f0f0;
@@ -84,7 +95,7 @@ interface ProductImageManagerProps {
   onUpdate: () => void;
 }
 
-export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
+export const ProductImageManager: FC<ProductImageManagerProps> = ({
   productId,
   images,
   onUpdate,
@@ -124,13 +135,13 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
         },
       }).unwrap();
       message.success('Image added successfully!');
-      const created = (resp as any)?.data as ProductImage | undefined;
+      const created = (resp as ApiResponse<ProductImage>)?.data;
       if (created) {
         setLocalImages((prev) => {
           const next = [...prev];
           if (created.is_thumbnail) {
             for (const img of next) {
-              (img as any).is_thumbnail = false;
+              img.is_thumbnail = false;
             }
           }
           next.push(created);
@@ -141,8 +152,9 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
       setAltText('');
       setIsThumbnail(false);
       onUpdate();
-    } catch (error: any) {
-      message.error(error?.data?.message || 'Failed to add image');
+    } catch (error) {
+      const apiError = error as ApiError;
+      message.error(apiError?.data?.message || 'Failed to add image');
     }
   };
 
@@ -155,8 +167,9 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
       }).unwrap();
       message.success(currentStatus ? 'Thumbnail removed' : 'Thumbnail set!');
       onUpdate();
-    } catch (error: any) {
-      message.error(error?.data?.message || 'Failed to update thumbnail');
+    } catch (error) {
+      const apiError = error as ApiError;
+      message.error(apiError?.data?.message || 'Failed to update thumbnail');
     }
   };
 
@@ -171,8 +184,9 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
           // Optimistically update UI
           setLocalImages((prev) => prev.filter((img) => img.id !== imageId));
           onUpdate();
-        } catch (error: any) {
-          message.error(error?.data?.message || 'Failed to delete image');
+        } catch (error) {
+          const apiError = error as ApiError;
+          message.error(apiError?.data?.message || 'Failed to delete image');
         }
       },
     });
@@ -192,8 +206,9 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
       setEditingAltId(null);
       setEditingAltText('');
       onUpdate();
-    } catch (error: any) {
-      message.error(error?.data?.message || 'Failed to update alt text');
+    } catch (error) {
+      const apiError = error as ApiError;
+      message.error(apiError?.data?.message || 'Failed to update alt text');
     }
   };
 
@@ -225,15 +240,15 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
         },
       });
       message.success('Image(s) uploaded successfully!');
-      const payload = (resp as any)?.data;
-      const created = payload?.data as ProductImage | ProductImage[] | undefined;
+      const payload = resp.data as ApiResponse<ProductImage | ProductImage[]>;
+      const created = payload?.data;
       if (created) {
         setLocalImages((prev) => {
           const next = [...prev];
           const addOne = (img: ProductImage) => {
             if (img.is_thumbnail) {
               for (const existing of next) {
-                (existing as any).is_thumbnail = false;
+                existing.is_thumbnail = false;
               }
             }
             next.push(img);
@@ -251,8 +266,9 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
       setAltText('');
       setIsThumbnail(false);
       onUpdate();
-    } catch (error: any) {
-      message.error(error?.response?.data?.message || 'Failed to upload image(s)');
+    } catch (error) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      message.error(axiosError?.response?.data?.message || 'Failed to upload image(s)');
     } finally {
       setUploading(false);
     }
@@ -361,7 +377,7 @@ export const ProductImageManager: React.FC<ProductImageManagerProps> = ({
                 <ImageCard key={img.id}>
                   <ImageCardContent>
                     <img src={img.url} alt={img.alt_text || 'Product image'} />
-                    {img.is_thumbnail && <ThumbnailBadge>Thumbnail</ThumbnailBadge>}
+                    {!!img.is_thumbnail && <ThumbnailBadge>Thumbnail</ThumbnailBadge>}
                   </ImageCardContent>
                   <ImageCardFooter>
                     {editingAltId === img.id ? (

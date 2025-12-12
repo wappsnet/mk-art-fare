@@ -44,7 +44,7 @@ import { MyTicketsPage } from './pages/MyTicketsPage';
 
 ### Example Navigation Component
 
-```typescript
+```tsx
 import { useAppSelector } from '@/hooks/useRedux';
 import { UserRole } from '@/types';
 
@@ -103,7 +103,7 @@ export const Navigation = () => {
 
 ## Route Protection Example
 
-```typescript
+```tsx
 import { Navigate } from 'react-router-dom';
 import { useAppSelector } from '@/hooks/useRedux';
 import { UserRole } from '@/types';
@@ -205,7 +205,7 @@ Add a "My Tickets" section for regular users:
 
 ## Complete Example Routes File
 
-```typescript
+```tsx
 // routes.tsx or App.tsx
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAppSelector } from '@/hooks/useRedux';

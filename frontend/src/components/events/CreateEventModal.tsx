@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, FC } from 'react';
 import {
   Modal,
   Form,
@@ -18,8 +18,9 @@ import {
 import { PlusOutlined, MinusCircleOutlined, UploadOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd/es/upload/interface';
 import dayjs from 'dayjs';
-import { eventService } from '../../services/eventService';
-import { Event, TicketDeliveryMethod } from '../../types';
+import { eventService } from '@/services/eventService';
+import { Event, TicketDeliveryMethod } from '@/types';
+import { getErrorMessage } from '@/types/errors';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -33,20 +34,57 @@ interface CreateEventModalProps {
   onCancel: () => void;
 }
 
-export const CreateEventModal: React.FC<CreateEventModalProps> = ({
+interface TicketFormData {
+  type: string;
+  price?: number;
+  quantity: number;
+  description?: string;
+  deliveryMethod?: TicketDeliveryMethod;
+  pickupLocation?: string;
+  pickupInstructions?: string;
+}
+
+interface CreateEventFormDataProps {
+  title: string;
+  description: string;
+  eventType: string;
+  venueName: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  state: string;
+  country: string;
+  postalCode: string;
+  dateRange: [dayjs.Dayjs, dayjs.Dayjs];
+  featuredImageUrl: string;
+  videoUrl: string;
+  tickets: TicketFormData[];
+}
+
+export const CreateEventModal: FC<CreateEventModalProps> = ({
   visible,
   event,
   organizationId,
   onSuccess,
   onCancel,
 }) => {
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<CreateEventFormDataProps>();
   const [loading, setLoading] = useState(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
 
   useEffect(() => {
     if (visible && event) {
       // Populate form with event data for editing
+      const ticketsData: TicketFormData[] = (event.tickets || []).map((ticket) => ({
+        type: ticket.ticket_type,
+        price: parseFloat(ticket.price),
+        quantity: ticket.quantity_available,
+        description: ticket.description,
+        deliveryMethod: ticket.delivery_method,
+        pickupLocation: ticket.pickup_location,
+        pickupInstructions: ticket.pickup_instructions,
+      }));
+
       form.setFieldsValue({
         title: event.title,
         description: event.description,
@@ -61,7 +99,7 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
         dateRange: [dayjs(event.start_date), dayjs(event.end_date)],
         featuredImageUrl: event.featured_image_url,
         videoUrl: event.video_url,
-        tickets: event.tickets || [],
+        tickets: ticketsData,
       });
     } else if (visible) {
       form.resetFields();
@@ -69,7 +107,7 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
     }
   }, [visible, event, form]);
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: CreateEventFormDataProps) => {
     setLoading(true);
     try {
       const formData = {
@@ -106,8 +144,8 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
       }
 
       onSuccess();
-    } catch (error: any) {
-      message.error(error.message || `Failed to ${event ? 'update' : 'create'} event`);
+    } catch (error) {
+      message.error(getErrorMessage(error) || `Failed to ${event ? 'update' : 'create'} event`);
     } finally {
       setLoading(false);
     }
@@ -140,7 +178,7 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
       onCancel={onCancel}
       footer={null}
       width={800}
-      destroyOnClose
+      destroyOnHidden
     >
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
         <Form.Item

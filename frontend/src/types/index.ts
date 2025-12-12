@@ -188,7 +188,7 @@ export interface Event {
   title: string;
   slug: string;
   description?: string;
-  event_type?: string;
+  event_type: string;
   venue_name?: string;
   address_line1?: string;
   address_line2?: string;
@@ -360,9 +360,36 @@ export interface Address {
   state?: string;
   country: string;
   postal_code: string;
+  notes?: string;
 }
 
-export interface ApiResponse<T = any> {
+export interface CreateAddressInput {
+  address_line1: string;
+  address_line2?: string;
+  city: string;
+  state?: string;
+  postal_code: string;
+  country: string;
+  address_type: string;
+}
+
+export interface DeliveryAddress {
+  address_line1: string;
+  address_line2?: string;
+  city: string;
+  state?: string;
+  postal_code: string;
+  country: string;
+  address_type: string;
+}
+
+export interface BookingAttendeeInfo {
+  name: string;
+  email: string;
+  phone?: string;
+}
+
+export interface ApiResponse<T = unknown> {
   success: boolean;
   message?: string;
   data?: T;
@@ -373,4 +400,81 @@ export interface ApiResponse<T = any> {
     total: number;
     totalPages: number;
   };
+}
+
+export interface RegisterFormData {
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+}
+
+export interface AnalyticsRevenueData {
+  date: string;
+  revenue: number;
+}
+
+export interface AnalyticsStatusData {
+  status: string;
+  count: number;
+  revenue: string | number;
+}
+
+export interface AnalyticsTopProduct {
+  id?: number;
+  name: string;
+  quantity_sold?: number;
+  total_sold: number;
+  revenue: string | number;
+}
+
+export interface AnalyticsTopEvent {
+  id?: number;
+  name: string;
+  title?: string;
+  tickets_sold?: number;
+  total_sold: number;
+  revenue: string | number;
+}
+
+export interface AnalyticsData {
+  total: {
+    total_orders?: number;
+    total_revenue?: number;
+    total_items_sold?: number;
+    total_tickets_sold?: number;
+    product_revenue?: number;
+    event_revenue?: number;
+  };
+  byStatus: AnalyticsStatusData[];
+  recentRevenue: AnalyticsRevenueData[];
+  topProducts: AnalyticsTopProduct[];
+  topEvents: AnalyticsTopEvent[];
+}
+
+export interface ProductFormData {
+  name: string;
+  description: string;
+  price: number;
+  stock_quantity: number;
+  sku: string;
+  category_id?: number;
+}
+
+export interface OrganizationThemeData {
+  id: number;
+  theme: {
+    primaryColor: string;
+    secondaryColor: string;
+  };
+}
+
+export interface OrganizationLogoData {
+  id: number;
+  file: File;
+}
+
+export interface OrganizationBannerData {
+  id: number;
+  file: File;
 }

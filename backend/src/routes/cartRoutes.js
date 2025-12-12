@@ -14,7 +14,7 @@ router.get(
     let cartId = null;
 
     if (req.user) {
-      const cart = await query('SELECT * FROM carts WHERE user_id = ?', [req.user.userId]);
+      const cart = await query(`SELECT * FROM carts WHERE user_id = ?`, [req.user.userId]);
       cartId = cart.length > 0 ? cart[0].id : null;
 
       if (!cartId) {

@@ -63,10 +63,11 @@ router.get(
       const images = await query('SELECT * FROM product_images WHERE product_id = ? ORDER BY sort_order', [
         product.id,
       ]);
-      // Transform image URLs
+      // Transform image URLs - database column is 'url', transform to 'image_url' for frontend
       product.images = images.map(img => ({
         ...img,
-        image_url: toFullImageUrl(img.image_url, 'products')
+        url: toFullImageUrl(img.url, 'products'),
+        image_url: toFullImageUrl(img.url, 'products')
       }));
     }
 

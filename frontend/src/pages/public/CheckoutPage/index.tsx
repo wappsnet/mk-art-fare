@@ -1,0 +1,397 @@
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router';
+import {
+  Row,
+  Col,
+  Typography,
+  Form,
+  Input,
+  Button,
+  Radio,
+  Divider,
+  message,
+  Select,
+  Space,
+  Modal,
+} from 'antd';
+import { CreditCardOutlined, EnvironmentOutlined, ShoppingOutlined } from '@ant-design/icons';
+import { Layout } from '@/components/Layout';
+import { useAppSelector } from '@/hooks/useRedux';
+import {
+  useGetCartQuery,
+  useGetUserAddressesQuery,
+  useCreateUserAddressMutation,
+  useCreateOrderMutation,
+  useClearCartMutation,
+} from '@/services/apiSlice';
+import { CreateAddressInput } from '@/types';
+import { getErrorMessage } from '@/types/errors';
+import {
+  Container,
+  PageTitle,
+  SectionCard,
+  SummaryCard,
+  CartItem,
+  FullWidthRadioGroup,
+  FullWidthSpace,
+  PaymentNotice,
+  CartItemsContainer,
+  PriceRow,
+  TotalRow,
+  TotalLabel,
+  TotalAmount,
+  TermsText,
+} from './styles';
+
+const { Text } = Typography;
+
+interface CheckoutFormValues extends CreateAddressInput {
+  notes?: string;
+}
+
+export const CheckoutPage = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const [form] = Form.useForm();
+  const [selectedAddress, setSelectedAddress] = useState<number | null>(null);
+  const [useNewAddress, setUseNewAddress] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('credit_card');
+
+  const { data: cartData } = useGetCartQuery();
+  const { data: addressesData } = useGetUserAddressesQuery();
+  const [createAddress] = useCreateUserAddressMutation();
+  const [createOrder, { isLoading: orderLoading }] = useCreateOrderMutation();
+  const [clearCart] = useClearCartMutation();
+
+  const cart = cartData?.data;
+  const items = useMemo(() => cart?.items || [], [cart?.items]);
+  const total = cart?.total || 0;
+  const addresses = useMemo(() => addressesData?.data || [], [addressesData?.data]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      message.info('Please login to proceed with checkout');
+      navigate('/login');
+      return;
+    }
+
+    if (items.length === 0) {
+      message.info('Your cart is empty');
+      navigate('/cart');
+      return;
+    }
+
+    // Auto-select first shipping address
+    if (addresses.length > 0 && !selectedAddress) {
+      const shippingAddress = addresses.find((addr) => addr.address_type === 'shipping');
+      if (shippingAddress) {
+        setSelectedAddress(shippingAddress.id);
+      }
+    }
+  }, [isAuthenticated, navigate, items, addresses, selectedAddress]);
+
+  const handlePlaceOrder = async (values: CheckoutFormValues) => {
+    try {
+      let shippingAddressId = selectedAddress;
+
+      // If using new address, create it first
+      if (useNewAddress) {
+        const addressPayload: CreateAddressInput = {
+          address_line1: values.address_line1,
+          address_line2: values.address_line2,
+          city: values.city,
+          state: values.state,
+          postal_code: values.postal_code,
+          country: values.country || 'USA',
+          address_type: 'shipping',
+        };
+        const addressResponse = await createAddress(addressPayload).unwrap();
+
+        if (addressResponse.data) {
+          shippingAddressId = addressResponse.data.id;
+        }
+      }
+
+      if (!shippingAddressId) {
+        message.error('Please select or enter a shipping address');
+        return;
+      }
+
+      // Create order
+      const orderResponse = await createOrder({
+        shipping_address_id: shippingAddressId,
+        payment_method: paymentMethod,
+        notes: values.notes || '',
+      }).unwrap();
+
+      if (orderResponse.data) {
+        // Clear cart
+        await clearCart('').unwrap();
+
+        // Show success modal
+        Modal.success({
+          title: 'Order Placed Successfully!',
+          content: (
+            <div>
+              <p>
+                Order Number: <strong>{orderResponse.data.order_number}</strong>
+              </p>
+              <p>
+                Total: <strong>${orderResponse.data.total.toFixed(2)}</strong>
+              </p>
+              <p>We'll send you an email confirmation shortly.</p>
+            </div>
+          ),
+          onOk: () => navigate('/dashboard'),
+        });
+      }
+    } catch (error) {
+      message.error(getErrorMessage(error) || 'Failed to place order');
+    }
+  };
+
+  const subtotal = total;
+  const shipping = 10.0; // Flat rate for now
+  const tax = subtotal * 0.08; // 8% tax
+  const orderTotal = subtotal + shipping + tax;
+
+  return (
+    <Layout>
+      <Container>
+        <PageTitle level={2}>
+          <ShoppingOutlined /> Checkout
+        </PageTitle>
+
+        <Form form={form} layout="vertical" onFinish={handlePlaceOrder}>
+          <Row gutter={[48, 24]}>
+            <Col xs={24} lg={14}>
+              {/* Shipping Address Section */}
+              <SectionCard
+                title={
+                  <>
+                    <EnvironmentOutlined /> Shipping Address
+                  </>
+                }
+              >
+                {addresses.length > 0 && !useNewAddress && (
+                  <>
+                    <FullWidthRadioGroup>
+                      <Radio.Group
+                        value={selectedAddress}
+                        onChange={(e) => setSelectedAddress(e.target.value)}
+                      >
+                        <FullWidthSpace>
+                          <Space direction="vertical" style={{ width: '100%' }}>
+                            {addresses.map((address) => (
+                              <Radio key={address.id} value={address.id}>
+                                <div>
+                                  <Text strong>{address.address_line1}</Text>
+                                  {address.address_line2 && <Text>, {address.address_line2}</Text>}
+                                  <br />
+                                  <Text type="secondary">
+                                    {address.city}, {address.state} {address.postal_code}
+                                  </Text>
+                                </div>
+                              </Radio>
+                            ))}
+                          </Space>
+                        </FullWidthSpace>
+                      </Radio.Group>
+                    </FullWidthRadioGroup>
+                    <Button
+                      type="link"
+                      onClick={() => setUseNewAddress(true)}
+                      style={{ marginTop: 16, padding: 0 }}
+                    >
+                      + Add New Address
+                    </Button>
+                  </>
+                )}
+
+                {(addresses.length === 0 || useNewAddress) && (
+                  <>
+                    {addresses.length > 0 && (
+                      <Button
+                        type="link"
+                        onClick={() => setUseNewAddress(false)}
+                        style={{ marginBottom: 16, padding: 0 }}
+                      >
+                        ← Use Saved Address
+                      </Button>
+                    )}
+
+                    <Row gutter={16}>
+                      <Col span={24}>
+                        <Form.Item
+                          name="address_line1"
+                          label="Address Line 1"
+                          rules={[{ required: true, message: 'Please enter your address' }]}
+                        >
+                          <Input placeholder="123 Main St" />
+                        </Form.Item>
+                      </Col>
+                      <Col span={24}>
+                        <Form.Item name="address_line2" label="Address Line 2 (Optional)">
+                          <Input placeholder="Apt, Suite, Building" />
+                        </Form.Item>
+                      </Col>
+                      <Col span={12}>
+                        <Form.Item
+                          name="city"
+                          label="City"
+                          rules={[{ required: true, message: 'Please enter city' }]}
+                        >
+                          <Input placeholder="New York" />
+                        </Form.Item>
+                      </Col>
+                      <Col span={6}>
+                        <Form.Item
+                          name="state"
+                          label="State"
+                          rules={[{ required: true, message: 'Please enter state' }]}
+                        >
+                          <Input placeholder="NY" />
+                        </Form.Item>
+                      </Col>
+                      <Col span={6}>
+                        <Form.Item
+                          name="postal_code"
+                          label="ZIP Code"
+                          rules={[{ required: true, message: 'Please enter ZIP code' }]}
+                        >
+                          <Input placeholder="10001" />
+                        </Form.Item>
+                      </Col>
+                      <Col span={12}>
+                        <Form.Item name="country" label="Country" initialValue="USA">
+                          <Select>
+                            <Select.Option value="USA">United States</Select.Option>
+                            <Select.Option value="Canada">Canada</Select.Option>
+                            <Select.Option value="Mexico">Mexico</Select.Option>
+                          </Select>
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  </>
+                )}
+              </SectionCard>
+
+              {/* Payment Method Section */}
+              <SectionCard
+                title={
+                  <>
+                    <CreditCardOutlined /> Payment Method
+                  </>
+                }
+              >
+                <FullWidthRadioGroup>
+                  <Radio.Group
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                  >
+                    <FullWidthSpace>
+                      <Space direction="vertical" style={{ width: '100%' }}>
+                        <Radio value="credit_card">
+                          <Space>
+                            <CreditCardOutlined />
+                            <Text>Credit / Debit Card</Text>
+                          </Space>
+                        </Radio>
+                        <Radio value="paypal">
+                          <Space>
+                            <Text>PayPal</Text>
+                          </Space>
+                        </Radio>
+                        <Radio value="cash_on_delivery">
+                          <Space>
+                            <Text>Cash on Delivery</Text>
+                          </Space>
+                        </Radio>
+                      </Space>
+                    </FullWidthSpace>
+                  </Radio.Group>
+                </FullWidthRadioGroup>
+
+                {paymentMethod === 'credit_card' && (
+                  <PaymentNotice>
+                    <Text type="secondary">
+                      Payment processing will be integrated with Stripe or PayPal in production. For
+                      now, orders will be created with pending payment status.
+                    </Text>
+                  </PaymentNotice>
+                )}
+              </SectionCard>
+
+              {/* Order Notes */}
+              <SectionCard title="Order Notes (Optional)">
+                <Form.Item name="notes">
+                  <Input.TextArea
+                    rows={4}
+                    placeholder="Add any special instructions for your order..."
+                  />
+                </Form.Item>
+              </SectionCard>
+            </Col>
+
+            {/* Order Summary */}
+            <Col xs={24} lg={10}>
+              <SummaryCard title="Order Summary">
+                <CartItemsContainer>
+                  {items.map((item) => (
+                    <CartItem key={item.product_id}>
+                      <div>
+                        <Text strong>{item.name}</Text>
+                        <br />
+                        <Text type="secondary">Quantity: {item.quantity}</Text>
+                      </div>
+                      <Text>${(Number.parseFloat(item.price) * item.quantity).toFixed(2)}</Text>
+                    </CartItem>
+                  ))}
+                </CartItemsContainer>
+
+                <Divider />
+
+                <Space direction="vertical" style={{ width: '100%' }}>
+                  <PriceRow>
+                    <Text>Subtotal:</Text>
+                    <Text>${subtotal.toFixed(2)}</Text>
+                  </PriceRow>
+                  <PriceRow>
+                    <Text>Shipping:</Text>
+                    <Text>${shipping.toFixed(2)}</Text>
+                  </PriceRow>
+                  <PriceRow>
+                    <Text>Tax (8%):</Text>
+                    <Text>${tax.toFixed(2)}</Text>
+                  </PriceRow>
+                </Space>
+
+                <Divider />
+
+                <TotalRow>
+                  <TotalLabel level={4}>Total:</TotalLabel>
+                  <TotalAmount level={4}>${orderTotal.toFixed(2)}</TotalAmount>
+                </TotalRow>
+
+                <Button
+                  type="primary"
+                  size="large"
+                  block
+                  htmlType="submit"
+                  loading={orderLoading}
+                  icon={<ShoppingOutlined />}
+                >
+                  Place Order
+                </Button>
+
+                <TermsText type="secondary">
+                  By placing this order, you agree to our terms and conditions.
+                </TermsText>
+              </SummaryCard>
+            </Col>
+          </Row>
+        </Form>
+      </Container>
+    </Layout>
+  );
+};

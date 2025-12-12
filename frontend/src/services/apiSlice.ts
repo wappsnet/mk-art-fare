@@ -10,6 +10,9 @@ import {
   Organization,
   Category,
   Cart,
+  Address,
+  CreateAddressInput,
+  BookingAttendeeInfo,
 } from '@/types';
 
 const baseQuery = fetchBaseQuery({
@@ -253,7 +256,12 @@ export const api = createApi({
       providesTags: ['Order'],
     }),
     getOrganizationStats: builder.query<
-      ApiResponse<{ total: any; byStatus: any[]; recentRevenue: any[]; topProducts: any[] }>,
+      ApiResponse<{
+        total: unknown;
+        byStatus: unknown[];
+        recentRevenue: unknown[];
+        topProducts: unknown[];
+      }>,
       number
     >({
       query: (organizationId) => `/orders/organization/${organizationId}/stats`,
@@ -307,8 +315,8 @@ export const api = createApi({
       providesTags: ['Event'],
     }),
     bookEvent: builder.mutation<
-      ApiResponse<any>,
-      { eventId: number; ticketId: number; quantity: number; attendeeInfo: any }
+      ApiResponse<unknown>,
+      { eventId: number; ticketId: number; quantity: number; attendeeInfo: BookingAttendeeInfo }
     >({
       query: ({ eventId, ...data }) => ({
         url: `/events/${eventId}/book`,
@@ -362,7 +370,10 @@ export const api = createApi({
       }),
       invalidatesTags: ['Organization'],
     }),
-    updateOrganizationTheme: builder.mutation<ApiResponse<any>, { id: number; theme: any }>({
+    updateOrganizationTheme: builder.mutation<
+      ApiResponse<unknown>,
+      { id: number; theme: Record<string, unknown> }
+    >({
       query: ({ id, theme }) => ({
         url: `/organizations/${id}/theme`,
         method: 'PATCH',
@@ -414,11 +425,11 @@ export const api = createApi({
       }),
       invalidatesTags: ['User'],
     }),
-    getUserAddresses: builder.query<ApiResponse<any[]>, void>({
+    getUserAddresses: builder.query<ApiResponse<Array<Address>>, void>({
       query: () => '/users/addresses',
       providesTags: ['Address'],
     }),
-    createUserAddress: builder.mutation<ApiResponse<any>, any>({
+    createUserAddress: builder.mutation<ApiResponse<Address>, CreateAddressInput>({
       query: (data) => ({
         url: '/users/addresses',
         method: 'POST',
@@ -428,7 +439,7 @@ export const api = createApi({
     }),
 
     // Dashboard stats
-    getDashboardStats: builder.query<ApiResponse<any>, void>({
+    getDashboardStats: builder.query<ApiResponse<unknown>, void>({
       query: () => '/users/dashboard/stats',
       providesTags: ['Order', 'Product', 'Organization'],
     }),
@@ -475,7 +486,7 @@ export const api = createApi({
 
     // Product Image endpoints
     addProductImage: builder.mutation<
-      ApiResponse<any>,
+      ApiResponse<unknown>,
       { productId: number; data: { url: string; alt_text?: string; is_thumbnail?: boolean } }
     >({
       query: ({ productId, data }) => ({
@@ -486,7 +497,7 @@ export const api = createApi({
       invalidatesTags: ['Product'],
     }),
     updateProductImage: builder.mutation<
-      ApiResponse<any>,
+      ApiResponse<unknown>,
       {
         productId: number;
         imageId: number;
@@ -510,7 +521,7 @@ export const api = createApi({
       }
     ),
     reorderProductImages: builder.mutation<
-      ApiResponse<any>,
+      ApiResponse<unknown>,
       { productId: number; imageOrders: { id: number; sort_order: number }[] }
     >({
       query: ({ productId, imageOrders }) => ({

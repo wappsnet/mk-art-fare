@@ -1,0 +1,155 @@
+import { useParams, Link } from 'react-router';
+import { Row, Col, Typography, Button, Tabs, Spin, Empty, Tag } from 'antd';
+import { ShoppingCartOutlined } from '@ant-design/icons';
+import { Layout } from '@/components/Layout';
+import { useGetOrganizationQuery, useGetOrganizationProductsQuery } from '@/services/apiSlice';
+import {
+  ShopHeader,
+  BannerImage,
+  ShopContent,
+  Container,
+  ShopLogo,
+  ProductCard,
+  ProductPrice,
+  LoadingContainer,
+  NoImagePlaceholder,
+  AboutCard,
+  ShopInfoSection,
+  ShopInfoContent,
+} from './styles';
+
+const { Title, Paragraph, Text } = Typography;
+
+export const ShopPage = () => {
+  const { slug } = useParams<{ slug: string }>();
+
+  const { data: shopData, isLoading: shopLoading } = useGetOrganizationQuery(slug || '', {
+    skip: !slug,
+  });
+  const { data: productsData, isLoading: productsLoading } = useGetOrganizationProductsQuery(
+    slug || '',
+    {
+      skip: !slug,
+    }
+  );
+
+  const shop = shopData?.data;
+  const products = productsData?.data || [];
+  const loading = shopLoading || productsLoading;
+
+  if (loading) {
+    return (
+      <Layout>
+        <LoadingContainer>
+          <Spin size="large" />
+        </LoadingContainer>
+      </Layout>
+    );
+  }
+
+  if (!shop) {
+    return (
+      <Layout>
+        <Container>
+          <Title level={3}>Shop not found</Title>
+        </Container>
+      </Layout>
+    );
+  }
+
+  const tabItems = [
+    {
+      key: 'products',
+      label: `Products (${products.length})`,
+      children: (
+        <>
+          {products.length > 0 ? (
+            <Row gutter={[24, 24]}>
+              {products.map((product) => (
+                <Col xs={24} sm={12} lg={8} xl={6} key={product.id}>
+                  <Link to={`/products/${product.slug}`}>
+                    <ProductCard
+                      cover={
+                        product.images?.[0] ? (
+                          <img alt={product.name} src={product.images[0].url} />
+                        ) : (
+                          <NoImagePlaceholder>
+                            <Text type="secondary">No Image</Text>
+                          </NoImagePlaceholder>
+                        )
+                      }
+                    >
+                      <Title level={5} ellipsis={{ rows: 2 }}>
+                        {product.name}
+                      </Title>
+                      <ProductPrice>${Number.parseFloat(product.price).toFixed(2)}</ProductPrice>
+                      {product.stock_quantity > 0 ? (
+                        <Tag color="success">In Stock</Tag>
+                      ) : (
+                        <Tag color="error">Out of Stock</Tag>
+                      )}
+                      <Button
+                        type="primary"
+                        icon={<ShoppingCartOutlined />}
+                        block
+                        style={{ marginTop: 12 }}
+                        disabled={product.stock_quantity === 0}
+                      >
+                        Add to Cart
+                      </Button>
+                    </ProductCard>
+                  </Link>
+                </Col>
+              ))}
+            </Row>
+          ) : (
+            <Empty description="No products available in this shop yet" />
+          )}
+        </>
+      ),
+    },
+    {
+      key: 'about',
+      label: 'About',
+      children: (
+        <AboutCard>
+          <Title level={4}>About {shop.name}</Title>
+          {shop.description ? (
+            <Paragraph>{shop.description}</Paragraph>
+          ) : (
+            <Text type="secondary">No description available</Text>
+          )}
+          <ShopInfoSection>
+            <Text strong>Shop Information</Text>
+            <ShopInfoContent>
+              <Text type="secondary">Visit this shop to discover unique artwork and products.</Text>
+            </ShopInfoContent>
+          </ShopInfoSection>
+        </AboutCard>
+      ),
+    },
+  ];
+
+  return (
+    <Layout>
+      <ShopHeader bgColor={shop.primary_color} textColor={shop.text_color}>
+        {shop.banner_url && <BannerImage url={shop.banner_url} />}
+        <ShopContent>
+          {shop.logo_url && <ShopLogo src={shop.logo_url} alt={shop.name} />}
+          <Title level={1} style={{ color: 'inherit', marginBottom: 16 }}>
+            {shop.name}
+          </Title>
+          {shop.description && (
+            <Paragraph style={{ color: 'inherit', fontSize: 16, maxWidth: 600, margin: '0 auto' }}>
+              {shop.description}
+            </Paragraph>
+          )}
+        </ShopContent>
+      </ShopHeader>
+
+      <Container>
+        <Tabs items={tabItems} />
+      </Container>
+    </Layout>
+  );
+};
