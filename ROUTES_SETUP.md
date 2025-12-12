@@ -4,7 +4,7 @@
 
 Add these routes to your React Router configuration (usually in `App.tsx` or `routes.tsx`):
 
-```typescript
+```tsx
 import { MyEventsPage } from './pages/MyEventsPage';
 import { AdminEventModerationPage } from './pages/AdminEventModerationPage';
 import { MyTicketsPage } from './pages/MyTicketsPage';
@@ -27,7 +27,7 @@ import { MyTicketsPage } from './pages/MyTicketsPage';
 
 ### In Main Navigation (Header/Navbar)
 
-```typescript
+```tsx
 // For all authenticated users
 <Link to="/my-tickets">My Tickets</Link>
 
@@ -156,7 +156,7 @@ const ProtectedRoute = ({ children, allowedRoles }: {
 
 Add event moderation link to admin dashboard:
 
-```typescript
+```tsx
 <Card title="Event Management">
   <Button
     type="primary"
@@ -175,7 +175,7 @@ Add event moderation link to admin dashboard:
 
 Add a "My Tickets" section for regular users:
 
-```typescript
+```tsx
 <Card title="My Event Tickets">
   <Button
     type="primary"
