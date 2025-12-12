@@ -126,7 +126,7 @@ router.patch(
   '/items/:productId',
   optionalAuth,
   asyncHandler(async (req, res) => {
-    const productId = parseInt(req.params.productId);
+    const productId = Number.parseInt(req.params.productId);
     const { quantity } = req.body;
 
     let cartId = null;
