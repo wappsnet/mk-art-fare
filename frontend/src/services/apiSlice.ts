@@ -13,6 +13,7 @@ import {
   Address,
   CreateAddressInput,
   BookingAttendeeInfo,
+  RegisterFormData,
 } from '@/types/common';
 
 const baseQuery = fetchBaseQuery({
@@ -108,7 +109,7 @@ export const api = createApi({
     }),
     register: builder.mutation<
       ApiResponse<{ user: User; accessToken: string; refreshToken: string }>,
-      { email: string; password: string; first_name: string; last_name: string }
+      RegisterFormData
     >({
       query: (data) => ({
         url: '/auth/register',

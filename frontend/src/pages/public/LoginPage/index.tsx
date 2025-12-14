@@ -11,7 +11,6 @@ import {
   StyledCard,
   FullWidthSpace,
   HeaderSection,
-  StyledForm,
   FormActionsRow,
   GoogleButton,
   FooterSection,
@@ -19,8 +18,13 @@ import {
 
 const { Title, Text } = Typography;
 
+interface LoginFormValues {
+  email: string;
+  password: string;
+}
+
 export const LoginPage = () => {
-  const [loginForm] = Form.useForm();
+  const [loginForm] = Form.useForm<LoginFormValues>();
   const navigate = useNavigate();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const [login, { isLoading }] = useLoginMutation();
@@ -31,7 +35,7 @@ export const LoginPage = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const onFinish = async (values: { email: string; password: string }) => {
+  const onFinish = async (values: LoginFormValues) => {
     try {
       const result = await login({ email: values.email, password: values.password }).unwrap();
       if (result.success) {
@@ -63,12 +67,13 @@ export const LoginPage = () => {
 
             <Divider>Or sign in with email</Divider>
 
-            <StyledForm
+            <Form<LoginFormValues>
               form={loginForm}
               name="login"
               layout="vertical"
               onFinish={onFinish}
               autoComplete="off"
+              style={{ marginTop: '24px' }}
             >
               <Form.Item
                 name="email"
@@ -111,7 +116,7 @@ export const LoginPage = () => {
                   Don't have an account? <Link to="/register">Sign up</Link>
                 </Text>
               </FooterSection>
-            </StyledForm>
+            </Form>
           </FullWidthSpace>
         </StyledCard>
       </Container>

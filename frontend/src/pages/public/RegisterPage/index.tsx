@@ -6,12 +6,20 @@ import { useAppSelector } from '@/hooks/useRedux';
 import { useRegisterMutation } from '@/services/apiSlice';
 import { Layout } from '@/components/Layout';
 import { getErrorMessage } from '@/types/errors';
-import { RegisterFormData } from '@/types/common';
-import { Container, StyledCard, StyledForm, GoogleButton, CenterText } from './styles';
+import { Container, StyledCard, GoogleButton, CenterText } from './styles';
 
 const { Title, Text } = Typography;
 
+interface RegisterFormValues {
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  password: string;
+  confirmPassword: string;
+}
+
 export const RegisterPage = () => {
+  const [registerForm] = Form.useForm<RegisterFormValues>();
   const navigate = useNavigate();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const [register, { isLoading }] = useRegisterMutation();
@@ -22,25 +30,14 @@ export const RegisterPage = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  function isRegisterFormData(values: unknown): values is RegisterFormData {
-    return (
-      typeof values === 'object' &&
-      values !== null &&
-      'email' in values &&
-      'password' in values &&
-      'firstName' in values &&
-      'lastName' in values
-    );
-  }
-
-  const onFinish = async (values: unknown) => {
-    if (!isRegisterFormData(values)) {
-      message.error('Invalid form data');
-      return;
-    }
-
+  const onFinish = async (values: RegisterFormValues) => {
     try {
-      const result = await register(values).unwrap();
+      const result = await register({
+        email: values.email,
+        password: values.password,
+        first_name: values.first_name,
+        last_name: values.last_name,
+      }).unwrap();
       if (result.success) {
         message.success('Registration successful!');
         navigate('/dashboard');
@@ -70,7 +67,14 @@ export const RegisterPage = () => {
 
             <Divider>Or register with email</Divider>
 
-            <StyledForm name="register" layout="vertical" onFinish={onFinish} autoComplete="off">
+            <Form<RegisterFormValues>
+              form={registerForm}
+              name="register"
+              layout="vertical"
+              onFinish={onFinish}
+              autoComplete="off"
+              style={{ marginTop: '24px' }}
+            >
               <Form.Item
                 name="email"
                 label="Email"
@@ -135,7 +139,7 @@ export const RegisterPage = () => {
                   Already have an account? <Link to="/login">Sign in</Link>
                 </Text>
               </CenterText>
-            </StyledForm>
+            </Form>
           </Space>
         </StyledCard>
       </Container>
