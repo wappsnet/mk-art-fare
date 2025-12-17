@@ -119,7 +119,7 @@ export const CartPage = () => {
   }
 
   const subtotal = cart.items.reduce(
-    (sum, item) => sum + Number.parseFloat(item.price) * item.quantity,
+    (sum, item) => sum + item.price * item.quantity,
     0
   );
   const tax = subtotal * 0.1;
@@ -162,7 +162,7 @@ export const CartPage = () => {
                       </SmallText>
                       <PriceWrapperStyled>
                         <Price strong style={{ fontSize: 16, color: '#1890ff' }}>
-                          ${Number.parseFloat(item.price).toFixed(2)}
+                          ${item.price.toFixed(2)}
                         </Price>
                       </PriceWrapperStyled>
                     </Col>
@@ -177,7 +177,7 @@ export const CartPage = () => {
                       <RightAlignColStyled>
                         <Space direction="vertical" align="end">
                           <TotalPrice strong style={{ fontSize: 18 }}>
-                            ${(Number.parseFloat(item.price) * item.quantity).toFixed(2)}
+                            ${(item.price * item.quantity).toFixed(2)}
                           </TotalPrice>
                           <Button
                             type="text"

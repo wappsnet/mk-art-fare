@@ -97,8 +97,8 @@ CREATE TABLE products (
     name VARCHAR(255) NOT NULL,
     slug VARCHAR(255) NOT NULL,
     description TEXT,
-    price DECIMAL(10, 2) NOT NULL,
-    compare_at_price DECIMAL(10, 2),
+    price DOUBLE NOT NULL,
+    compare_at_price DOUBLE,
     stock_quantity INT DEFAULT 0,
     sku VARCHAR(100),
     is_active BOOLEAN DEFAULT TRUE,
@@ -158,10 +158,10 @@ CREATE TABLE orders (
     order_number VARCHAR(50) UNIQUE NOT NULL,
     user_id INT NOT NULL,
     status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
-    subtotal DECIMAL(10, 2) NOT NULL,
-    tax DECIMAL(10, 2) DEFAULT 0,
-    shipping_cost DECIMAL(10, 2) DEFAULT 0,
-    total DECIMAL(10, 2) NOT NULL,
+    subtotal DOUBLE NOT NULL,
+    tax DOUBLE DEFAULT 0,
+    shipping_cost DOUBLE DEFAULT 0,
+    total DOUBLE NOT NULL,
     shipping_address_line1 VARCHAR(255),
     shipping_address_line2 VARCHAR(255),
     shipping_city VARCHAR(100),
@@ -191,8 +191,8 @@ CREATE TABLE order_items (
     product_id INT NOT NULL,
     organization_id INT NOT NULL,
     quantity INT NOT NULL,
-    price DECIMAL(10, 2) NOT NULL,
-    subtotal DECIMAL(10, 2) NOT NULL,
+    price DOUBLE NOT NULL,
+    subtotal DOUBLE NOT NULL,
     product_name VARCHAR(255),
     product_sku VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -241,77 +241,6 @@ CREATE TABLE blog_comments (
     INDEX idx_post_id (post_id),
     INDEX idx_user_id (user_id),
     INDEX idx_parent_id (parent_id)
-);
-
--- Events
-CREATE TABLE events (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    organization_id INT,
-    title VARCHAR(255) NOT NULL,
-    slug VARCHAR(255) UNIQUE NOT NULL,
-    description TEXT,
-    event_type VARCHAR(100),
-    venue_name VARCHAR(255),
-    address_line1 VARCHAR(255),
-    address_line2 VARCHAR(255),
-    city VARCHAR(100),
-    state VARCHAR(100),
-    country VARCHAR(100),
-    postal_code VARCHAR(20),
-    latitude DECIMAL(10, 8),
-    longitude DECIMAL(11, 8),
-    start_date TIMESTAMP NOT NULL,
-    end_date TIMESTAMP NOT NULL,
-    featured_image_url VARCHAR(500),
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE SET NULL,
-    INDEX idx_slug (slug),
-    INDEX idx_organization_id (organization_id),
-    INDEX idx_event_type (event_type),
-    INDEX idx_city (city),
-    INDEX idx_start_date (start_date),
-    INDEX idx_is_active (is_active)
-);
-
--- Event tickets
-CREATE TABLE event_tickets (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    event_id INT NOT NULL,
-    ticket_type VARCHAR(100) NOT NULL,
-    price DECIMAL(10, 2) NOT NULL,
-    quantity_available INT NOT NULL,
-    quantity_sold INT DEFAULT 0,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
-    INDEX idx_event_id (event_id)
-);
-
--- Event bookings
-CREATE TABLE event_bookings (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    booking_number VARCHAR(50) UNIQUE NOT NULL,
-    event_id INT NOT NULL,
-    ticket_id INT NOT NULL,
-    user_id INT NOT NULL,
-    quantity INT NOT NULL,
-    total_price DECIMAL(10, 2) NOT NULL,
-    status ENUM('pending', 'confirmed', 'cancelled') DEFAULT 'pending',
-    attendee_name VARCHAR(255),
-    attendee_email VARCHAR(255),
-    attendee_phone VARCHAR(20),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
-    FOREIGN KEY (ticket_id) REFERENCES event_tickets(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    INDEX idx_booking_number (booking_number),
-    INDEX idx_event_id (event_id),
-    INDEX idx_user_id (user_id),
-    INDEX idx_status (status)
 );
 
 -- Addresses for users

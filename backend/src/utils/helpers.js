@@ -83,12 +83,6 @@ export const generateOrderNumber = () => {
   return `ORD-${timestamp}-${random}`;
 };
 
-export const generateBookingNumber = () => {
-  const timestamp = Date.now().toString(36).toUpperCase();
-  const random = crypto.randomBytes(3).toString('hex').toUpperCase();
-  return `BKG-${timestamp}-${random}`;
-};
-
 export const generateResetToken = () => {
   return crypto.randomBytes(32).toString('hex');
 };

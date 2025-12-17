@@ -60,7 +60,7 @@ export class UserController {
         throw new AppError('Not authenticated', 401);
       }
 
-      const addressId = parseInt(req.params.id);
+      const addressId = Number.parseInt(req.params.id);
       const address = await userService.updateUserAddress(req.user.userId, addressId, req.body);
 
       sendSuccess(res, address, 'Address updated successfully');
@@ -75,7 +75,7 @@ export class UserController {
         throw new AppError('Not authenticated', 401);
       }
 
-      const addressId = parseInt(req.params.id);
+      const addressId = Number.parseInt(req.params.id);
       await userService.deleteUserAddress(req.user.userId, addressId);
 
       sendSuccess(res, null, 'Address deleted successfully');
@@ -104,7 +104,7 @@ export class UserController {
 
   async updateUserRole(req, res, next) {
     try {
-      const userId = parseInt(req.params.id);
+      const userId = Number.parseInt(req.params.id);
       const { role } = req.body;
 
       const user = await userService.updateUserRole(userId, role);
@@ -120,7 +120,7 @@ export class UserController {
 
   async toggleUserStatus(req, res, next) {
     try {
-      const userId = parseInt(req.params.id);
+      const userId = Number.parseInt(req.params.id);
       const { isActive } = req.body;
 
       const user = await userService.toggleUserStatus(userId, isActive);

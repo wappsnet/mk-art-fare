@@ -35,7 +35,7 @@ export class OrganizationController {
 
   async getOrganizationById(req, res, next) {
     try {
-      const id = parseInt(req.params.id);
+      const id = Number.parseInt(req.params.id);
       const organization = await organizationService.getOrganizationById(id);
 
       if (!organization) {
@@ -67,7 +67,7 @@ export class OrganizationController {
         throw new AppError('Not authenticated', 401);
       }
 
-      const orgId = parseInt(req.params.id);
+      const orgId = Number.parseInt(req.params.id);
       const organization = await organizationService.updateOrganization(
         orgId,
         req.user.userId,
@@ -86,7 +86,7 @@ export class OrganizationController {
         throw new AppError('Not authenticated', 401);
       }
 
-      const orgId = parseInt(req.params.id);
+      const orgId = Number.parseInt(req.params.id);
       const theme = await organizationService.updateOrganizationTheme(
         orgId,
         req.user.userId,
@@ -105,7 +105,7 @@ export class OrganizationController {
         throw new AppError('Not authenticated', 401);
       }
 
-      const orgId = parseInt(req.params.id);
+      const orgId = Number.parseInt(req.params.id);
       await organizationService.deleteOrganization(orgId, req.user.userId);
 
       sendSuccess(res, null, 'Organization deleted successfully');

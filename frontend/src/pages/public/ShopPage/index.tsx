@@ -82,7 +82,7 @@ export const ShopPage = () => {
                       <Title level={5} ellipsis={{ rows: 2 }}>
                         {product.name}
                       </Title>
-                      <ProductPriceStyled>${Number.parseFloat(product.price).toFixed(2)}</ProductPriceStyled>
+                      <ProductPriceStyled>${product.price.toFixed(2)}</ProductPriceStyled>
                       {product.stock_quantity > 0 ? (
                         <Tag color="success">In Stock</Tag>
                       ) : (

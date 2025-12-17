@@ -1,0 +1,22 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="64" height="64" rx="12" fill="#1890ff"/>
+
+  <!-- Palette Shape -->
+  <path d="M32 18C41.389 18 49 25.611 49 35C49 44.389 41.389 52 32 52C22.611 52 15 44.389 15 35C15 25.611 22.611 18 32 18Z" fill="white"/>
+
+  <!-- Thumb Hole -->
+  <ellipse cx="41" cy="43" rx="6" ry="7" fill="#1890ff"/>
+
+  <!-- Paint Colors -->
+  <circle cx="26" cy="32" r="4" fill="#ff4d4f"/>
+  <circle cx="32" cy="28" r="4" fill="#52c41a"/>
+  <circle cx="38" cy="32" r="4" fill="#faad14"/>
+  <circle cx="29" cy="38" r="4" fill="#722ed1"/>
+
+  <!-- Brush Accent -->
+  <g transform="translate(44, 20) rotate(45)">
+    <rect x="0" y="0" width="2.5" height="12" fill="#595959"/>
+    <path d="M -1 0 L 3.5 0 L 3 -4 L 1.25 -5 L -0.5 -4 Z" fill="#434343"/>
+  </g>
+</svg>

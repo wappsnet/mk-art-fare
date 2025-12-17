@@ -21,7 +21,6 @@ import {
   useUploadOrganizationBannerMutation,
 } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
-import type { Organization } from '@/types/common';
 import { FullWidthSpaceStyled, LogoImageStyled, BannerImageStyled } from './styles';
 
 const { Title, Text } = Typography;
@@ -43,17 +42,7 @@ export const ShopSettingsPage = () => {
   const [uploadLogo, { isLoading: isUploadingLogo }] = useUploadOrganizationLogoMutation();
   const [uploadBanner, { isLoading: isUploadingBanner }] = useUploadOrganizationBannerMutation();
 
-  function isOrganization(data: unknown): data is Organization {
-    return (
-      typeof data === 'object' &&
-      data !== null &&
-      'id' in data &&
-      'name' in data &&
-      'slug' in data
-    );
-  }
-
-  const organization = isOrganization(orgData?.data) ? orgData.data : undefined;
+  const organization = orgData?.data;
 
   interface ShopUpdateValues {
     name?: string;
@@ -75,7 +64,12 @@ export const ShopSettingsPage = () => {
     try {
       const getPrimaryColor = (): string => {
         const color = values.primaryColor;
-        if (color && typeof color === 'object' && 'toHexString' in color && typeof color.toHexString === 'function') {
+        if (
+          color &&
+          typeof color === 'object' &&
+          'toHexString' in color &&
+          typeof color.toHexString === 'function'
+        ) {
           return color.toHexString();
         }
         return typeof color === 'string' ? color : '#1890ff';
@@ -83,7 +77,12 @@ export const ShopSettingsPage = () => {
 
       const getSecondaryColor = (): string => {
         const color = values.secondaryColor;
-        if (color && typeof color === 'object' && 'toHexString' in color && typeof color.toHexString === 'function') {
+        if (
+          color &&
+          typeof color === 'object' &&
+          'toHexString' in color &&
+          typeof color.toHexString === 'function'
+        ) {
           return color.toHexString();
         }
         return typeof color === 'string' ? color : '#52c41a';

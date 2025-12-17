@@ -241,7 +241,7 @@ export const ProductsPage = () => {
                               {product.name}
                             </Title>
                             <ProductPriceStyled>
-                              ${Number.parseFloat(product.price).toFixed(2)}
+                              ${product.price.toFixed(2)}
                             </ProductPriceStyled>
                             <Button type="primary" icon={<ShoppingCartOutlined />} block>
                               Add to Cart

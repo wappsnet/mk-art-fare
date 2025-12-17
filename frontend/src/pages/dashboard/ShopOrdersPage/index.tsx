@@ -44,7 +44,7 @@ export const ShopOrdersPage = () => {
       title: 'Total',
       dataIndex: 'total',
       key: 'total',
-      render: (total: string) => `$${Number.parseFloat(total).toFixed(2)}`,
+      render: (total: string) => `$${total.toFixed(2)}`,
     },
     {
       title: 'Status',

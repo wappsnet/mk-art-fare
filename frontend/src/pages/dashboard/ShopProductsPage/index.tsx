@@ -61,7 +61,7 @@ export const ShopProductsPage = () => {
       productForm.setFieldsValue({
         name: product.name,
         description: product.description,
-        price: parseFloat(product.price),
+        price: product.price,
         stock_quantity: product.stock_quantity,
         sku: product.sku,
         category_id: product.category_id,
@@ -132,7 +132,7 @@ export const ShopProductsPage = () => {
                   title={product.name}
                   description={
                     <>
-                      <Text strong>${Number.parseFloat(product.price).toFixed(2)}</Text>
+                      <Text strong>${product.price.toFixed(2)}</Text>
                       <br />
                       <Text type="secondary">Stock: {product.stock_quantity}</Text>
                     </>

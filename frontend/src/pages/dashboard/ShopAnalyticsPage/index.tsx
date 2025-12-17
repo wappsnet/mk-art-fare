@@ -36,7 +36,7 @@ export const ShopAnalyticsPage = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Title level={4}>
-              ${Number.parseFloat(String(stats?.total?.total_revenue || '0')).toFixed(2)}
+              ${(stats?.total?.total_revenue || 0).toFixed(2)}
             </Title>
             <Text type="secondary">Total Revenue</Text>
           </Card>
@@ -54,7 +54,7 @@ export const ShopAnalyticsPage = () => {
           <Col xs={24} sm={12} lg={6}>
             <Card>
               <Title level={4}>
-                ${Number.parseFloat(String(stats?.total?.product_revenue || 0)).toFixed(2)}
+                ${(stats?.total?.product_revenue || 0).toFixed(2)}
               </Title>
               <Text type="secondary">Product Revenue</Text>
             </Card>
@@ -85,7 +85,7 @@ export const ShopAnalyticsPage = () => {
                       <Tag color={getStatusTheme(item.status)}>{item.status.toUpperCase()}</Tag>
                       <Text>
                         {item.count} orders ($
-                        {Number.parseFloat(String(item.revenue)).toFixed(2)})
+                        {(typeof item.revenue === 'number' ? item.revenue : 0).toFixed(2)})
                       </Text>
                     </FlexBetweenStyled>
                   ))}
@@ -106,7 +106,7 @@ export const ShopAnalyticsPage = () => {
                         {product.total_sold} sold ($
                         {(typeof product.revenue === 'number'
                           ? product.revenue
-                          : Number.parseFloat(String(product.revenue))
+                          : 0
                         ).toFixed(2)}
                         )
                       </Text>

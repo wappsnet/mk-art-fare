@@ -144,12 +144,12 @@ export const ProductDetailPage = () => {
 
             <PriceSectionStyled>
               <PriceStyled>
-                ${Number.parseFloat(product.price).toFixed(2)}
+                ${product.price.toFixed(2)}
                 {product.compare_at_price &&
-                  Number.parseFloat(product.compare_at_price) >
-                    Number.parseFloat(product.price) && (
+                  product.compare_at_price >
+                    product.price && (
                     <ComparePriceStyled>
-                      ${Number.parseFloat(product.compare_at_price).toFixed(2)}
+                      ${product.compare_at_price.toFixed(2)}
                     </ComparePriceStyled>
                   )}
               </PriceStyled>

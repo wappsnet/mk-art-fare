@@ -58,11 +58,11 @@ router.get(
     // Price filtering
     if (minPrice !== undefined && minPrice !== null && minPrice !== '') {
       queryStr += ' AND p.price >= ?';
-      params.push(parseFloat(minPrice));
+      params.push(Number.parseFloat(minPrice));
     }
     if (maxPrice !== undefined && maxPrice !== null && maxPrice !== '') {
       queryStr += ' AND p.price <= ?';
-      params.push(parseFloat(maxPrice));
+      params.push(Number.parseFloat(maxPrice));
     }
 
     queryStr += ` ORDER BY p.created_at DESC LIMIT ${validLimit} OFFSET ${validOffset}`;
@@ -118,11 +118,11 @@ router.get(
     // Price filtering in count query
     if (minPrice !== undefined && minPrice !== null && minPrice !== '') {
       countQuery += ' AND p.price >= ?';
-      countParams.push(parseFloat(minPrice));
+      countParams.push(Number.parseFloat(minPrice));
     }
     if (maxPrice !== undefined && maxPrice !== null && maxPrice !== '') {
       countQuery += ' AND p.price <= ?';
-      countParams.push(parseFloat(maxPrice));
+      countParams.push(Number.parseFloat(maxPrice));
     }
 
     const countResult = await query(countQuery, countParams);
@@ -222,7 +222,7 @@ router.patch(
   authenticate,
   authorize(UserRole.ARTIST, UserRole.ADMIN),
   asyncHandler(async (req, res) => {
-    const productId = parseInt(req.params.id);
+    const productId = Number.parseInt(req.params.id);
     const product = await query(
       'SELECT p.*, o.owner_id FROM products p LEFT JOIN organizations o ON p.organization_id = o.id WHERE p.id = ?',
       [productId]
@@ -285,7 +285,7 @@ router.delete(
   authenticate,
   authorize(UserRole.ARTIST, UserRole.ADMIN),
   asyncHandler(async (req, res) => {
-    const productId = parseInt(req.params.id);
+    const productId = Number.parseInt(req.params.id);
     const product = await query(
       'SELECT p.*, o.owner_id FROM products p LEFT JOIN organizations o ON p.organization_id = o.id WHERE p.id = ?',
       [productId]
@@ -309,7 +309,7 @@ router.post(
   authenticate,
   authorize(UserRole.ARTIST, UserRole.ADMIN),
   asyncHandler(async (req, res) => {
-    const productId = parseInt(req.params.id);
+    const productId = Number.parseInt(req.params.id);
     const { url, alt_text, is_thumbnail } = req.body;
 
     const product = await query(
@@ -450,7 +450,7 @@ router.put(
   authenticate,
   authorize(UserRole.ARTIST, UserRole.ADMIN),
   asyncHandler(async (req, res) => {
-    const productId = parseInt(req.params.id);
+    const productId = Number.parseInt(req.params.id);
     const { imageOrders } = req.body; // Array of {id, sort_order}
 
     const product = await query(
@@ -493,7 +493,7 @@ router.post(
     { name: 'images', maxCount: 10 },
   ]),
   asyncHandler(async (req, res) => {
-    const productId = parseInt(req.params.id);
+    const productId = Number.parseInt(req.params.id);
     const { is_thumbnail } = req.body;
     const altPayload = req.body.alt_text; // string or string[]
 

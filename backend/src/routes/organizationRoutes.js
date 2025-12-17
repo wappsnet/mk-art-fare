@@ -38,7 +38,7 @@ router.get(
   authenticate,
   authorize(UserRole.ARTIST, UserRole.ADMIN),
   asyncHandler(async (req, res) => {
-    const orgId = parseInt(req.params.id);
+    const orgId = Number.parseInt(req.params.id);
 
     // Verify organization ownership
     const org = await query('SELECT * FROM organizations WHERE id = ? AND owner_id = ?', [
@@ -106,7 +106,7 @@ router.post(
   authorize(UserRole.ARTIST, UserRole.ADMIN),
   organizationUpload.single('logo'),
   asyncHandler(async (req, res) => {
-    const orgId = parseInt(req.params.id);
+    const orgId = Number.parseInt(req.params.id);
 
     if (!req.file) {
       throw new AppError('No file uploaded', 400);
@@ -129,7 +129,7 @@ router.post(
   authorize(UserRole.ARTIST, UserRole.ADMIN),
   organizationUpload.single('banner'),
   asyncHandler(async (req, res) => {
-    const orgId = parseInt(req.params.id);
+    const orgId = Number.parseInt(req.params.id);
 
     if (!req.file) {
       throw new AppError('No file uploaded', 400);

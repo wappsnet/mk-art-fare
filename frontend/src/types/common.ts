@@ -72,8 +72,8 @@ export interface Product {
   name: string;
   slug: string;
   description?: string;
-  price: string;
-  compare_at_price?: string;
+  price: number;
+  compare_at_price?: number;
   stock_quantity: number;
   sku?: string;
   is_active: boolean;
@@ -105,7 +105,7 @@ export interface CartItem {
   product_id: number;
   quantity: number;
   name: string;
-  price: string;
+  price: number;
   slug: string;
   organization_name: string;
   organization_slug: string;

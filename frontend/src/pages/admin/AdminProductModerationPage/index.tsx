@@ -114,7 +114,7 @@ export const AdminProductModerationPage = () => {
       key: 'price',
       render: (price: number) => `$${price?.toFixed(2) || '0.00'}`,
       sorter: (a: Product, b: Product) =>
-        Number.parseFloat(a.price || '0') - Number.parseFloat(b.price || '0'),
+        (a.price || 0) - (b.price || 0),
     },
     {
       title: 'Stock',
@@ -230,7 +230,7 @@ export const AdminProductModerationPage = () => {
                 <Paragraph type="secondary">{selectedProduct.description}</Paragraph>
                 <Space>
                   <Text strong>Price:</Text>
-                  <Text>${Number.parseFloat(selectedProduct.price || '0').toFixed(2)}</Text>
+                  <Text>${(selectedProduct.price || 0).toFixed(2)}</Text>
                 </Space>
                 <br />
                 <Space>

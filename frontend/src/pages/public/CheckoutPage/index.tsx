@@ -344,7 +344,7 @@ export const CheckoutPage = () => {
                         <br />
                         <Text type="secondary">Quantity: {item.quantity}</Text>
                       </div>
-                      <Text>${(Number.parseFloat(item.price) * item.quantity).toFixed(2)}</Text>
+                      <Text>${(item.price * item.quantity).toFixed(2)}</Text>
                     </CartItemStyled>
                   ))}
                 </CartItemsContainerStyled>
