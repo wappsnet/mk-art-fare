@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { config } from '../config/index.js';
 
 /**
@@ -44,7 +44,7 @@ export const transformImageUrls = (data, imageFields, defaultUploadType = 'produ
   if (typeof imageFields === 'string') {
     fieldMap[imageFields] = defaultUploadType;
   } else if (Array.isArray(imageFields)) {
-    imageFields.forEach(field => {
+    imageFields.forEach((field) => {
       fieldMap[field] = defaultUploadType;
     });
   } else {
@@ -94,16 +94,16 @@ export const generateResetToken = () => {
 };
 
 export const getPaginationParams = (page, limit) => {
-  const pageNum = typeof page === 'string' ? parseInt(page) : page || 1;
-  const limitNum = typeof limit === 'string' ? parseInt(limit) : limit || 10;
+  const pageNum = typeof page === 'string' ? Number.parseInt(page, 10) : page;
+  const limitNum = typeof limit === 'string' ? Number.parseInt(limit, 10) : limit;
 
-  const validPage = Math.max(1, pageNum);
-  const validLimit = Math.min(Math.max(1, limitNum), 100);
+  const validPage = Math.max(1, Number.isNaN(pageNum) ? 1 : pageNum || 1);
+  const validLimit = Math.min(Math.max(1, Number.isNaN(limitNum) ? 10 : limitNum || 10), 100);
 
   return {
-    page: validPage,
-    limit: validLimit,
-    offset: (validPage - 1) * validLimit,
+    page: Math.floor(validPage),
+    limit: Math.floor(validLimit),
+    offset: Math.floor((validPage - 1) * validLimit),
   };
 };
 
@@ -129,6 +129,6 @@ export const calculateTax = (subtotal, taxRate = 0.1) => {
 export const calculateShipping = (itemCount) => {
   if (itemCount === 0) return 0;
   const baseShipping = 5.99;
-  const additionalPerItem = 2.0;
+  const additionalPerItem = 2;
   return baseShipping + (itemCount - 1) * additionalPerItem;
 };

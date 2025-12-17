@@ -34,7 +34,7 @@ export class CategoryController {
 
   // Create a new category
   async createCategory(req, res) {
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const userRole = req.user.role;
     const data = req.body;
 
@@ -49,7 +49,7 @@ export class CategoryController {
   // Update category
   async updateCategory(req, res) {
     const categoryId = Number.parseInt(req.params.id);
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const userRole = req.user.role;
     const data = req.body;
 
@@ -64,7 +64,7 @@ export class CategoryController {
   // Delete category
   async deleteCategory(req, res) {
     const categoryId = Number.parseInt(req.params.id);
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const userRole = req.user.role;
 
     await categoryService.deleteCategory(categoryId, userId, userRole);

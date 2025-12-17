@@ -3,7 +3,7 @@ import { ShoppingOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useGetOrdersQuery } from '@/services/apiSlice';
 import { Order, OrderStatus } from '@/types/common';
-import { OrdersContainer } from './styles';
+import { OrdersContainerStyled } from './styles';
 
 const { Title, Text } = Typography;
 
@@ -68,7 +68,7 @@ export const MyOrdersPage = () => {
   ];
 
   return (
-    <OrdersContainer>
+    <OrdersContainerStyled>
       {orders.length > 0 ? (
         <Card>
           <Table
@@ -92,6 +92,6 @@ export const MyOrdersPage = () => {
           />
         </Card>
       )}
-    </OrdersContainer>
+    </OrdersContainerStyled>
   );
 };

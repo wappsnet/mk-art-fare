@@ -1,8 +1,7 @@
 import type { AppRouteObject } from '@/types/routes';
-import { RequireRole } from '@/components/guards';
+import { RequireRole } from '@/guards';
 import { UserRole } from '@/types/common';
 import { AdminPage } from '@/pages/admin/AdminPage';
-import { AdminEventModerationPage } from '@/pages/admin/AdminEventModerationPage';
 import { AdminOrganizationModerationPage } from '@/pages/admin/AdminOrganizationModerationPage';
 import { AdminProductModerationPage } from '@/pages/admin/AdminProductModerationPage';
 import { AdminOrdersPage } from '@/pages/admin/AdminOrdersPage';
@@ -45,19 +44,6 @@ export const adminRoutes: AppRouteObject[] = [
       requiresAuth: true,
       allowedRoles: [UserRole.ADMIN],
       title: 'Product Moderation - Art Fare',
-    },
-  },
-  {
-    path: '/admin/events',
-    element: (
-      <RequireRole allowedRoles={[UserRole.ADMIN]}>
-        <AdminEventModerationPage />
-      </RequireRole>
-    ),
-    meta: {
-      requiresAuth: true,
-      allowedRoles: [UserRole.ADMIN],
-      title: 'Event Moderation - Art Fare',
     },
   },
   {

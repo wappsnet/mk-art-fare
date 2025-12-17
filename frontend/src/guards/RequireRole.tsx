@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { Navigate } from 'react-router';
-import { useAppSelector } from '@/hooks/useRedux';
-import { UserRole } from '@/types/common';
+import { useAppSelector } from '@/hooks/useRedux.ts';
+import { UserRole } from '@/types/common.ts';
 
 interface RequireRoleProps {
   children: ReactNode;
@@ -9,11 +9,7 @@ interface RequireRoleProps {
   fallbackPath?: string;
 }
 
-export const RequireRole = ({
-  children,
-  allowedRoles,
-  fallbackPath = '/',
-}: RequireRoleProps) => {
+export const RequireRole = ({ children, allowedRoles, fallbackPath = '/' }: RequireRoleProps) => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
 
   if (!isAuthenticated) {

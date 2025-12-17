@@ -2,7 +2,7 @@ import { Form, Input, Button, message, Alert, Space } from 'antd';
 import { LockOutlined } from '@ant-design/icons';
 import { useChangePasswordMutation } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
-import { PasswordContainer } from './styles';
+import { PasswordContainerStyled } from './styles';
 
 interface ChangePasswordFormValues {
   current_password: string;
@@ -28,7 +28,7 @@ export const ChangePasswordPage = () => {
   };
 
   return (
-    <PasswordContainer>
+    <PasswordContainerStyled>
       <Alert
         message="Password Requirements"
         description="Your password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character."
@@ -102,6 +102,6 @@ export const ChangePasswordPage = () => {
           </Form.Item>
         </Space>
       </Form>
-    </PasswordContainer>
+    </PasswordContainerStyled>
   );
 };

@@ -4,18 +4,18 @@ import { ShoppingCartOutlined } from '@ant-design/icons';
 import { Layout } from '@/components/Layout';
 import { useGetOrganizationQuery, useGetOrganizationProductsQuery } from '@/services/apiSlice';
 import {
-  ShopHeader,
-  BannerImage,
-  ShopContent,
-  Container,
-  ShopLogo,
-  ProductCard,
-  ProductPrice,
-  LoadingContainer,
-  NoImagePlaceholder,
-  AboutCard,
-  ShopInfoSection,
-  ShopInfoContent,
+  ShopHeaderStyled,
+  BannerImageStyled,
+  ShopContentStyled,
+  ContainerStyled,
+  ShopLogoStyled,
+  ProductCardStyled,
+  ProductPriceStyled,
+  LoadingContainerStyled,
+  NoImagePlaceholderStyled,
+  AboutCardStyled,
+  ShopInfoSectionStyled,
+  ShopInfoContentStyled,
 } from './styles';
 
 const { Title, Paragraph, Text } = Typography;
@@ -40,9 +40,9 @@ export const ShopPage = () => {
   if (loading) {
     return (
       <Layout>
-        <LoadingContainer>
+        <LoadingContainerStyled>
           <Spin size="large" />
-        </LoadingContainer>
+        </LoadingContainerStyled>
       </Layout>
     );
   }
@@ -50,9 +50,9 @@ export const ShopPage = () => {
   if (!shop) {
     return (
       <Layout>
-        <Container>
+        <ContainerStyled>
           <Title level={3}>Shop not found</Title>
-        </Container>
+        </ContainerStyled>
       </Layout>
     );
   }
@@ -68,21 +68,21 @@ export const ShopPage = () => {
               {products.map((product) => (
                 <Col xs={24} sm={12} lg={8} xl={6} key={product.id}>
                   <Link to={`/products/${product.slug}`}>
-                    <ProductCard
+                    <ProductCardStyled
                       cover={
                         product.images?.[0] ? (
                           <img alt={product.name} src={product.images[0].url} />
                         ) : (
-                          <NoImagePlaceholder>
+                          <NoImagePlaceholderStyled>
                             <Text type="secondary">No Image</Text>
-                          </NoImagePlaceholder>
+                          </NoImagePlaceholderStyled>
                         )
                       }
                     >
                       <Title level={5} ellipsis={{ rows: 2 }}>
                         {product.name}
                       </Title>
-                      <ProductPrice>${Number.parseFloat(product.price).toFixed(2)}</ProductPrice>
+                      <ProductPriceStyled>${Number.parseFloat(product.price).toFixed(2)}</ProductPriceStyled>
                       {product.stock_quantity > 0 ? (
                         <Tag color="success">In Stock</Tag>
                       ) : (
@@ -97,7 +97,7 @@ export const ShopPage = () => {
                       >
                         Add to Cart
                       </Button>
-                    </ProductCard>
+                    </ProductCardStyled>
                   </Link>
                 </Col>
               ))}
@@ -112,30 +112,30 @@ export const ShopPage = () => {
       key: 'about',
       label: 'About',
       children: (
-        <AboutCard>
+        <AboutCardStyled>
           <Title level={4}>About {shop.name}</Title>
           {shop.description ? (
             <Paragraph>{shop.description}</Paragraph>
           ) : (
             <Text type="secondary">No description available</Text>
           )}
-          <ShopInfoSection>
+          <ShopInfoSectionStyled>
             <Text strong>Shop Information</Text>
-            <ShopInfoContent>
+            <ShopInfoContentStyled>
               <Text type="secondary">Visit this shop to discover unique artwork and products.</Text>
-            </ShopInfoContent>
-          </ShopInfoSection>
-        </AboutCard>
+            </ShopInfoContentStyled>
+          </ShopInfoSectionStyled>
+        </AboutCardStyled>
       ),
     },
   ];
 
   return (
     <Layout>
-      <ShopHeader bgColor={shop.primary_color} textColor={shop.text_color}>
-        {shop.banner_url && <BannerImage url={shop.banner_url} />}
-        <ShopContent>
-          {shop.logo_url && <ShopLogo src={shop.logo_url} alt={shop.name} />}
+      <ShopHeaderStyled bgColor={shop.primary_color} textColor={shop.text_color}>
+        {shop.banner_url && <BannerImageStyled url={shop.banner_url} />}
+        <ShopContentStyled>
+          {shop.logo_url && <ShopLogoStyled src={shop.logo_url} alt={shop.name} />}
           <Title level={1} style={{ color: 'inherit', marginBottom: 16 }}>
             {shop.name}
           </Title>
@@ -144,12 +144,12 @@ export const ShopPage = () => {
               {shop.description}
             </Paragraph>
           )}
-        </ShopContent>
-      </ShopHeader>
+        </ShopContentStyled>
+      </ShopHeaderStyled>
 
-      <Container>
+      <ContainerStyled>
         <Tabs items={tabItems} />
-      </Container>
+      </ContainerStyled>
     </Layout>
   );
 };

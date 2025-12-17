@@ -1,11 +1,9 @@
 import type { AppRouteObject } from '@/types/routes';
-import { RequireAuth } from '@/components/guards';
+import { RequireAuth } from '@/guards';
 import { AccountPage } from '@/pages/account/AccountPage';
 import { ProfilePage } from '@/pages/account/ProfilePage';
 import { ChangePasswordPage } from '@/pages/account/ChangePasswordPage';
 import { MyOrdersPage } from '@/pages/account/MyOrdersPage';
-import { MyEventsPage } from '@/pages/account/MyEventsPage';
-import { MyTicketsPage } from '@/pages/account/MyTicketsPage';
 
 export const accountRoutes: AppRouteObject[] = [
   {
@@ -38,16 +36,6 @@ export const accountRoutes: AppRouteObject[] = [
         path: 'orders',
         element: <MyOrdersPage />,
         meta: { title: 'My Orders - Account' },
-      },
-      {
-        path: 'events',
-        element: <MyEventsPage />,
-        meta: { title: 'My Events - Account' },
-      },
-      {
-        path: 'tickets',
-        element: <MyTicketsPage />,
-        meta: { title: 'My Tickets - Account' },
       },
     ],
   },

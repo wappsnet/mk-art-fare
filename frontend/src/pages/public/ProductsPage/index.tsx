@@ -17,21 +17,21 @@ import { Link } from 'react-router';
 import { Layout } from '@/components/Layout';
 import { useGetProductsQuery, useGetGlobalCategoriesQuery } from '@/services/apiSlice';
 import {
-  PageContainer,
-  PageHeader,
-  Container,
-  Sidebar,
-  MainContent,
-  FilterSection,
+  PageContainerStyled,
+  PageHeaderStyled,
+  ContainerStyled,
+  SidebarStyled,
+  MainContentStyled,
+  FilterSectionStyled,
   PriceRangeText,
-  PriceSliderWrapper,
-  MobileFilterButton,
-  ProductCard,
-  PlaceholderImage,
-  ProductPrice,
+  PriceSliderWrapperStyled,
+  MobileFilterButtonStyled,
+  ProductCardStyled,
+  PlaceholderImageStyled,
+  ProductPriceStyled,
   ProductShop,
-  LoadingContainer,
-  PaginationContainer,
+  LoadingContainerStyled,
+  PaginationContainerStyled,
 } from './styles';
 
 const { Title, Text } = Typography;
@@ -97,7 +97,7 @@ export const ProductsPage = () => {
 
   const FilterPanel = () => (
     <>
-      <FilterSection>
+      <FilterSectionStyled>
         <Title level={5}>Search</Title>
         <Search
           placeholder="Search artworks..."
@@ -107,9 +107,9 @@ export const ProductsPage = () => {
           onSearch={handleSearch}
           enterButton={<SearchOutlined />}
         />
-      </FilterSection>
+      </FilterSectionStyled>
 
-      <FilterSection>
+      <FilterSectionStyled>
         <Title level={5}>Categories</Title>
         <Select
           mode="multiple"
@@ -126,14 +126,14 @@ export const ProductsPage = () => {
             </Select.Option>
           ))}
         </Select>
-      </FilterSection>
+      </FilterSectionStyled>
 
-      <FilterSection>
+      <FilterSectionStyled>
         <Title level={5}>Price Range</Title>
-        <PriceRangeText type="secondary">
+        <PriceRangeText type="secondary" style={{ fontSize: 12 }}>
           ${priceRange[0]} - ${priceRange[1]}
         </PriceRangeText>
-        <PriceSliderWrapper>
+        <PriceSliderWrapperStyled>
           <Slider
             range
             min={0}
@@ -143,8 +143,8 @@ export const ProductsPage = () => {
             onChange={handlePriceChange}
             tooltip={{ formatter: (value) => `$${value}` }}
           />
-        </PriceSliderWrapper>
-      </FilterSection>
+        </PriceSliderWrapperStyled>
+      </FilterSectionStyled>
 
       <Button block onClick={handleClearFilters}>
         Clear All Filters
@@ -154,27 +154,27 @@ export const ProductsPage = () => {
 
   return (
     <Layout>
-      <PageContainer>
-        <PageHeader>
+      <PageContainerStyled>
+        <PageHeaderStyled>
           <Title level={2}>Discover Artworks</Title>
           <Text type="secondary">
             Browse through our curated collection of amazing artworks from talented artists
           </Text>
-        </PageHeader>
+        </PageHeaderStyled>
 
-        <MobileFilterButton
+        <MobileFilterButtonStyled
           icon={<FilterOutlined />}
           size="large"
           onClick={() => setDrawerOpen(true)}
         >
           Filters
-        </MobileFilterButton>
+        </MobileFilterButtonStyled>
 
-        <Container>
+        <ContainerStyled>
           {/* Desktop Sidebar */}
-          <Sidebar>
+          <SidebarStyled>
             <FilterPanel />
-          </Sidebar>
+          </SidebarStyled>
 
           {/* Mobile Drawer */}
           <Drawer
@@ -188,13 +188,13 @@ export const ProductsPage = () => {
           </Drawer>
 
           {/* Main Content */}
-          <MainContent>
+          <MainContentStyled>
             {(() => {
               if (loading) {
                 return (
-                  <LoadingContainer>
+                  <LoadingContainerStyled>
                     <Spin size="large" />
-                  </LoadingContainer>
+                  </LoadingContainerStyled>
                 );
               }
 
@@ -210,7 +210,7 @@ export const ProductsPage = () => {
                     {products.map((product) => (
                       <Col xs={24} sm={12} lg={8} key={product.id}>
                         <Link to={`/products/${product.slug}`}>
-                          <ProductCard
+                          <ProductCardStyled
                             cover={
                               product.images && product.images.length > 0 ? (
                                 <img
@@ -221,31 +221,38 @@ export const ProductsPage = () => {
                                   }
                                 />
                               ) : (
-                                <PlaceholderImage>
+                                <PlaceholderImageStyled>
                                   <Text type="secondary">No Image</Text>
-                                </PlaceholderImage>
+                                </PlaceholderImageStyled>
                               )
                             }
                           >
-                            <ProductShop>
+                            <ProductShop
+                              style={{
+                                display: 'block',
+                                color: '#666',
+                                marginBottom: 8,
+                                fontSize: 12,
+                              }}
+                            >
                               by {product.organization_name || 'Unknown Artist'}
                             </ProductShop>
                             <Title level={5} ellipsis={{ rows: 2 }}>
                               {product.name}
                             </Title>
-                            <ProductPrice>
+                            <ProductPriceStyled>
                               ${Number.parseFloat(product.price).toFixed(2)}
-                            </ProductPrice>
+                            </ProductPriceStyled>
                             <Button type="primary" icon={<ShoppingCartOutlined />} block>
                               Add to Cart
                             </Button>
-                          </ProductCard>
+                          </ProductCardStyled>
                         </Link>
                       </Col>
                     ))}
                   </Row>
 
-                  <PaginationContainer>
+                  <PaginationContainerStyled>
                     <Pagination
                       current={page}
                       total={total}
@@ -254,13 +261,13 @@ export const ProductsPage = () => {
                       showSizeChanger={false}
                       showTotal={(total) => `Total ${total} products`}
                     />
-                  </PaginationContainer>
+                  </PaginationContainerStyled>
                 </>
               );
             })()}
-          </MainContent>
-        </Container>
-      </PageContainer>
+          </MainContentStyled>
+        </ContainerStyled>
+      </PageContainerStyled>
     </Layout>
   );
 };

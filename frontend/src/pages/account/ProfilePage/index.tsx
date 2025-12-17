@@ -4,7 +4,7 @@ import { UserOutlined, UploadOutlined } from '@ant-design/icons';
 import { useAppSelector } from '@/hooks/useRedux';
 import { useUpdateProfileMutation } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
-import { ProfileContainer, AvatarSection } from './styles';
+import { ProfileContainerStyled, AvatarSectionStyled } from './styles';
 
 interface ProfileFormValues {
   first_name: string;
@@ -36,8 +36,8 @@ export const ProfilePage = () => {
   };
 
   return (
-    <ProfileContainer>
-      <AvatarSection>
+    <ProfileContainerStyled>
+      <AvatarSectionStyled>
         <Avatar size={100} src={avatarUrl} icon={<UserOutlined />} />
         <Upload
           accept="image/*"
@@ -48,7 +48,7 @@ export const ProfilePage = () => {
             Change Avatar
           </Button>
         </Upload>
-      </AvatarSection>
+      </AvatarSectionStyled>
 
       <Form
         form={form}
@@ -101,6 +101,6 @@ export const ProfilePage = () => {
           </Form.Item>
         </Space>
       </Form>
-    </ProfileContainer>
+    </ProfileContainerStyled>
   );
 };

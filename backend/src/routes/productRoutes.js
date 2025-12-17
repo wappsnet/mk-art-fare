@@ -17,6 +17,10 @@ router.get(
     const { page, limit, offset } = getPaginationParams(req.query.page, req.query.limit);
     const { organizationId, category, search, minPrice, maxPrice } = req.query;
 
+    // Ensure limit and offset are valid integers
+    const validLimit = Math.floor(Number(limit)) || 10;
+    const validOffset = Math.floor(Number(offset)) || 0;
+
     let queryStr =
       'SELECT p.*, o.name as organization_name, o.slug as organization_slug FROM products p LEFT JOIN organizations o ON p.organization_id = o.id WHERE p.is_active = TRUE';
     const params = [];
@@ -61,7 +65,7 @@ router.get(
       params.push(parseFloat(maxPrice));
     }
 
-    queryStr += ` ORDER BY p.created_at DESC LIMIT ${limit} OFFSET ${offset}`;
+    queryStr += ` ORDER BY p.created_at DESC LIMIT ${validLimit} OFFSET ${validOffset}`;
 
     let products = await query(queryStr, params);
 

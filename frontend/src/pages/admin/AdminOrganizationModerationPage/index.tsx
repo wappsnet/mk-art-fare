@@ -13,7 +13,7 @@ import { Layout } from '@/components/Layout';
 import { useGetOrganizationsQuery, useModerateOrganizationMutation } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
 import { Organization } from '@/types/common';
-import { Container, Header } from './styles';
+import { ContainerStyled, HeaderStyled } from './styles';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -150,15 +150,15 @@ export const AdminOrganizationModerationPage = () => {
 
   return (
     <Layout>
-      <Container>
-        <Header>
+      <ContainerStyled>
+        <HeaderStyled>
           <div>
             <Title level={2}>
               <ShopOutlined /> Organization Moderation
             </Title>
             <Text type="secondary">Review and moderate shop listings</Text>
           </div>
-        </Header>
+        </HeaderStyled>
 
         <Card>
           <Table
@@ -220,7 +220,7 @@ export const AdminOrganizationModerationPage = () => {
             </Space>
           )}
         </Modal>
-      </Container>
+      </ContainerStyled>
     </Layout>
   );
 };

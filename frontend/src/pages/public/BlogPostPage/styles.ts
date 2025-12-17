@@ -1,16 +1,16 @@
 import styled from '@emotion/styled';
 
-export const Container = styled.div`
+export const ContainerStyled = styled.div`
   max-width: 900px;
   margin: 0 auto;
   padding: 40px 20px;
 `;
 
-export const ArticleHeader = styled.div`
+export const ArticleHeaderStyled = styled.div`
   margin-bottom: 32px;
 `;
 
-export const FeaturedImage = styled.img`
+export const FeaturedImageStyled = styled.img`
   width: 100%;
   height: 400px;
   object-fit: cover;
@@ -18,14 +18,14 @@ export const FeaturedImage = styled.img`
   margin-bottom: 32px;
 `;
 
-export const AuthorInfo = styled.div`
+export const AuthorInfoStyled = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 16px;
 `;
 
-export const MetaInfo = styled.div`
+export const MetaInfoStyled = styled.div`
   display: flex;
   gap: 24px;
   color: #666;
@@ -33,7 +33,7 @@ export const MetaInfo = styled.div`
   margin-bottom: 24px;
 `;
 
-export const Content = styled.div`
+export const ContentStyled = styled.div`
   font-size: 16px;
   line-height: 1.8;
   color: #333;
@@ -43,19 +43,19 @@ export const Content = styled.div`
   }
 `;
 
-export const CommentSection = styled.div`
+export const CommentSectionStyled = styled.div`
   margin-top: 48px;
 `;
 
-export const LoadingContainer = styled.div`
+export const LoadingContainerStyled = styled.div`
   text-align: center;
   padding: 100px 0;
 `;
 
-export const CommentForm = styled.div`
+export const CommentFormStyled = styled.div`
   margin-bottom: 32px;
 `;
 
-export const SignInPrompt = styled.div`
+export const SignInPromptStyled = styled.div`
   margin-bottom: 32px;
 `;

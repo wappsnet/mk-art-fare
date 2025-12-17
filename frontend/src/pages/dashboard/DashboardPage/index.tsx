@@ -7,13 +7,13 @@ import { useAppSelector } from '@/hooks/useRedux';
 import { useGetMyOrganizationsQuery, useCreateOrganizationMutation } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
 import {
-  Container,
-  WelcomeSection,
-  CreateShopSpace,
-  ShopCardCover,
-  PlaceholderCover,
-  PlaceholderIcon,
-  ShopCardActions,
+  ContainerStyled,
+  WelcomeSectionStyled,
+  CreateShopSpaceStyled,
+  ShopCardCoverStyled,
+  PlaceholderCoverStyled,
+  PlaceholderIconStyled,
+  ShopCardActionsStyled,
 } from './styles';
 
 const { Title, Text } = Typography;
@@ -49,18 +49,18 @@ export const DashboardPage = () => {
 
   return (
     <Layout>
-      <Container>
-        <WelcomeSection>
+      <ContainerStyled>
+        <WelcomeSectionStyled>
           <Title level={2}>Welcome back, {user?.first_name || user?.email}!</Title>
           <Text type="secondary">Manage your shops and products from your dashboard</Text>
-        </WelcomeSection>
+        </WelcomeSectionStyled>
 
         <Card>
-          <CreateShopSpace>
+          <CreateShopSpaceStyled>
             <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}>
               Create New Shop
             </Button>
-          </CreateShopSpace>
+          </CreateShopSpaceStyled>
 
           {organizations.length > 0 ? (
             <Row gutter={[16, 16]}>
@@ -70,25 +70,25 @@ export const DashboardPage = () => {
                     hoverable
                     cover={
                       org.banner_url ? (
-                        <ShopCardCover alt={org.name} src={org.banner_url} />
+                        <ShopCardCoverStyled alt={org.name} src={org.banner_url} />
                       ) : (
-                        <PlaceholderCover>
-                          <PlaceholderIcon>
+                        <PlaceholderCoverStyled>
+                          <PlaceholderIconStyled>
                             <ShopOutlined />
-                          </PlaceholderIcon>
-                        </PlaceholderCover>
+                          </PlaceholderIconStyled>
+                        </PlaceholderCoverStyled>
                       )
                     }
                   >
                     <Card.Meta title={org.name} description={org.description || 'No description'} />
-                    <ShopCardActions>
+                    <ShopCardActionsStyled>
                       <Button size="small" onClick={() => navigate(`/dashboard/shop/${org.id}`)}>
                         Manage
                       </Button>
                       <Button size="small" onClick={() => navigate(`/shop/${org.slug}`)}>
                         View Shop
                       </Button>
-                    </ShopCardActions>
+                    </ShopCardActionsStyled>
                   </Card>
                 </Col>
               ))}
@@ -97,7 +97,7 @@ export const DashboardPage = () => {
             <Text type="secondary">You don't have any shops yet. Create one to get started!</Text>
           )}
         </Card>
-      </Container>
+      </ContainerStyled>
 
       <Modal
         title="Create New Shop"
@@ -133,7 +133,7 @@ export const DashboardPage = () => {
           </Form.Item>
 
           <Form.Item>
-            <ShopCardActions>
+            <ShopCardActionsStyled>
               <Button type="primary" htmlType="submit" loading={isCreating}>
                 Create Shop
               </Button>
@@ -145,7 +145,7 @@ export const DashboardPage = () => {
               >
                 Cancel
               </Button>
-            </ShopCardActions>
+            </ShopCardActionsStyled>
           </Form.Item>
         </Form>
       </Modal>

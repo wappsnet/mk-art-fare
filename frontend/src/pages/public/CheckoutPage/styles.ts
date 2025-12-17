@@ -3,29 +3,29 @@ import { Card, Typography } from 'antd';
 
 const { Text, Title: AntTitle } = Typography;
 
-export const Container = styled.div`
+export const ContainerStyled = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 20px;
   min-height: calc(100vh - 64px - 200px);
 `;
 
-export const PageTitle = styled(AntTitle)`
+export const PageTitleStyled = styled(AntTitle)`
   &.ant-typography {
     margin-bottom: 32px;
   }
 `;
 
-export const SectionCard = styled(Card)`
+export const SectionCardStyled = styled(Card)`
   margin-bottom: 24px;
 `;
 
-export const SummaryCard = styled(Card)`
+export const SummaryCardStyled = styled(Card)`
   position: sticky;
   top: 80px;
 `;
 
-export const CartItem = styled.div`
+export const CartItemStyled = styled.div`
   display: flex;
   justify-content: space-between;
   padding: 12px 0;
@@ -36,60 +36,60 @@ export const CartItem = styled.div`
   }
 `;
 
-export const FullWidthRadioGroup = styled.div`
+export const FullWidthRadioGroupStyled = styled.div`
   width: 100%;
 `;
 
-export const FullWidthSpace = styled.div`
+export const FullWidthSpaceStyled = styled.div`
   width: 100%;
 `;
 
-export const AddNewAddressButton = styled.div`
+export const AddNewAddressButtonStyled = styled.div`
   margin-top: 16px;
   padding: 0;
 `;
 
-export const UseSavedAddressButton = styled.div`
+export const UseSavedAddressButtonStyled = styled.div`
   margin-bottom: 16px;
   padding: 0;
 `;
 
-export const PaymentNotice = styled.div`
+export const PaymentNoticeStyled = styled.div`
   margin-top: 24px;
   padding: 16px;
   background: #f5f5f5;
   border-radius: 4px;
 `;
 
-export const CartItemsContainer = styled.div`
+export const CartItemsContainerStyled = styled.div`
   margin-bottom: 24px;
 `;
 
-export const PriceRow = styled.div`
+export const PriceRowStyled = styled.div`
   display: flex;
   justify-content: space-between;
 `;
 
-export const TotalRow = styled.div`
+export const TotalRowStyled = styled.div`
   display: flex;
   justify-content: space-between;
   margin-bottom: 24px;
 `;
 
-export const TotalLabel = styled(AntTitle)`
+export const TotalLabelStyled = styled(AntTitle)`
   &.ant-typography {
     margin: 0;
   }
 `;
 
-export const TotalAmount = styled(AntTitle)`
+export const TotalAmountStyled = styled(AntTitle)`
   &.ant-typography {
     margin: 0;
     color: #1890ff;
   }
 `;
 
-export const TermsText = styled(Text)`
+export const TermsTextStyled = styled(Text)`
   &.ant-typography {
     display: block;
     margin-top: 16px;

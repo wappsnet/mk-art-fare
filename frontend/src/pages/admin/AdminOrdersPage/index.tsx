@@ -10,7 +10,7 @@ import dayjs from 'dayjs';
 import { Layout } from '@/components/Layout';
 import { useGetOrdersQuery } from '@/services/apiSlice';
 import { Order, OrderStatus } from '@/types/common';
-import { Container, Header, StatCard } from './styles';
+import { ContainerStyled, HeaderStyled, StatCardStyled } from './styles';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -110,29 +110,29 @@ export const AdminOrdersPage = () => {
 
   return (
     <Layout>
-      <Container>
-        <Header>
+      <ContainerStyled>
+        <HeaderStyled>
           <div>
             <Title level={2}>
               <ShoppingOutlined /> All Orders
             </Title>
             <Text type="secondary">View and manage all platform orders</Text>
           </div>
-        </Header>
+        </HeaderStyled>
 
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
           <Col xs={24} sm={12} lg={6}>
-            <StatCard>
+            <StatCardStyled>
               <Statistic
                 title="Total Orders"
                 value={stats.totalOrders}
                 prefix={<ShoppingOutlined />}
                 valueStyle={{ color: '#1890ff' }}
               />
-            </StatCard>
+            </StatCardStyled>
           </Col>
           <Col xs={24} sm={12} lg={6}>
-            <StatCard>
+            <StatCardStyled>
               <Statistic
                 title="Total Revenue"
                 value={stats.totalRevenue}
@@ -140,27 +140,27 @@ export const AdminOrdersPage = () => {
                 precision={2}
                 valueStyle={{ color: '#52c41a' }}
               />
-            </StatCard>
+            </StatCardStyled>
           </Col>
           <Col xs={24} sm={12} lg={6}>
-            <StatCard>
+            <StatCardStyled>
               <Statistic
                 title="Pending Orders"
                 value={stats.pendingOrders}
                 prefix={<ClockCircleOutlined />}
                 valueStyle={{ color: '#faad14' }}
               />
-            </StatCard>
+            </StatCardStyled>
           </Col>
           <Col xs={24} sm={12} lg={6}>
-            <StatCard>
+            <StatCardStyled>
               <Statistic
                 title="Completed Orders"
                 value={stats.completedOrders}
                 prefix={<CheckCircleOutlined />}
                 valueStyle={{ color: '#52c41a' }}
               />
-            </StatCard>
+            </StatCardStyled>
           </Col>
         </Row>
 
@@ -188,7 +188,7 @@ export const AdminOrdersPage = () => {
             />
           </Space>
         </Card>
-      </Container>
+      </ContainerStyled>
     </Layout>
   );
 };

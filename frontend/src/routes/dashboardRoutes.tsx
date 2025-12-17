@@ -1,10 +1,9 @@
 import type { AppRouteObject } from '@/types/routes';
-import { RequireAuth, RequireRole } from '@/components/guards';
+import { RequireAuth, RequireRole } from '@/guards';
 import { UserRole } from '@/types/common';
 import { DashboardPage } from '@/pages/dashboard/DashboardPage';
 import { ShopManagementPage } from '@/pages/dashboard/ShopManagementPage';
 import { ShopProductsPage } from '@/pages/dashboard/ShopProductsPage';
-import { ShopEventsPage } from '@/pages/dashboard/ShopEventsPage';
 import { ShopOrdersPage } from '@/pages/dashboard/ShopOrdersPage';
 import { ShopAnalyticsPage } from '@/pages/dashboard/ShopAnalyticsPage';
 import { ShopCategoriesPage } from '@/pages/dashboard/ShopCategoriesPage';
@@ -42,11 +41,6 @@ export const dashboardRoutes: AppRouteObject[] = [
         path: 'categories',
         element: <ShopCategoriesPage />,
         meta: { title: 'Categories - Shop Management' },
-      },
-      {
-        path: 'events',
-        element: <ShopEventsPage />,
-        meta: { title: 'Events - Shop Management' },
       },
       {
         path: 'orders',

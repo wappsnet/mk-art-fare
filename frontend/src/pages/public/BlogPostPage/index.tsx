@@ -19,16 +19,16 @@ import { Layout } from '@/components/Layout';
 import { useGetBlogPostQuery } from '@/services/apiSlice';
 import { useAppSelector } from '@/hooks/useRedux';
 import {
-  Container,
-  ArticleHeader,
-  FeaturedImage,
-  AuthorInfo,
-  MetaInfo,
-  Content,
-  CommentSection,
-  LoadingContainer,
-  CommentForm,
-  SignInPrompt,
+  ContainerStyled,
+  ArticleHeaderStyled,
+  FeaturedImageStyled,
+  AuthorInfoStyled,
+  MetaInfoStyled,
+  ContentStyled,
+  CommentSectionStyled,
+  LoadingContainerStyled,
+  CommentFormStyled,
+  SignInPromptStyled,
 } from './styles';
 
 const { Title, Paragraph, Text } = Typography;
@@ -89,11 +89,11 @@ export const BlogPostPage = () => {
   if (loading) {
     return (
       <Layout>
-        <Container>
-          <LoadingContainer>
+        <ContainerStyled>
+          <LoadingContainerStyled>
             <Spin size="large" />
-          </LoadingContainer>
-        </Container>
+          </LoadingContainerStyled>
+        </ContainerStyled>
       </Layout>
     );
   }
@@ -101,16 +101,16 @@ export const BlogPostPage = () => {
   if (!post) {
     return (
       <Layout>
-        <Container>
+        <ContainerStyled>
           <Title level={3}>Blog post not found</Title>
-        </Container>
+        </ContainerStyled>
       </Layout>
     );
   }
 
   return (
     <Layout>
-      <Container>
+      <ContainerStyled>
         <Breadcrumb
           items={[
             { title: <Link to="/">Home</Link> },
@@ -121,13 +121,13 @@ export const BlogPostPage = () => {
         />
 
         {post.featured_image_url && (
-          <FeaturedImage src={post.featured_image_url} alt={post.title} />
+          <FeaturedImageStyled src={post.featured_image_url} alt={post.title} />
         )}
 
-        <ArticleHeader>
+        <ArticleHeaderStyled>
           <Title level={1}>{post.title}</Title>
 
-          <AuthorInfo>
+          <AuthorInfoStyled>
             <Avatar size={48} src={post.avatar_url} icon={<UserOutlined />} />
             <div>
               <Text strong>
@@ -138,33 +138,33 @@ export const BlogPostPage = () => {
                 Author
               </Text>
             </div>
-          </AuthorInfo>
+          </AuthorInfoStyled>
 
-          <MetaInfo>
+          <MetaInfoStyled>
             <span>
               <CalendarOutlined /> {formatDate(post.published_at || post.created_at)}
             </span>
             <span>
               <EyeOutlined /> {post.view_count} views
             </span>
-          </MetaInfo>
-        </ArticleHeader>
+          </MetaInfoStyled>
+        </ArticleHeaderStyled>
 
         <Divider />
 
-        <Content>
+        <ContentStyled>
           {withKeys(post.content.split('\n')).map((item) => (
             <Paragraph key={item._key}>{item.value}</Paragraph>
           ))}
-        </Content>
+        </ContentStyled>
 
         <Divider />
 
-        <CommentSection>
+        <CommentSectionStyled>
           <Title level={3}>Comments ({post.comments?.length || 0})</Title>
 
           {isAuthenticated ? (
-            <CommentForm>
+            <CommentFormStyled>
               <Form form={form} onFinish={handleSubmitComment}>
                 <Form.Item
                   name="content"
@@ -178,13 +178,13 @@ export const BlogPostPage = () => {
                   </Button>
                 </Form.Item>
               </Form>
-            </CommentForm>
+            </CommentFormStyled>
           ) : (
-            <SignInPrompt>
+            <SignInPromptStyled>
               <Paragraph type="secondary">
                 <Link to="/login">Sign in</Link> to post a comment
               </Paragraph>
-            </SignInPrompt>
+            </SignInPromptStyled>
           )}
 
           {post.comments && post.comments.length > 0 ? (
@@ -206,8 +206,8 @@ export const BlogPostPage = () => {
           ) : (
             <Text type="secondary">No comments yet. Be the first to comment!</Text>
           )}
-        </CommentSection>
-      </Container>
+        </CommentSectionStyled>
+      </ContainerStyled>
     </Layout>
   );
 };

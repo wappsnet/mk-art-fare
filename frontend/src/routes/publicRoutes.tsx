@@ -1,5 +1,5 @@
 import type { AppRouteObject } from '@/types/routes';
-import { RequireGuest } from '@/components/guards';
+import { RequireGuest } from '@/guards';
 import { HomePage } from '@/pages/public/HomePage';
 import { LoginPage } from '@/pages/public/LoginPage';
 import { RegisterPage } from '@/pages/public/RegisterPage';
@@ -10,8 +10,6 @@ import { CartPage } from '@/pages/public/CartPage';
 import { CheckoutPage } from '@/pages/public/CheckoutPage';
 import { BlogPage } from '@/pages/public/BlogPage';
 import { BlogPostPage } from '@/pages/public/BlogPostPage';
-import { EventsPage } from '@/pages/public/EventsPage';
-import { EventDetailPage } from '@/pages/public/EventDetailPage';
 
 export const publicRoutes: AppRouteObject[] = [
   {
@@ -71,15 +69,5 @@ export const publicRoutes: AppRouteObject[] = [
     path: '/blog/:slug',
     element: <BlogPostPage />,
     meta: { title: 'Blog Post - Art Fare' },
-  },
-  {
-    path: '/events',
-    element: <EventsPage />,
-    meta: { title: 'Events - Art Fare' },
-  },
-  {
-    path: '/events/:slug',
-    element: <EventDetailPage />,
-    meta: { title: 'Event Details - Art Fare' },
   },
 ];

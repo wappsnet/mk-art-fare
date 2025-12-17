@@ -3,6 +3,7 @@ import { Provider } from 'react-redux';
 import { store } from './store';
 import { useGetProfileQuery, useGetCartQuery } from './services/apiSlice';
 import { AppRouter } from './routes';
+import { theme } from './config/theme';
 import './styles/global.scss';
 
 function AppContent() {
@@ -20,16 +21,7 @@ function AppContent() {
 function App() {
   return (
     <Provider store={store}>
-      <ConfigProvider
-        theme={{
-          token: {
-            colorPrimary: '#1890ff',
-            borderRadius: 4,
-            fontFamily:
-              '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-          },
-        }}
-      >
+      <ConfigProvider theme={theme}>
         <AppContent />
       </ConfigProvider>
     </Provider>

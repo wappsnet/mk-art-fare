@@ -3,17 +3,17 @@ import { Card, Button, Typography } from 'antd';
 
 const { Text: AntText } = Typography;
 
-export const PageContainer = styled.div`
+export const PageContainerStyled = styled.div`
   max-width: 1400px;
   margin: 0 auto;
   padding: 40px 20px;
 `;
 
-export const PageHeader = styled.div`
+export const PageHeaderStyled = styled.div`
   margin-bottom: 32px;
 `;
 
-export const Container = styled.div`
+export const ContainerStyled = styled.div`
   max-width: 1400px;
   margin: 0 auto;
   padding: 40px 20px;
@@ -25,7 +25,7 @@ export const Container = styled.div`
   }
 `;
 
-export const Sidebar = styled.div`
+export const SidebarStyled = styled.div`
   width: 280px;
   flex-shrink: 0;
   position: sticky;
@@ -37,29 +37,27 @@ export const Sidebar = styled.div`
   }
 `;
 
-export const MainContent = styled.div`
+export const MainContentStyled = styled.div`
   flex: 1;
   min-width: 0;
 `;
 
-export const FilterSection = styled.div`
+export const FilterSectionStyled = styled.div`
   background: #fafafa;
   padding: 24px;
   border-radius: 8px;
   margin-bottom: 24px;
 `;
 
-export const PriceRangeText = styled(AntText)`
-  &.ant-typography {
-    font-size: 12px;
-  }
-`;
+// Use AntD Text directly - apply styles via props
+export const PriceRangeText = AntText;
+export const ProductShop = AntText;
 
-export const PriceSliderWrapper = styled.div`
+export const PriceSliderWrapperStyled = styled.div`
   margin-top: 16px;
 `;
 
-export const MobileFilterButton = styled(Button)`
+export const MobileFilterButtonStyled = styled(Button)`
   display: none;
   margin-bottom: 24px;
 
@@ -68,7 +66,7 @@ export const MobileFilterButton = styled(Button)`
   }
 `;
 
-export const ProductCard = styled(Card)`
+export const ProductCardStyled = styled(Card)`
   height: 100%;
   transition:
     transform 0.3s,
@@ -93,33 +91,26 @@ export const ProductCard = styled(Card)`
   }
 `;
 
-export const PlaceholderImage = styled.div`
+export const PlaceholderImageStyled = styled.div`
   height: 250px;
   display: flex;
   align-items: center;
   justify-content: center;
 `;
 
-export const ProductPrice = styled.div`
+export const ProductPriceStyled = styled.div`
   font-size: 24px;
   font-weight: bold;
   color: #1890ff;
   margin: 12px 0;
 `;
 
-export const ProductShop = styled(AntText)`
-  display: block;
-  color: #666;
-  margin-bottom: 8px;
-  font-size: 12px;
-`;
-
-export const LoadingContainer = styled.div`
+export const LoadingContainerStyled = styled.div`
   text-align: center;
   padding: 100px 0;
 `;
 
-export const PaginationContainer = styled.div`
+export const PaginationContainerStyled = styled.div`
   text-align: center;
   margin-top: 48px;
 `;

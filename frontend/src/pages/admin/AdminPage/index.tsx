@@ -23,7 +23,6 @@ import {
   DollarOutlined,
   TeamOutlined,
   FileTextOutlined,
-  CalendarOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { Layout } from '@/components/Layout';
@@ -32,11 +31,10 @@ import {
   useUpdateUserMutation,
   useGetOrganizationsQuery,
   useGetBlogPostsQuery,
-  useGetEventsQuery,
 } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
 import { Organization, UserRole } from '@/types/common';
-import { Container, StatCard, Header } from './styles';
+import { ContainerStyled, StatCardStyled, HeaderStyled } from './styles';
 
 const { Title, Text } = Typography;
 
@@ -59,15 +57,6 @@ interface BlogPost {
   created_at: string;
 }
 
-interface Event {
-  id: number;
-  title: string;
-  slug: string;
-  event_type: string;
-  start_date: string;
-  created_at: string;
-}
-
 interface PlatformStats {
   totalUsers: number;
   totalOrganizations: number;
@@ -75,7 +64,6 @@ interface PlatformStats {
   totalOrders: number;
   totalRevenue: number;
   totalBlogPosts: number;
-  totalEvents: number;
 }
 
 export const AdminPage = () => {
@@ -87,14 +75,12 @@ export const AdminPage = () => {
   const { data: usersData, isLoading: usersLoading } = useGetUsersQuery();
   const { data: orgsData, isLoading: orgsLoading } = useGetOrganizationsQuery();
   const { data: blogData, isLoading: blogLoading } = useGetBlogPostsQuery({});
-  const { data: eventsData, isLoading: eventsLoading } = useGetEventsQuery({});
   const [updateUser] = useUpdateUserMutation();
 
   const users = usersData?.data || [];
   const organizations = orgsData?.data || [];
   const blogPosts = blogData?.data?.posts || [];
-  const events = eventsData?.data || [];
-  const loading = usersLoading || orgsLoading || blogLoading || eventsLoading;
+  const loading = usersLoading || orgsLoading || blogLoading;
 
   const stats: PlatformStats = {
     totalUsers: users.length,
@@ -103,7 +89,6 @@ export const AdminPage = () => {
     totalOrders: 0,
     totalRevenue: 0,
     totalBlogPosts: blogPosts.length,
-    totalEvents: events.length,
   };
 
   const handleEditUser = (user: User) => {
@@ -284,52 +269,6 @@ export const AdminPage = () => {
     },
   ];
 
-  const eventColumns = [
-    {
-      title: 'Title',
-      dataIndex: 'title',
-      key: 'title',
-      render: (title: string, record: Event) => (
-        <div>
-          <Text strong>{title}</Text>
-          <br />
-          <Text type="secondary" style={{ fontSize: 12 }}>
-            /{record.slug}
-          </Text>
-        </div>
-      ),
-    },
-    {
-      title: 'Type',
-      dataIndex: 'event_type',
-      key: 'event_type',
-      render: (type: string, record: Event) => <Tag>{type ?? record.event_type}</Tag>,
-    },
-    {
-      title: 'Start Date',
-      dataIndex: 'start_date',
-      key: 'start_date',
-      render: (date: string) => dayjs(date).format('MMM DD, YYYY'),
-    },
-    {
-      title: 'Created',
-      dataIndex: 'created_at',
-      key: 'created_at',
-      render: (date: string) => dayjs(date).format('MMM DD, YYYY'),
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      render: (record: Event) => (
-        <Space>
-          <Button size="small" onClick={() => navigate(`/events/${record.slug}`)}>
-            View
-          </Button>
-        </Space>
-      ),
-    },
-  ];
-
   const tabItems = [
     {
       key: 'overview',
@@ -337,37 +276,37 @@ export const AdminPage = () => {
       children: (
         <Row gutter={[24, 24]}>
           <Col xs={24} sm={12} lg={8}>
-            <StatCard>
+            <StatCardStyled>
               <Statistic
                 title="Total Users"
                 value={stats.totalUsers}
                 prefix={<TeamOutlined />}
                 valueStyle={{ color: '#3f8600' }}
               />
-            </StatCard>
+            </StatCardStyled>
           </Col>
           <Col xs={24} sm={12} lg={8}>
-            <StatCard>
+            <StatCardStyled>
               <Statistic
                 title="Total Shops"
                 value={stats.totalOrganizations}
                 prefix={<ShopOutlined />}
                 valueStyle={{ color: '#1890ff' }}
               />
-            </StatCard>
+            </StatCardStyled>
           </Col>
           <Col xs={24} sm={12} lg={8}>
-            <StatCard>
+            <StatCardStyled>
               <Statistic
                 title="Total Orders"
                 value={stats.totalOrders}
                 prefix={<ShoppingOutlined />}
                 valueStyle={{ color: '#cf1322' }}
               />
-            </StatCard>
+            </StatCardStyled>
           </Col>
           <Col xs={24} sm={12} lg={8}>
-            <StatCard>
+            <StatCardStyled>
               <Statistic
                 title="Total Revenue"
                 value={stats.totalRevenue}
@@ -375,27 +314,17 @@ export const AdminPage = () => {
                 precision={2}
                 valueStyle={{ color: '#faad14' }}
               />
-            </StatCard>
+            </StatCardStyled>
           </Col>
           <Col xs={24} sm={12} lg={8}>
-            <StatCard>
+            <StatCardStyled>
               <Statistic
                 title="Blog Posts"
                 value={stats.totalBlogPosts}
                 prefix={<FileTextOutlined />}
                 valueStyle={{ color: '#722ed1' }}
               />
-            </StatCard>
-          </Col>
-          <Col xs={24} sm={12} lg={8}>
-            <StatCard>
-              <Statistic
-                title="Events"
-                value={stats.totalEvents}
-                prefix={<CalendarOutlined />}
-                valueStyle={{ color: '#eb2f96' }}
-              />
-            </StatCard>
+            </StatCardStyled>
           </Col>
         </Row>
       ),
@@ -445,32 +374,17 @@ export const AdminPage = () => {
         </Card>
       ),
     },
-    {
-      key: 'events',
-      label: `Events (${events.length})`,
-      children: (
-        <Card>
-          <Table
-            dataSource={events}
-            columns={eventColumns}
-            rowKey="id"
-            loading={loading}
-            pagination={{ pageSize: 10 }}
-          />
-        </Card>
-      ),
-    },
   ];
 
   return (
     <Layout>
-      <Container>
-        <Header>
+      <ContainerStyled>
+        <HeaderStyled>
           <Title level={2}>
             <UserOutlined /> Admin Dashboard
           </Title>
           <Text type="secondary">Platform management and analytics</Text>
-        </Header>
+        </HeaderStyled>
 
         <Tabs items={tabItems} />
 
@@ -514,7 +428,7 @@ export const AdminPage = () => {
             </Form.Item>
           </Form>
         </Modal>
-      </Container>
+      </ContainerStyled>
     </Layout>
   );
 };

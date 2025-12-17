@@ -22,7 +22,7 @@ import {
 } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
 import type { Organization } from '@/types/common';
-import { FullWidthSpace, LogoImage, BannerImage } from './styles';
+import { FullWidthSpaceStyled, LogoImageStyled, BannerImageStyled } from './styles';
 
 const { Title, Text } = Typography;
 
@@ -124,7 +124,7 @@ export const ShopSettingsPage = () => {
   return (
     <div>
       <Card>
-        <FullWidthSpace direction="vertical" size="large">
+        <FullWidthSpaceStyled direction="vertical" size="large">
           <div>
             <Title level={4}>Basic Information</Title>
             <Button type="primary" onClick={() => setIsShopModalOpen(true)}>
@@ -153,7 +153,7 @@ export const ShopSettingsPage = () => {
               Update Branding
             </Button>
           </div>
-        </FullWidthSpace>
+        </FullWidthSpaceStyled>
       </Card>
 
       {/* Shop Details Modal */}
@@ -216,7 +216,7 @@ export const ShopSettingsPage = () => {
               <Button icon={<UploadOutlined />}>Select Logo</Button>
             </Upload>
             {organization.logo_url && (
-              <LogoImage src={organization.logo_url} alt="Current logo" />
+              <LogoImageStyled src={organization.logo_url} alt="Current logo" />
             )}
           </Form.Item>
 
@@ -231,7 +231,7 @@ export const ShopSettingsPage = () => {
               <Button icon={<UploadOutlined />}>Select Banner</Button>
             </Upload>
             {organization.banner_url && (
-              <BannerImage src={organization.banner_url} alt="Current banner" />
+              <BannerImageStyled src={organization.banner_url} alt="Current banner" />
             )}
           </Form.Item>
 

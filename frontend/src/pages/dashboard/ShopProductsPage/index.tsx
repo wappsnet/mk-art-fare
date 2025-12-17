@@ -26,11 +26,11 @@ import { ProductImageManager } from '@/components/ProductImageManager';
 import { Product, ProductFormData } from '@/types/common';
 import { getErrorMessage } from '@/types/errors';
 import {
-  TopSpace,
-  ProductImage,
-  PlaceholderImage,
-  ProductActions,
-  FullWidthInput,
+  TopSpaceStyled,
+  ProductImageStyled,
+  PlaceholderImageStyled,
+  ProductActionsStyled,
+  FullWidthInputStyled,
 } from './styles';
 
 const { Text } = Typography;
@@ -106,11 +106,11 @@ export const ShopProductsPage = () => {
 
   return (
     <div>
-      <TopSpace>
+      <TopSpaceStyled>
         <Button type="primary" icon={<PlusOutlined />} onClick={() => openProductModal()}>
           Add Product
         </Button>
-      </TopSpace>
+      </TopSpaceStyled>
 
       {products.length > 0 ? (
         <Row gutter={[16, 16]}>
@@ -120,11 +120,11 @@ export const ShopProductsPage = () => {
                 hoverable
                 cover={
                   product.images?.[0]?.url ? (
-                    <ProductImage alt={product.name} src={product.images[0].url} />
+                    <ProductImageStyled alt={product.name} src={product.images[0].url} />
                   ) : (
-                    <PlaceholderImage>
+                    <PlaceholderImageStyled>
                       <Text type="secondary">No Image</Text>
-                    </PlaceholderImage>
+                    </PlaceholderImageStyled>
                   )
                 }
               >
@@ -138,7 +138,7 @@ export const ShopProductsPage = () => {
                     </>
                   }
                 />
-                <ProductActions direction="vertical">
+                <ProductActionsStyled direction="vertical">
                   <Space>
                     <Button size="small" onClick={() => openProductModal(product)}>
                       Edit
@@ -168,7 +168,7 @@ export const ShopProductsPage = () => {
                   >
                     Delete
                   </Button>
-                </ProductActions>
+                </ProductActionsStyled>
               </Card>
             </Col>
           ))}
@@ -195,14 +195,14 @@ export const ShopProductsPage = () => {
             <Input.TextArea rows={3} />
           </Form.Item>
           <Form.Item name="price" label="Price" rules={[{ required: true }]}>
-            <FullWidthInput>
+            <FullWidthInputStyled>
               <InputNumber min={0} step={0.01} style={{ width: '100%' }} prefix="$" />
-            </FullWidthInput>
+            </FullWidthInputStyled>
           </Form.Item>
           <Form.Item name="stock_quantity" label="Stock Quantity" rules={[{ required: true }]}>
-            <FullWidthInput>
+            <FullWidthInputStyled>
               <InputNumber min={0} style={{ width: '100%' }} />
-            </FullWidthInput>
+            </FullWidthInputStyled>
           </Form.Item>
           <Form.Item name="sku" label="SKU">
             <Input />

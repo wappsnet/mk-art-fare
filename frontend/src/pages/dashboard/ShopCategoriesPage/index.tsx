@@ -10,7 +10,7 @@ import {
 } from '@/services/apiSlice';
 import { Category } from '@/types/common';
 import { getErrorMessage } from '@/types/errors.ts';
-import { TopSpace } from './styles';
+import { TopSpaceStyled } from './styles';
 
 const { Text } = Typography;
 
@@ -122,14 +122,14 @@ export const ShopCategoriesPage = () => {
 
   return (
     <div>
-      <TopSpace direction="vertical">
+      <TopSpaceStyled direction="vertical">
         <Button type="primary" icon={<PlusOutlined />} onClick={() => openCategoryModal()}>
           Create Custom Category
         </Button>
         <Text type="secondary">
           You can use global categories (blue tags) or create shop-specific categories (green tags)
         </Text>
-      </TopSpace>
+      </TopSpaceStyled>
 
       <Table columns={categoryColumns} dataSource={allCategories} rowKey="id" pagination={false} />
 

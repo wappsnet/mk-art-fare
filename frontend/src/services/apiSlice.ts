@@ -6,13 +6,11 @@ import {
   Product,
   Order,
   BlogPost,
-  Event,
   Organization,
   Category,
   Cart,
   Address,
   CreateAddressInput,
-  BookingAttendeeInfo,
   RegisterFormData,
 } from '@/types/common';
 
@@ -89,7 +87,6 @@ export const api = createApi({
     'Cart',
     'Order',
     'Blog',
-    'Event',
     'Organization',
     'Address',
     'Category',
@@ -305,36 +302,6 @@ export const api = createApi({
       invalidatesTags: ['Blog'],
     }),
 
-    // Event endpoints
-    getEvents: builder.query<
-      ApiResponse<Event[]>,
-      { type?: string; city?: string; startDate?: string; endDate?: string }
-    >({
-      query: (params) => {
-        const queryParams = new URLSearchParams();
-        if (params.type) queryParams.append('type', params.type);
-        if (params.city) queryParams.append('city', params.city);
-        if (params.startDate) queryParams.append('startDate', params.startDate);
-        if (params.endDate) queryParams.append('endDate', params.endDate);
-        return `/events?${queryParams.toString()}`;
-      },
-      providesTags: ['Event'],
-    }),
-    getEvent: builder.query<ApiResponse<Event>, string>({
-      query: (slug) => `/events/${slug}`,
-      providesTags: ['Event'],
-    }),
-    bookEvent: builder.mutation<
-      ApiResponse<unknown>,
-      { eventId: number; ticketId: number; quantity: number; attendeeInfo: BookingAttendeeInfo }
-    >({
-      query: ({ eventId, ...data }) => ({
-        url: `/events/${eventId}/book`,
-        method: 'POST',
-        body: data,
-      }),
-      invalidatesTags: ['Event', 'Order'],
-    }),
 
     // Organization endpoints
     getOrganizations: builder.query<ApiResponse<Organization[]>, void>({
@@ -444,17 +411,6 @@ export const api = createApi({
         body: { status, note },
       }),
       invalidatesTags: ['Product'],
-    }),
-    moderateEvent: builder.mutation<
-      ApiResponse<Event>,
-      { id: number; status: 'approved' | 'declined'; note?: string }
-    >({
-      query: ({ id, status, note }) => ({
-        url: `/admin/events/${id}/moderate`,
-        method: 'PATCH',
-        body: { status, note },
-      }),
-      invalidatesTags: ['Event'],
     }),
 
     // User endpoints
@@ -623,9 +579,6 @@ export const {
   useGetBlogPostsQuery,
   useGetBlogPostQuery,
   useCreateBlogPostMutation,
-  useGetEventsQuery,
-  useGetEventQuery,
-  useBookEventMutation,
   useGetOrganizationsQuery,
   useGetOrganizationQuery,
   useGetOrganizationByIdQuery,
@@ -639,7 +592,6 @@ export const {
   useUploadOrganizationBannerMutation,
   useModerateOrganizationMutation,
   useModerateProductMutation,
-  useModerateEventMutation,
   useGetUsersQuery,
   useUpdateUserMutation,
   useUpdateProfileMutation,

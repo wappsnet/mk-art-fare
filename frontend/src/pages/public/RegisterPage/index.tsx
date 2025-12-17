@@ -6,7 +6,7 @@ import { useAppSelector } from '@/hooks/useRedux';
 import { useRegisterMutation } from '@/services/apiSlice';
 import { Layout } from '@/components/Layout';
 import { getErrorMessage } from '@/types/errors';
-import { Container, StyledCard, GoogleButton, CenterText } from './styles';
+import { ContainerStyled, CardStyled, GoogleButtonStyled, CenterTextStyled } from './styles';
 
 const { Title, Text } = Typography;
 
@@ -53,17 +53,17 @@ export const RegisterPage = () => {
 
   return (
     <Layout>
-      <Container>
-        <StyledCard>
+      <ContainerStyled>
+        <CardStyled>
           <Space direction="vertical" size="large" style={{ width: '100%' }}>
-            <CenterText>
+            <CenterTextStyled>
               <Title level={2}>Create Account</Title>
               <Text type="secondary">Join Art Fare and start your journey</Text>
-            </CenterText>
+            </CenterTextStyled>
 
-            <GoogleButton icon={<GoogleOutlined />} size="large" onClick={handleGoogleLogin}>
+            <GoogleButtonStyled icon={<GoogleOutlined />} size="large" onClick={handleGoogleLogin}>
               Continue with Google
-            </GoogleButton>
+            </GoogleButtonStyled>
 
             <Divider>Or register with email</Divider>
 
@@ -134,15 +134,15 @@ export const RegisterPage = () => {
                 </Button>
               </Form.Item>
 
-              <CenterText>
+              <CenterTextStyled>
                 <Text type="secondary">
                   Already have an account? <Link to="/login">Sign in</Link>
                 </Text>
-              </CenterText>
+              </CenterTextStyled>
             </Form>
           </Space>
-        </StyledCard>
-      </Container>
+        </CardStyled>
+      </ContainerStyled>
     </Layout>
   );
 };

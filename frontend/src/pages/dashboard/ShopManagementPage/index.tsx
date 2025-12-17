@@ -3,7 +3,7 @@ import { Card, Typography, Button, Tabs, Spin } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Layout } from '@/components/Layout';
 import { useGetOrganizationByIdQuery } from '@/services/apiSlice';
-import { Container, Header, OutletWrapper } from './styles';
+import { ContainerStyled, HeaderStyled, OutletWrapperStyled } from './styles';
 
 const { Title } = Typography;
 
@@ -16,20 +16,16 @@ export const ShopManagementPage = () => {
   const { data: orgData, isLoading } = useGetOrganizationByIdQuery(orgId, { skip: !orgId });
   const organization = orgData?.data;
 
-  const handleTabChange = (key: string) => {
-    if (key === 'products') {
-      navigate(`/dashboard/shop/${id}`);
-    } else {
-      navigate(`/dashboard/shop/${id}/${key}`);
-    }
+  const handleTabChange = (path: string) => {
+    navigate(path);
   };
 
   if (isLoading) {
     return (
       <Layout>
-        <Container>
+        <ContainerStyled>
           <Spin size="large" />
-        </Container>
+        </ContainerStyled>
       </Layout>
     );
   }
@@ -37,9 +33,9 @@ export const ShopManagementPage = () => {
   if (!organization) {
     return (
       <Layout>
-        <Container>
+        <ContainerStyled>
           <Title level={3}>Organization not found</Title>
-        </Container>
+        </ContainerStyled>
       </Layout>
     );
   }
@@ -52,10 +48,6 @@ export const ShopManagementPage = () => {
     {
       key: `/dashboard/shop/${id}/categories`,
       label: 'Categories',
-    },
-    {
-      key: `/dashboard/shop/${id}/events`,
-      label: 'Events',
     },
     {
       key: `/dashboard/shop/${id}/orders`,
@@ -73,8 +65,8 @@ export const ShopManagementPage = () => {
 
   return (
     <Layout>
-      <Container>
-        <Header>
+      <ContainerStyled>
+        <HeaderStyled>
           <div>
             <Button
               icon={<ArrowLeftOutlined />}
@@ -87,16 +79,16 @@ export const ShopManagementPage = () => {
               Manage {organization.name}
             </Title>
           </div>
-        </Header>
+        </HeaderStyled>
 
         <Card>
           <Tabs activeKey={location.pathname} onChange={handleTabChange} items={tabItems} />
 
-          <OutletWrapper>
+          <OutletWrapperStyled>
             <Outlet />
-          </OutletWrapper>
+          </OutletWrapperStyled>
         </Card>
-      </Container>
+      </ContainerStyled>
     </Layout>
   );
 };

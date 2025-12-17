@@ -1,6 +1,5 @@
 import { query } from '../../config/database.js';
-import { AppError } from '../../middleware/errorHandler.js';
-import { asyncHandler } from '../../middleware/asyncHandler.js';
+import { AppError, asyncHandler } from '../../middleware/errorHandler.js';
 
 /**
  * Moderate an organization (approve/decline)
@@ -9,7 +8,7 @@ import { asyncHandler } from '../../middleware/asyncHandler.js';
 export const moderateOrganization = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { status, note } = req.body;
-  const userId = req.user.id;
+  const userId = req.user.userId;
 
   // Validate status
   if (!['approved', 'declined'].includes(status)) {
@@ -51,7 +50,7 @@ export const moderateOrganization = asyncHandler(async (req, res) => {
 export const moderateProduct = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { status, note } = req.body;
-  const userId = req.user.id;
+  const userId = req.user.userId;
 
   // Validate status
   if (!['approved', 'declined'].includes(status)) {
@@ -93,7 +92,7 @@ export const moderateProduct = asyncHandler(async (req, res) => {
 export const moderateEvent = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { status, note } = req.body;
-  const userId = req.user.id;
+  const userId = req.user.userId;
 
   // Validate status
   if (!['approved', 'declined'].includes(status)) {

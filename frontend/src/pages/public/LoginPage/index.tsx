@@ -7,13 +7,13 @@ import { useLoginMutation } from '@/services/apiSlice';
 import { Layout } from '@/components/Layout';
 import { getErrorMessage } from '@/types/errors.ts';
 import {
-  Container,
-  StyledCard,
-  FullWidthSpace,
-  HeaderSection,
-  FormActionsRow,
-  GoogleButton,
-  FooterSection,
+  ContainerStyled,
+  CardStyled,
+  FullWidthSpaceStyled,
+  HeaderSectionStyled,
+  FormActionsRowStyled,
+  GoogleButtonStyled,
+  FooterSectionStyled,
 } from './styles';
 
 const { Title, Text } = Typography;
@@ -53,17 +53,17 @@ export const LoginPage = () => {
 
   return (
     <Layout>
-      <Container>
-        <StyledCard>
-          <FullWidthSpace direction="vertical" size="large">
-            <HeaderSection>
+      <ContainerStyled>
+        <CardStyled>
+          <FullWidthSpaceStyled direction="vertical" size="large">
+            <HeaderSectionStyled>
               <Title level={2}>Welcome Back</Title>
               <Text type="secondary">Sign in to your Art Fare account</Text>
-            </HeaderSection>
+            </HeaderSectionStyled>
 
-            <GoogleButton icon={<GoogleOutlined />} size="large" onClick={handleGoogleLogin}>
+            <GoogleButtonStyled icon={<GoogleOutlined />} size="large" onClick={handleGoogleLogin}>
               Continue with Google
-            </GoogleButton>
+            </GoogleButtonStyled>
 
             <Divider>Or sign in with email</Divider>
 
@@ -98,11 +98,11 @@ export const LoginPage = () => {
               </Form.Item>
 
               <Form.Item>
-                <FormActionsRow>
+                <FormActionsRowStyled>
                   <Link to="/forgot-password">
                     <Text type="secondary">Forgot password?</Text>
                   </Link>
-                </FormActionsRow>
+                </FormActionsRowStyled>
               </Form.Item>
 
               <Form.Item>
@@ -111,15 +111,15 @@ export const LoginPage = () => {
                 </Button>
               </Form.Item>
 
-              <FooterSection>
+              <FooterSectionStyled>
                 <Text type="secondary">
                   Don't have an account? <Link to="/register">Sign up</Link>
                 </Text>
-              </FooterSection>
+              </FooterSectionStyled>
             </Form>
-          </FullWidthSpace>
-        </StyledCard>
-      </Container>
+          </FullWidthSpaceStyled>
+        </CardStyled>
+      </ContainerStyled>
     </Layout>
   );
 };

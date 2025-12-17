@@ -1,13 +1,13 @@
 import styled from '@emotion/styled';
 import { Card, Tag } from 'antd';
 
-export const Container = styled.div`
+export const ContainerStyled = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 20px;
 `;
 
-export const HeroSection = styled.div`
+export const HeroSectionStyled = styled.div`
   text-align: center;
   padding: 60px 20px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -16,7 +16,7 @@ export const HeroSection = styled.div`
   margin-bottom: 40px;
 `;
 
-export const PostCard = styled(Card)`
+export const PostCardStyled = styled(Card)`
   height: 100%;
   transition:
     transform 0.3s,
@@ -41,7 +41,7 @@ export const PostCard = styled(Card)`
   }
 `;
 
-export const PostMeta = styled.div`
+export const PostMetaStyled = styled.div`
   display: flex;
   align-items: center;
   gap: 16px;
@@ -50,34 +50,34 @@ export const PostMeta = styled.div`
   color: #666;
 `;
 
-export const FeaturedBadge = styled(Tag)`
+export const FeaturedBadgeStyled = styled(Tag)`
   position: absolute;
   top: 16px;
   right: 16px;
   z-index: 1;
 `;
 
-export const LoadingContainer = styled.div`
+export const LoadingContainerStyled = styled.div`
   text-align: center;
   padding: 100px 0;
 `;
 
-export const SearchContainer = styled.div`
+export const SearchContainerStyled = styled.div`
   margin-bottom: 32px;
   max-width: 600px;
   margin: 0 auto 32px;
 `;
 
-export const PaginationContainer = styled.div`
+export const PaginationContainerStyled = styled.div`
   text-align: center;
   margin-top: 48px;
 `;
 
-export const CoverWrapper = styled.div`
+export const CoverWrapperStyled = styled.div`
   position: relative;
 `;
 
-export const NoImagePlaceholder = styled.div`
+export const NoImagePlaceholderStyled = styled.div`
   height: 200px;
   display: flex;
   align-items: center;

@@ -1,0 +1,27 @@
+<svg width="300" height="120" viewBox="0 0 300 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Icon: Art Palette -->
+  <g id="palette-icon">
+    <!-- Palette Base -->
+    <path d="M50 30C65.464 30 78 42.536 78 58C78 73.464 65.464 86 50 86C34.536 86 22 73.464 22 58C22 42.536 34.536 30 50 30Z" fill="#1890ff"/>
+
+    <!-- Thumb Hole -->
+    <ellipse cx="65" cy="70" rx="8" ry="10" fill="white"/>
+
+    <!-- Paint Colors -->
+    <circle cx="38" cy="50" r="5" fill="#ff4d4f"/>
+    <circle cx="50" cy="45" r="5" fill="#52c41a"/>
+    <circle cx="62" cy="50" r="5" fill="#faad14"/>
+    <circle cx="45" cy="60" r="5" fill="#722ed1"/>
+
+    <!-- Brush -->
+    <g transform="translate(70, 20) rotate(45)">
+      <rect x="0" y="0" width="3" height="25" fill="#8c8c8c"/>
+      <path d="M -2 0 L 5 0 L 4 -8 L 1.5 -10 L -1 -8 Z" fill="#434343"/>
+      <path d="M 0.5 -8 L 2.5 -8 L 2 -6 L 1 -6 Z" fill="#fadb14"/>
+    </g>
+  </g>
+
+  <!-- Text: Art Fare -->
+  <text x="110" y="65" font-family="'Segoe UI', system-ui, sans-serif" font-size="42" font-weight="700" fill="#262626" letter-spacing="-0.5">Art Fare</text>
+  <text x="110" y="85" font-family="'Segoe UI', system-ui, sans-serif" font-size="12" font-weight="400" fill="#8c8c8c" letter-spacing="3">MARKETPLACE</text>
+</svg>

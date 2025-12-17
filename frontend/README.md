@@ -1,68 +1,50 @@
-# Art Fare Frontend
+# Art Fare - Frontend
 
-React-based frontend application for the Art Fare e-commerce platform.
+Modern React + TypeScript frontend for the Art Fare marketplace platform.
 
 ## Tech Stack
 
-- **React 18** - UI library
-- **TypeScript** - Type safety
-- **Vite** - Build tool and dev server
-- **React Router** - Client-side routing
-- **Redux Toolkit** - State management
-- **Ant Design** - UI component library
-- **Emotion** - CSS-in-JS styling
-- **SCSS** - Global styles and variables
-- **Axios** - HTTP client
+- **Framework**: React 18.2 with TypeScript 5.3
+- **Build Tool**: Vite 5.0
+- **UI Library**: Ant Design 5.12
+- **Styling**: Emotion (CSS-in-JS) + SASS
+- **State Management**: Redux Toolkit 2.0 + RTK Query
+- **Routing**: React Router 7.10
+- **HTTP Client**: Axios 1.6
+- **Date Handling**: Day.js 1.11
 
 ## Project Structure
 
 ```
-src/
-├── components/      # Reusable UI components
-├── pages/           # Page components
-├── store/           # Redux store and slices
-├── services/        # API service layer
-├── types/           # TypeScript type definitions
-├── styles/          # Global SCSS styles
-├── hooks/           # Custom React hooks
-├── utils/           # Utility functions
-├── App.tsx          # Root component
-└── main.tsx         # Application entry point
+frontend/
+├── src/
+│   ├── components/        # Reusable UI components
+│   │   ├── Header/
+│   │   ├── Footer/
+│   │   └── Layout/
+│   ├── pages/            # Page components
+│   │   ├── public/       # Public pages (home, products, blog, etc.)
+│   │   ├── admin/        # Admin pages
+│   │   ├── dashboard/    # Shop owner dashboard
+│   │   └── account/      # User account pages
+│   ├── routes/           # Route configuration
+│   ├── services/         # API services (RTK Query)
+│   ├── store/            # Redux store configuration
+│   ├── hooks/            # Custom React hooks
+│   ├── guards/           # Route guards (auth, roles)
+│   ├── types/            # TypeScript type definitions
+│   ├── config/           # App configuration (theme, etc.)
+│   ├── utils/            # Utility functions
+│   └── styles/           # Global styles
+├── public/               # Static assets
+└── package.json
 ```
-
-## Features
-
-### Implemented
-
-- Project structure and configuration
-- TypeScript setup with strict mode
-- Vite configuration with path aliases
-- Redux Toolkit store with auth and cart slices
-- API service layer with auto token refresh
-- Global SCSS styles and variables
-- Ant Design theme configuration
-- Emotion CSS-in-JS setup
-- React Router setup
-
-### To Be Implemented
-
-- Authentication pages (Login, Register, Forgot Password)
-- Product browsing and filtering
-- Product detail pages
-- Shopping cart interface
-- Checkout flow
-- Artist dashboard
-- Shop management interface
-- Blog pages and editor
-- Events browsing and booking
-- Admin dashboard
-- User profile management
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js >= 18.x
 - npm or yarn
 
 ### Installation
@@ -71,76 +53,183 @@ src/
 # Install dependencies
 npm install
 
-# Copy environment variables
-cp .env.example .env
-
-# Edit .env with your configuration
-```
-
-### Development
-
-```bash
 # Start development server
-yarn dev
+npm run dev
 
-# Server will run on http://localhost:3000
-```
-
-### Build
-
-```bash
 # Build for production
-yarn build
+npm run build
 
 # Preview production build
-yarn preview
+npm run preview
 ```
 
-## Environment Variables
+### Development Commands
 
-Create a `.env` file in the frontend directory:
+```bash
+# Run ESLint
+npm run lint
+
+# Fix ESLint errors
+npm run lint:fix
+
+# Format code with Prettier
+npm run format
+
+# Check formatting
+npm run format:check
+```
+
+## Code Organization
+
+### Pages Pattern
+
+Each page follows a consistent structure:
 
 ```
-VITE_API_URL=http://localhost:5000/api
-VITE_API_HOST=http://localhost:5001
-VITE_GOOGLE_CLIENT_ID=your-google-client-id
+PageName/
+├── index.tsx       # Component logic
+└── styles.ts       # Styled components (if needed)
 ```
 
-## Available Scripts
+Example:
+```typescript
+// pages/public/HomePage/index.tsx
+export const HomePage = () => {
+  // Component logic
+};
 
-- `yarn dev` - Start development server with hot reload
-- `yarn build` - Build for production
-- `yarn preview` - Preview production build
-- `yarn lint` - Run ESLint
+// pages/public/HomePage/styles.ts
+export const Container = styled.div`
+  /* Structural styles only */
+`;
+```
+
+### Components Pattern
+
+Components follow the same structure as pages:
+
+```
+ComponentName/
+├── index.tsx       # Component logic
+└── styles.ts       # Styled components (if needed)
+```
+
+### Styling Guidelines
+
+1. **Use AntD Components**: Always prefer AntD components over custom HTML
+2. **Theme Configuration**: Global styles in `src/config/theme.ts`
+3. **Inline Styles**: For component-specific customizations
+4. **Styled Components**: Only for layout/structure, not style overrides
+
+**DO:**
+```typescript
+<Button type="primary" icon={<Icon />}>Click</Button>
+<Text strong style={{ fontSize: 16, color: '#1890ff' }}>Price</Text>
+```
+
+**DON'T:**
+```typescript
+<button className="ant-btn ant-btn-primary">Click</button>
+export const CustomText = styled(Text)`
+  &.ant-typography { color: red; }
+`;
+```
 
 ## State Management
 
-The application uses Redux Toolkit for state management:
+### Redux Store Structure
 
-- **authSlice** - User authentication and profile
-- **cartSlice** - Shopping cart management
+```typescript
+store/
+├── index.ts           # Store configuration
+└── slices/
+    └── authSlice.ts   # Authentication state
+```
 
-## API Integration
+### API Services (RTK Query)
 
-API calls are handled through a centralized service layer (`src/services/api.ts`) that includes:
+```typescript
+services/
+├── apiSlice.ts        # Main API configuration with RTK Query
+└── api.ts            # Axios instance
+```
 
-- Automatic JWT token management
-- Token refresh on expiry
-- Error handling
-- Request/response interceptors
+## Routing
 
-## Styling
+### Route Structure
 
-The application uses a hybrid approach:
+```typescript
+routes/
+├── index.tsx          # Main router
+├── publicRoutes.tsx   # Public pages
+├── adminRoutes.tsx    # Admin pages
+├── dashboardRoutes.tsx # Shop dashboard
+└── accountRoutes.tsx  # User account
+```
 
-- **SCSS** for global styles and CSS variables
-- **Emotion** for component-level CSS-in-JS
-- **Ant Design** for pre-built UI components
+### Guards
+
+```typescript
+guards/
+├── RequireAuth.tsx    # Requires authentication
+├── RequireGuest.tsx   # Guests only
+└── RequireRole.tsx    # Role-based access
+```
+
+## Type Safety
+
+All types are defined in `src/types/`:
+
+- `common.ts` - Shared types (User, Product, Order, etc.)
+- `routes.ts` - Route metadata types
+- `errors.ts` - Error handling types
+
+## Environment Variables
+
+Create `.env` file:
+
+```env
+VITE_API_URL=http://localhost:5001/api
+```
+
+## Best Practices
+
+1. **Component Organization**: One component per folder with index.tsx
+2. **Type Safety**: Always use TypeScript types, avoid `any`
+3. **Imports**: Use path aliases (`@/` for src)
+4. **Naming**: PascalCase for components, camelCase for utilities
+5. **State**: Prefer local state, use Redux only for global state
+6. **Styling**: Follow AntD design system, avoid custom overrides
+7. **Code Splitting**: Use lazy loading for routes
+8. **Error Handling**: Use try/catch with proper error messages
+
+## Performance
+
+- Route-based code splitting with React.lazy()
+- Memoization with useMemo/useCallback where needed
+- Image optimization (lazy loading, responsive images)
+- Bundle size monitoring with Vite build analyzer
+
+## Testing
+
+```bash
+# Run tests (to be configured)
+npm test
+```
+
+## Deployment
+
+```bash
+# Build for production
+npm run build
+
+# Output in dist/ directory
+```
 
 ## Contributing
 
-1. Create feature branches from main
-2. Follow the existing code structure
-3. Use TypeScript types for all components
-4. Follow the established styling patterns
-5. Test your changes before committing
+See `AI_INSTRUCTIONS.md` for development guidelines and AI assistance rules.
+
+## License
+
+Private - Art Fare Platform

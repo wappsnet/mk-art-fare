@@ -189,6 +189,10 @@ export class OrganizationService {
   }
 
   async getAllOrganizations(page, limit, offset, search) {
+    // Ensure limit and offset are valid integers
+    const validLimit = Math.floor(Number(limit)) || 10;
+    const validOffset = Math.floor(Number(offset)) || 0;
+
     let queryStr = `
       SELECT o.*, u.first_name as owner_first_name, u.last_name as owner_last_name
       FROM organizations o
@@ -202,8 +206,7 @@ export class OrganizationService {
       params.push(`%${search}%`, `%${search}%`);
     }
 
-    queryStr += ' ORDER BY o.created_at DESC LIMIT ? OFFSET ?';
-    params.push(limit, offset);
+    queryStr += ` ORDER BY o.created_at DESC LIMIT ${validLimit} OFFSET ${validOffset}`;
 
     let organizations = await query(queryStr, params);
     organizations = transformImageUrls(organizations, ['logo_url', 'banner_url'], 'organizations');

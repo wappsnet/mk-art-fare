@@ -3,7 +3,7 @@ import { Card, Typography, Button } from 'antd';
 
 const { Title: AntTitle, Paragraph: AntParagraph } = Typography;
 
-export const HeroSection = styled.div`
+export const HeroSectionStyled = styled.div`
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   padding: 100px 50px;
@@ -14,7 +14,7 @@ export const HeroSection = styled.div`
   }
 `;
 
-export const HeroTitle = styled(AntTitle)`
+export const HeroTitleStyled = styled(AntTitle)`
   color: white !important;
   font-size: 48px !important;
   margin-bottom: 24px !important;
@@ -24,7 +24,7 @@ export const HeroTitle = styled(AntTitle)`
   }
 `;
 
-export const HeroText = styled(AntParagraph)`
+export const HeroTextStyled = styled(AntParagraph)`
   color: rgba(255, 255, 255, 0.9);
   font-size: 20px;
   margin-bottom: 32px;
@@ -33,12 +33,12 @@ export const HeroText = styled(AntParagraph)`
   margin-right: auto;
 `;
 
-export const BecomeArtistButton = styled(Button)`
+export const BecomeArtistButtonStyled = styled(Button)`
   background: white;
   border-color: white;
 `;
 
-export const Section = styled.div`
+export const SectionStyled = styled.div`
   padding: 80px 50px;
 
   @media (max-width: 768px) {
@@ -46,18 +46,18 @@ export const Section = styled.div`
   }
 `;
 
-export const SectionHeader = styled.div`
+export const SectionHeaderStyled = styled.div`
   text-align: center;
   margin-bottom: 48px;
 `;
 
-export const SectionDescription = styled(AntParagraph)`
+export const SectionDescriptionStyled = styled(AntParagraph)`
   &.ant-typography {
     font-size: 16px;
   }
 `;
 
-export const FeatureCard = styled(Card)`
+export const FeatureCardStyled = styled(Card)`
   height: 100%;
   text-align: center;
   border-radius: 8px;
@@ -71,13 +71,13 @@ export const FeatureCard = styled(Card)`
   }
 `;
 
-export const IconWrapper = styled.div`
+export const IconWrapperStyled = styled.div`
   font-size: 48px;
   color: #1890ff;
   margin-bottom: 16px;
 `;
 
-export const StatsSection = styled.div`
+export const StatsSectionStyled = styled.div`
   background: #f5f5f5;
   padding: 60px 50px;
   text-align: center;
@@ -87,29 +87,29 @@ export const StatsSection = styled.div`
   }
 `;
 
-export const StatsTitle = styled(AntTitle)`
+export const StatsTitleStyled = styled(AntTitle)`
   &.ant-typography {
     margin-bottom: 48px;
   }
 `;
 
-export const StatNumber = styled.div`
+export const StatNumberStyled = styled.div`
   font-size: 36px;
   font-weight: bold;
   color: #1890ff;
   margin-bottom: 8px;
 `;
 
-export const StatLabel = styled.div`
+export const StatLabelStyled = styled.div`
   font-size: 16px;
   color: #666;
 `;
 
-export const CTASection = styled.div`
+export const CTASectionStyled = styled.div`
   text-align: center;
 `;
 
-export const CTADescription = styled(AntParagraph)`
+export const CTADescriptionStyled = styled(AntParagraph)`
   &.ant-typography {
     font-size: 16px;
     margin-bottom: 32px;

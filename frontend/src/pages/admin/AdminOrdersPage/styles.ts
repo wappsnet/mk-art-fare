@@ -1,13 +1,13 @@
 import styled from '@emotion/styled';
 import { Card } from 'antd';
 
-export const Container = styled.div`
+export const ContainerStyled = styled.div`
   max-width: 1400px;
   margin: 0 auto;
   padding: 24px;
 `;
 
-export const Header = styled.div`
+export const HeaderStyled = styled.div`
   margin-bottom: 24px;
 
   h2 {
@@ -15,7 +15,7 @@ export const Header = styled.div`
   }
 `;
 
-export const StatCard = styled(Card)`
+export const StatCardStyled = styled(Card)`
   .ant-statistic-title {
     font-size: 14px;
     margin-bottom: 8px;

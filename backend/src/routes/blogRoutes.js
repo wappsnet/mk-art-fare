@@ -15,12 +15,16 @@ router.get(
   asyncHandler(async (req, res) => {
     const { page, limit, offset } = getPaginationParams(req.query.page, req.query.limit);
 
+    // Ensure limit and offset are valid integers (safe for string interpolation)
+    const validLimit = Math.floor(Number(limit)) || 10;
+    const validOffset = Math.floor(Number(offset)) || 0;
+
     let posts = await query(
       `SELECT bp.*, u.first_name, u.last_name, u.avatar_url
      FROM blog_posts bp
      LEFT JOIN users u ON bp.author_id = u.id
-     WHERE bp.status = ? ORDER BY bp.published_at DESC LIMIT ? OFFSET ?`,
-      [BlogPostStatus.PUBLISHED, limit, offset]
+     WHERE bp.status = ? ORDER BY bp.published_at DESC LIMIT ${validLimit} OFFSET ${validOffset}`,
+      [BlogPostStatus.PUBLISHED]
     );
 
     // Transform image URLs
@@ -61,7 +65,10 @@ router.get(
     );
 
     // Transform image URLs
-    const transformedPost = transformImageUrls(post[0], { featured_image_url: 'blog', avatar_url: 'users' });
+    const transformedPost = transformImageUrls(post[0], {
+      featured_image_url: 'blog',
+      avatar_url: 'users',
+    });
     comments = transformImageUrls(comments, 'avatar_url', 'users');
 
     sendSuccess(res, { ...transformedPost, comments });
@@ -103,7 +110,7 @@ router.patch(
   '/:id',
   authenticate,
   asyncHandler(async (req, res) => {
-    const postId = parseInt(req.params.id);
+    const postId = Number.parseInt(req.params.id);
 
     const post = await query('SELECT * FROM blog_posts WHERE id = ? AND author_id = ?', [
       postId,
@@ -159,7 +166,7 @@ router.delete(
   '/:id',
   authenticate,
   asyncHandler(async (req, res) => {
-    const postId = parseInt(req.params.id);
+    const postId = Number.parseInt(req.params.id);
 
     const post = await query('SELECT * FROM blog_posts WHERE id = ? AND author_id = ?', [
       postId,
@@ -180,7 +187,7 @@ router.post(
   '/:postId/comments',
   authenticate,
   asyncHandler(async (req, res) => {
-    const postId = parseInt(req.params.postId);
+    const postId = Number.parseInt(req.params.postId);
     const { content, parentId } = req.body;
 
     const post = await query('SELECT * FROM blog_posts WHERE id = ?', [postId]);

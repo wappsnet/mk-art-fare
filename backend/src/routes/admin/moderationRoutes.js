@@ -1,6 +1,5 @@
 import express from 'express';
-import { authenticate } from '../../middleware/auth.js';
-import { authorize } from '../../middleware/authorize.js';
+import { authenticate, authorize } from '../../middleware/auth.js';
 import { UserRole } from '../../types/index.js';
 import {
   moderateOrganization,

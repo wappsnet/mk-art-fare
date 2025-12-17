@@ -1,27 +1,27 @@
 import styled from '@emotion/styled';
 import { Space } from 'antd';
 
-export const Container = styled.div`
+export const ContainerStyled = styled.div`
   max-width: 1400px;
   margin: 0 auto;
   padding: 40px 20px;
   min-height: calc(100vh - 64px - 200px);
 `;
 
-export const WelcomeSection = styled.div`
+export const WelcomeSectionStyled = styled.div`
   margin-bottom: 32px;
 `;
 
-export const CreateShopSpace = styled(Space)`
+export const CreateShopSpaceStyled = styled(Space)`
   margin-bottom: 16px;
 `;
 
-export const ShopCardCover = styled.img`
+export const ShopCardCoverStyled = styled.img`
   height: 150px;
   object-fit: cover;
 `;
 
-export const PlaceholderCover = styled.div`
+export const PlaceholderCoverStyled = styled.div`
   height: 150px;
   background: #f5f5f5;
   display: flex;
@@ -29,11 +29,11 @@ export const PlaceholderCover = styled.div`
   justify-content: center;
 `;
 
-export const PlaceholderIcon = styled.span`
+export const PlaceholderIconStyled = styled.span`
   font-size: 48px;
   color: #ccc;
 `;
 
-export const ShopCardActions = styled(Space)`
+export const ShopCardActionsStyled = styled(Space)`
   margin-top: 16px;
 `;

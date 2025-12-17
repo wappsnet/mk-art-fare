@@ -27,20 +27,20 @@ import {
 import { CreateAddressInput } from '@/types/common';
 import { getErrorMessage } from '@/types/errors';
 import {
-  Container,
-  PageTitle,
-  SectionCard,
-  SummaryCard,
-  CartItem,
-  FullWidthRadioGroup,
-  FullWidthSpace,
-  PaymentNotice,
-  CartItemsContainer,
-  PriceRow,
-  TotalRow,
-  TotalLabel,
-  TotalAmount,
-  TermsText,
+  ContainerStyled,
+  PageTitleStyled,
+  SectionCardStyled,
+  SummaryCardStyled,
+  CartItemStyled,
+  FullWidthRadioGroupStyled,
+  FullWidthSpaceStyled,
+  PaymentNoticeStyled,
+  CartItemsContainerStyled,
+  PriceRowStyled,
+  TotalRowStyled,
+  TotalLabelStyled,
+  TotalAmountStyled,
+  TermsTextStyled,
 } from './styles';
 
 const { Text } = Typography;
@@ -157,16 +157,16 @@ export const CheckoutPage = () => {
 
   return (
     <Layout>
-      <Container>
-        <PageTitle level={2}>
+      <ContainerStyled>
+        <PageTitleStyled level={2}>
           <ShoppingOutlined /> Checkout
-        </PageTitle>
+        </PageTitleStyled>
 
         <Form form={form} layout="vertical" onFinish={handlePlaceOrder}>
           <Row gutter={[48, 24]}>
             <Col xs={24} lg={14}>
               {/* Shipping Address Section */}
-              <SectionCard
+              <SectionCardStyled
                 title={
                   <>
                     <EnvironmentOutlined /> Shipping Address
@@ -175,12 +175,12 @@ export const CheckoutPage = () => {
               >
                 {addresses.length > 0 && !useNewAddress && (
                   <>
-                    <FullWidthRadioGroup>
+                    <FullWidthRadioGroupStyled>
                       <Radio.Group
                         value={selectedAddress}
                         onChange={(e) => setSelectedAddress(e.target.value)}
                       >
-                        <FullWidthSpace>
+                        <FullWidthSpaceStyled>
                           <Space direction="vertical" style={{ width: '100%' }}>
                             {addresses.map((address) => (
                               <Radio key={address.id} value={address.id}>
@@ -195,9 +195,9 @@ export const CheckoutPage = () => {
                               </Radio>
                             ))}
                           </Space>
-                        </FullWidthSpace>
+                        </FullWidthSpaceStyled>
                       </Radio.Group>
-                    </FullWidthRadioGroup>
+                    </FullWidthRadioGroupStyled>
                     <Button
                       type="link"
                       onClick={() => setUseNewAddress(true)}
@@ -274,22 +274,22 @@ export const CheckoutPage = () => {
                     </Row>
                   </>
                 )}
-              </SectionCard>
+              </SectionCardStyled>
 
               {/* Payment Method Section */}
-              <SectionCard
+              <SectionCardStyled
                 title={
                   <>
                     <CreditCardOutlined /> Payment Method
                   </>
                 }
               >
-                <FullWidthRadioGroup>
+                <FullWidthRadioGroupStyled>
                   <Radio.Group
                     value={paymentMethod}
                     onChange={(e) => setPaymentMethod(e.target.value)}
                   >
-                    <FullWidthSpace>
+                    <FullWidthSpaceStyled>
                       <Space direction="vertical" style={{ width: '100%' }}>
                         <Radio value="credit_card">
                           <Space>
@@ -308,70 +308,70 @@ export const CheckoutPage = () => {
                           </Space>
                         </Radio>
                       </Space>
-                    </FullWidthSpace>
+                    </FullWidthSpaceStyled>
                   </Radio.Group>
-                </FullWidthRadioGroup>
+                </FullWidthRadioGroupStyled>
 
                 {paymentMethod === 'credit_card' && (
-                  <PaymentNotice>
+                  <PaymentNoticeStyled>
                     <Text type="secondary">
                       Payment processing will be integrated with Stripe or PayPal in production. For
                       now, orders will be created with pending payment status.
                     </Text>
-                  </PaymentNotice>
+                  </PaymentNoticeStyled>
                 )}
-              </SectionCard>
+              </SectionCardStyled>
 
               {/* Order Notes */}
-              <SectionCard title="Order Notes (Optional)">
+              <SectionCardStyled title="Order Notes (Optional)">
                 <Form.Item name="notes">
                   <Input.TextArea
                     rows={4}
                     placeholder="Add any special instructions for your order..."
                   />
                 </Form.Item>
-              </SectionCard>
+              </SectionCardStyled>
             </Col>
 
             {/* Order Summary */}
             <Col xs={24} lg={10}>
-              <SummaryCard title="Order Summary">
-                <CartItemsContainer>
+              <SummaryCardStyled title="Order Summary">
+                <CartItemsContainerStyled>
                   {items.map((item) => (
-                    <CartItem key={item.product_id}>
+                    <CartItemStyled key={item.product_id}>
                       <div>
                         <Text strong>{item.name}</Text>
                         <br />
                         <Text type="secondary">Quantity: {item.quantity}</Text>
                       </div>
                       <Text>${(Number.parseFloat(item.price) * item.quantity).toFixed(2)}</Text>
-                    </CartItem>
+                    </CartItemStyled>
                   ))}
-                </CartItemsContainer>
+                </CartItemsContainerStyled>
 
                 <Divider />
 
                 <Space direction="vertical" style={{ width: '100%' }}>
-                  <PriceRow>
+                  <PriceRowStyled>
                     <Text>Subtotal:</Text>
                     <Text>${subtotal.toFixed(2)}</Text>
-                  </PriceRow>
-                  <PriceRow>
+                  </PriceRowStyled>
+                  <PriceRowStyled>
                     <Text>Shipping:</Text>
                     <Text>${shipping.toFixed(2)}</Text>
-                  </PriceRow>
-                  <PriceRow>
+                  </PriceRowStyled>
+                  <PriceRowStyled>
                     <Text>Tax (8%):</Text>
                     <Text>${tax.toFixed(2)}</Text>
-                  </PriceRow>
+                  </PriceRowStyled>
                 </Space>
 
                 <Divider />
 
-                <TotalRow>
-                  <TotalLabel level={4}>Total:</TotalLabel>
-                  <TotalAmount level={4}>${orderTotal.toFixed(2)}</TotalAmount>
-                </TotalRow>
+                <TotalRowStyled>
+                  <TotalLabelStyled level={4}>Total:</TotalLabelStyled>
+                  <TotalAmountStyled level={4}>${orderTotal.toFixed(2)}</TotalAmountStyled>
+                </TotalRowStyled>
 
                 <Button
                   type="primary"
@@ -384,14 +384,14 @@ export const CheckoutPage = () => {
                   Place Order
                 </Button>
 
-                <TermsText type="secondary">
+                <TermsTextStyled type="secondary">
                   By placing this order, you agree to our terms and conditions.
-                </TermsText>
-              </SummaryCard>
+                </TermsTextStyled>
+              </SummaryCardStyled>
             </Col>
           </Row>
         </Form>
-      </Container>
+      </ContainerStyled>
     </Layout>
   );
 };

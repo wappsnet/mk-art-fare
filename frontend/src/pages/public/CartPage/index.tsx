@@ -8,6 +8,7 @@ import {
   Divider,
   Space,
   message,
+  Button,
 } from 'antd';
 import { DeleteOutlined, ShoppingOutlined } from '@ant-design/icons';
 import { Layout } from '@/components/Layout';
@@ -19,26 +20,23 @@ import {
   useClearCartMutation,
 } from '@/services/apiSlice';
 import {
-  Container,
-  LoadingContainer,
-  ContentRow,
-  CartItemCard,
-  ProductImage,
+  ContainerStyled,
+  LoadingContainerStyled,
+  ContentRowStyled,
+  CartItemCardStyled,
+  ProductImageStyled,
   ProductTitle,
   SmallText,
-  BlockText,
-  PriceWrapper,
+  PriceWrapperStyled,
   Price,
-  FreePrice,
-  RightAlignCol,
+  RightAlignColStyled,
   TotalPrice,
-  EventTicketsTitle,
-  ClearCartButton,
-  SummaryCard,
-  SummaryRow,
+  ClearCartButtonStyled,
+  SummaryCardStyled,
+  SummaryRowStyled,
   TotalTitle,
-  CheckoutButton,
-  ContinueShoppingButton,
+  CheckoutButtonStyled,
+  ContinueShoppingButtonStyled,
 } from './styles';
 
 const { Title, Text } = Typography;
@@ -93,227 +91,146 @@ export const CartPage = () => {
   if (loading) {
     return (
       <Layout>
-        <Container>
-          <LoadingContainer>
+        <ContainerStyled>
+          <LoadingContainerStyled>
             <Empty description="Loading cart..." />
-          </LoadingContainer>
-        </Container>
+          </LoadingContainerStyled>
+        </ContainerStyled>
       </Layout>
     );
   }
 
   const hasProducts = cart?.items && cart.items.length > 0;
-  const hasTickets = cart?.eventTicketItems && cart.eventTicketItems.length > 0;
 
-  if (!cart || (!hasProducts && !hasTickets)) {
+  if (!cart || !hasProducts) {
     return (
       <Layout>
-        <Container>
+        <ContainerStyled>
           <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Your cart is empty">
             <Link to="/products">
-              <button type="button" className="ant-btn ant-btn-primary">
-                <ShoppingOutlined /> Start Shopping
-              </button>
+              <Button type="primary" icon={<ShoppingOutlined />}>
+                Start Shopping
+              </Button>
             </Link>
           </Empty>
-        </Container>
+        </ContainerStyled>
       </Layout>
     );
   }
 
-  const productSubtotal = cart.items.reduce(
+  const subtotal = cart.items.reduce(
     (sum, item) => sum + Number.parseFloat(item.price) * item.quantity,
     0
   );
-  const ticketSubtotal =
-    cart.eventTicketItems?.reduce(
-      (sum, item) => sum + Number.parseFloat(item.price) * item.quantity,
-      0
-    ) || 0;
-  const subtotal = productSubtotal + ticketSubtotal;
-  const tax = productSubtotal * 0.1; // Tax only on products
-  const shipping = hasProducts ? 9.99 : 0; // Shipping only for products
+  const tax = subtotal * 0.1;
+  const shipping = 9.99;
   const total = subtotal + tax + shipping;
 
-  const totalItems = cart.items.length + (cart.eventTicketItems?.length || 0);
+  const totalItems = cart.items.length;
 
   return (
     <Layout>
-      <Container>
+      <ContainerStyled>
         <Title level={2}>Shopping Cart</Title>
         <Text type="secondary">{totalItems} items in your cart</Text>
 
-        <ContentRow gutter={[24, 24]}>
+        <ContentRowStyled gutter={[24, 24]}>
           <Col xs={24} lg={16}>
-            {/* Product Items */}
-            {hasProducts && (
-              <>
-                <Title level={4}>Products</Title>
-                <List
-                  dataSource={cart.items}
-                  renderItem={(item) => (
-                    <CartItemCard>
-                      <ContentRow gutter={16} align="middle">
-                        <Col xs={6} sm={4}>
-                          <ProductImage
-                            src="/placeholder-image.jpg"
-                            alt={item.name}
-                            onError={(e) => {
-                              e.currentTarget.src = 'https://via.placeholder.com/100';
-                            }}
-                          />
-                        </Col>
-                        <Col xs={18} sm={12}>
-                          <Link to={`/products/${item.slug}`}>
-                            <ProductTitle level={5}>{item.name}</ProductTitle>
-                          </Link>
-                          <SmallText type="secondary">by {item.organization_name}</SmallText>
-                          <PriceWrapper>
-                            <Price strong>${Number.parseFloat(item.price).toFixed(2)}</Price>
-                          </PriceWrapper>
-                        </Col>
-                        <Col xs={12} sm={4}>
-                          <InputNumber
-                            min={1}
-                            value={item.quantity}
-                            onChange={(value) => handleUpdateQuantity(item.product_id, value || 1)}
-                          />
-                        </Col>
-                        <Col xs={12} sm={4}>
-                          <RightAlignCol>
-                            <Space direction="vertical" align="end">
-                              <TotalPrice strong>
-                                ${(Number.parseFloat(item.price) * item.quantity).toFixed(2)}
-                              </TotalPrice>
-                              <button
-                                type="button"
-                                className="ant-btn ant-btn-text ant-btn-dangerous"
-                                onClick={() => handleRemoveItem(item.product_id)}
-                              >
-                                <DeleteOutlined /> Remove
-                              </button>
-                            </Space>
-                          </RightAlignCol>
-                        </Col>
-                      </ContentRow>
-                    </CartItemCard>
-                  )}
-                />
-              </>
-            )}
+            <Title level={4}>Products</Title>
+            <List
+              dataSource={cart.items}
+              renderItem={(item) => (
+                <CartItemCardStyled>
+                  <ContentRowStyled gutter={16} align="middle">
+                    <Col xs={6} sm={4}>
+                      <ProductImageStyled
+                        src="/placeholder-image.jpg"
+                        alt={item.name}
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://via.placeholder.com/100';
+                        }}
+                      />
+                    </Col>
+                    <Col xs={18} sm={12}>
+                      <Link to={`/products/${item.slug}`}>
+                        <ProductTitle level={5} style={{ marginBottom: 4 }}>
+                          {item.name}
+                        </ProductTitle>
+                      </Link>
+                      <SmallText type="secondary" style={{ fontSize: 12 }}>
+                        by {item.organization_name}
+                      </SmallText>
+                      <PriceWrapperStyled>
+                        <Price strong style={{ fontSize: 16, color: '#1890ff' }}>
+                          ${Number.parseFloat(item.price).toFixed(2)}
+                        </Price>
+                      </PriceWrapperStyled>
+                    </Col>
+                    <Col xs={12} sm={4}>
+                      <InputNumber
+                        min={1}
+                        value={item.quantity}
+                        onChange={(value) => handleUpdateQuantity(item.product_id, value || 1)}
+                      />
+                    </Col>
+                    <Col xs={12} sm={4}>
+                      <RightAlignColStyled>
+                        <Space direction="vertical" align="end">
+                          <TotalPrice strong style={{ fontSize: 18 }}>
+                            ${(Number.parseFloat(item.price) * item.quantity).toFixed(2)}
+                          </TotalPrice>
+                          <Button
+                            type="text"
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={() => handleRemoveItem(item.product_id)}
+                          >
+                            Remove
+                          </Button>
+                        </Space>
+                      </RightAlignColStyled>
+                    </Col>
+                  </ContentRowStyled>
+                </CartItemCardStyled>
+              )}
+            />
 
-            {/* Event Ticket Items */}
-            {hasTickets && (
-              <>
-                <EventTicketsTitle level={4} hasProducts={!!hasProducts}>
-                  Event Tickets
-                </EventTicketsTitle>
-                <List
-                  dataSource={cart.eventTicketItems}
-                  renderItem={(item) => (
-                    <CartItemCard>
-                      <ContentRow gutter={16} align="middle">
-                        <Col xs={24} sm={12}>
-                          <Link to={`/events/${item.event_slug}`}>
-                            <ProductTitle level={5}>{item.event_title}</ProductTitle>
-                          </Link>
-                          <BlockText type="secondary">{item.ticket_type}</BlockText>
-                          {item.start_date && (
-                            <BlockText type="secondary">
-                              {new Date(item.start_date).toLocaleDateString()}
-                            </BlockText>
-                          )}
-                          {item.venue_name && (
-                            <BlockText type="secondary">{item.venue_name}</BlockText>
-                          )}
-                          <PriceWrapper>
-                            {item.is_free ? (
-                              <FreePrice strong>FREE</FreePrice>
-                            ) : (
-                              <Price strong>${Number.parseFloat(item.price).toFixed(2)}</Price>
-                            )}
-                          </PriceWrapper>
-                        </Col>
-                        <Col xs={12} sm={6}>
-                          <SmallText type="secondary">Quantity</SmallText>
-                          <div>
-                            <Text strong>{item.quantity}</Text>
-                          </div>
-                          <SmallText type="secondary">
-                            {item.quantity_available - item.quantity_sold} available
-                          </SmallText>
-                        </Col>
-                        <Col xs={12} sm={6}>
-                          <RightAlignCol>
-                            <Space direction="vertical" align="end">
-                              <TotalPrice strong>
-                                {item.is_free
-                                  ? 'FREE'
-                                  : `$${(Number.parseFloat(item.price) * item.quantity).toFixed(2)}`}
-                              </TotalPrice>
-                              <button type="button" className="ant-btn ant-btn-text ant-btn-dangerous">
-                                <DeleteOutlined /> Remove
-                              </button>
-                            </Space>
-                          </RightAlignCol>
-                        </Col>
-                      </ContentRow>
-                    </CartItemCard>
-                  )}
-                />
-              </>
-            )}
-
-            <ClearCartButton danger onClick={handleClearCart}>
+            <ClearCartButtonStyled danger onClick={handleClearCart}>
               Clear Cart
-            </ClearCartButton>
+            </ClearCartButtonStyled>
           </Col>
 
           <Col xs={24} lg={8}>
-            <SummaryCard title="Order Summary">
-              {hasProducts && (
-                <SummaryRow>
-                  <Text>Products:</Text>
-                  <Text strong>${productSubtotal.toFixed(2)}</Text>
-                </SummaryRow>
-              )}
-              {hasTickets && (
-                <SummaryRow>
-                  <Text>Event Tickets:</Text>
-                  <Text strong>${ticketSubtotal.toFixed(2)}</Text>
-                </SummaryRow>
-              )}
-              <SummaryRow>
+            <SummaryCardStyled title="Order Summary">
+              <SummaryRowStyled>
                 <Text>Subtotal:</Text>
                 <Text strong>${subtotal.toFixed(2)}</Text>
-              </SummaryRow>
-              {hasProducts && (
-                <>
-                  <SummaryRow>
-                    <Text>Tax (10%):</Text>
-                    <Text strong>${tax.toFixed(2)}</Text>
-                  </SummaryRow>
-                  <SummaryRow>
-                    <Text>Shipping:</Text>
-                    <Text strong>${shipping.toFixed(2)}</Text>
-                  </SummaryRow>
-                </>
-              )}
+              </SummaryRowStyled>
+              <SummaryRowStyled>
+                <Text>Tax (10%):</Text>
+                <Text strong>${tax.toFixed(2)}</Text>
+              </SummaryRowStyled>
+              <SummaryRowStyled>
+                <Text>Shipping:</Text>
+                <Text strong>${shipping.toFixed(2)}</Text>
+              </SummaryRowStyled>
               <Divider />
-              <SummaryRow>
+              <SummaryRowStyled>
                 <Title level={4}>Total:</Title>
-                <TotalTitle level={4}>${total.toFixed(2)}</TotalTitle>
-              </SummaryRow>
-              <CheckoutButton type="primary" size="large" block onClick={handleCheckout}>
+                <TotalTitle level={4} style={{ color: '#1890ff' }}>
+                  ${total.toFixed(2)}
+                </TotalTitle>
+              </SummaryRowStyled>
+              <CheckoutButtonStyled type="primary" size="large" block onClick={handleCheckout}>
                 Proceed to Checkout
-              </CheckoutButton>
+              </CheckoutButtonStyled>
               <Link to="/products">
-                <ContinueShoppingButton block>Continue Shopping</ContinueShoppingButton>
+                <ContinueShoppingButtonStyled block>Continue Shopping</ContinueShoppingButtonStyled>
               </Link>
-            </SummaryCard>
+            </SummaryCardStyled>
           </Col>
-        </ContentRow>
-      </Container>
+        </ContentRowStyled>
+      </ContainerStyled>
     </Layout>
   );
 };

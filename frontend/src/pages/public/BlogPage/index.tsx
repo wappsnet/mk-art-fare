@@ -5,16 +5,16 @@ import { UserOutlined, EyeOutlined, CalendarOutlined, SearchOutlined } from '@an
 import { Layout } from '@/components/Layout';
 import { useGetBlogPostsQuery } from '@/services/apiSlice';
 import {
-  Container,
-  HeroSection,
-  PostCard,
-  PostMeta,
-  FeaturedBadge,
-  LoadingContainer,
-  SearchContainer,
-  PaginationContainer,
-  CoverWrapper,
-  NoImagePlaceholder,
+  ContainerStyled,
+  HeroSectionStyled,
+  PostCardStyled,
+  PostMetaStyled,
+  FeaturedBadgeStyled,
+  LoadingContainerStyled,
+  SearchContainerStyled,
+  PaginationContainerStyled,
+  CoverWrapperStyled,
+  NoImagePlaceholderStyled,
 } from './styles';
 
 const { Title, Paragraph, Text } = Typography;
@@ -50,9 +50,9 @@ export const BlogPage = () => {
   let content: ReactNode;
   if (loading) {
     content = (
-      <LoadingContainer>
+      <LoadingContainerStyled>
         <Spin size="large" />
-      </LoadingContainer>
+      </LoadingContainerStyled>
     );
   } else if (posts.length === 0) {
     content = <Empty description="No blog posts found" />;
@@ -63,17 +63,17 @@ export const BlogPage = () => {
           {posts.map((post, index) => (
             <Col xs={24} sm={12} lg={8} key={post.id}>
               <Link to={`/blog/${post.slug}`}>
-                <PostCard
+                <PostCardStyled
                   cover={
                     post.featured_image_url ? (
-                      <CoverWrapper>
-                        {index === 0 && <FeaturedBadge color="gold">Featured</FeaturedBadge>}
+                      <CoverWrapperStyled>
+                        {index === 0 && <FeaturedBadgeStyled color="gold">Featured</FeaturedBadgeStyled>}
                         <img alt={post.title} src={post.featured_image_url} />
-                      </CoverWrapper>
+                      </CoverWrapperStyled>
                     ) : (
-                      <NoImagePlaceholder>
+                      <NoImagePlaceholderStyled>
                         <Text type="secondary">No Image</Text>
-                      </NoImagePlaceholder>
+                      </NoImagePlaceholderStyled>
                     )
                   }
                 >
@@ -84,7 +84,7 @@ export const BlogPage = () => {
                     {post.excerpt || post.content.substring(0, 150) + '...'}
                   </Paragraph>
 
-                  <PostMeta>
+                  <PostMetaStyled>
                     <span>
                       <Avatar size="small" src={post.avatar_url} icon={<UserOutlined />} />
                       <Text style={{ marginLeft: 8 }}>
@@ -97,14 +97,14 @@ export const BlogPage = () => {
                     <span>
                       <EyeOutlined /> {post.view_count} views
                     </span>
-                  </PostMeta>
-                </PostCard>
+                  </PostMetaStyled>
+                </PostCardStyled>
               </Link>
             </Col>
           ))}
         </Row>
 
-        <PaginationContainer>
+        <PaginationContainerStyled>
           <Pagination
             current={page}
             total={total}
@@ -113,15 +113,15 @@ export const BlogPage = () => {
             showSizeChanger={false}
             showTotal={(total) => `Total ${total} posts`}
           />
-        </PaginationContainer>
+        </PaginationContainerStyled>
       </>
     );
   }
 
   return (
     <Layout>
-      <Container>
-        <HeroSection>
+      <ContainerStyled>
+        <HeroSectionStyled>
           <Title level={1} style={{ color: 'white', marginBottom: 16 }}>
             Art Blog
           </Title>
@@ -136,9 +136,9 @@ export const BlogPage = () => {
             Discover inspiring stories, art techniques, and insights from our vibrant community of
             artists
           </Paragraph>
-        </HeroSection>
+        </HeroSectionStyled>
 
-        <SearchContainer>
+        <SearchContainerStyled>
           <Search
             placeholder="Search blog posts..."
             allowClear
@@ -146,10 +146,10 @@ export const BlogPage = () => {
             size="large"
             onSearch={handleSearch}
           />
-        </SearchContainer>
+        </SearchContainerStyled>
 
         {content}
-      </Container>
+      </ContainerStyled>
     </Layout>
   );
 };

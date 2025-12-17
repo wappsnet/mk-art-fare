@@ -116,9 +116,12 @@ export class UserService {
   }
 
   async getAllUsers(page, limit, offset) {
+    // Ensure limit and offset are valid integers (safe for string interpolation)
+    const validLimit = Number.parseInt(limit, 10) || 10;
+    const validOffset = Number.parseInt(offset, 10) || 0;
+
     const users = await query(
-      'SELECT id, email, first_name, last_name, phone, role, avatar_url, is_verified, is_active, created_at FROM users LIMIT ? OFFSET ?',
-      [limit, offset]
+      `SELECT id, email, first_name, last_name, phone, role, avatar_url, is_verified, is_active, created_at FROM users LIMIT ${validLimit} OFFSET ${validOffset}`
     );
 
     const countResult = await query('SELECT COUNT(*) as total FROM users');

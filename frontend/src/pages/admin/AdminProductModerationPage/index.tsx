@@ -25,7 +25,7 @@ import { Layout } from '@/components/Layout';
 import { useGetProductsQuery, useModerateProductMutation } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
 import { Product } from '@/types/common';
-import { Container, Header } from './styles';
+import { ContainerStyled, HeaderStyled } from './styles';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -183,15 +183,15 @@ export const AdminProductModerationPage = () => {
 
   return (
     <Layout>
-      <Container>
-        <Header>
+      <ContainerStyled>
+        <HeaderStyled>
           <div>
             <Title level={2}>
               <ShoppingOutlined /> Product Moderation
             </Title>
             <Text type="secondary">Review and moderate product listings</Text>
           </div>
-        </Header>
+        </HeaderStyled>
 
         <Card>
           <Table
@@ -270,7 +270,7 @@ export const AdminProductModerationPage = () => {
             </Space>
           )}
         </Modal>
-      </Container>
+      </ContainerStyled>
     </Layout>
   );
 };

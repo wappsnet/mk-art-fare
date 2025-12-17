@@ -1,7 +1,8 @@
 import { useParams } from 'react-router';
 import { Table, Tag } from 'antd';
 import { useGetOrganizationOrdersQuery } from '@/services/apiSlice';
-import { PageTitle } from './styles';
+import { PageTitleStyled } from './styles';
+import { getStatusTheme } from '@/utils/themeHelpers.ts';
 
 export const ShopOrdersPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,13 +29,6 @@ export const ShopOrdersPage = () => {
       render: (products: string) => products || '-',
     },
     {
-      title: 'Events',
-      dataIndex: 'events',
-      key: 'events',
-      ellipsis: true,
-      render: (events: string) => events || '-',
-    },
-    {
       title: 'Product Items',
       dataIndex: 'product_items',
       key: 'product_items',
@@ -50,27 +44,13 @@ export const ShopOrdersPage = () => {
       title: 'Total',
       dataIndex: 'total',
       key: 'total',
-      render: (total: string) => `$${parseFloat(total).toFixed(2)}`,
+      render: (total: string) => `$${Number.parseFloat(total).toFixed(2)}`,
     },
     {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (status: string) => (
-        <Tag
-          color={
-            status === 'completed'
-              ? 'green'
-              : status === 'pending'
-                ? 'gold'
-                : status === 'cancelled'
-                  ? 'red'
-                  : 'blue'
-          }
-        >
-          {status.toUpperCase()}
-        </Tag>
-      ),
+      render: (status: string) => <Tag color={getStatusTheme(status)}>{status.toUpperCase()}</Tag>,
     },
     {
       title: 'Date',
@@ -82,7 +62,7 @@ export const ShopOrdersPage = () => {
 
   return (
     <div>
-      <PageTitle level={4}>Recent Orders</PageTitle>
+      <PageTitleStyled level={4}>Recent Orders</PageTitleStyled>
       <Table dataSource={orders} rowKey="id" columns={columns} pagination={{ pageSize: 10 }} />
     </div>
   );

@@ -18,17 +18,17 @@ import 'react-medium-image-zoom/dist/styles.css';
 import { Layout } from '@/components/Layout';
 import { useGetProductQuery, useAddToCartMutation } from '@/services/apiSlice';
 import {
-  Container,
-  ImageGallery,
-  MainImageContainer,
-  ZoomHint,
-  ThumbnailsContainer,
-  Thumbnail,
-  PriceSection,
-  Price,
-  ComparePrice,
-  LoadingContainer,
-  QuantityContainer,
+  ContainerStyled,
+  ImageGalleryStyled,
+  MainImageContainerStyled,
+  ZoomHintStyled,
+  ThumbnailsContainerStyled,
+  ThumbnailStyled,
+  PriceSectionStyled,
+  PriceStyled,
+  ComparePriceStyled,
+  LoadingContainerStyled,
+  QuantityContainerStyled,
 } from './styles';
 
 const { Title, Paragraph, Text } = Typography;
@@ -59,11 +59,11 @@ export const ProductDetailPage = () => {
   if (loading) {
     return (
       <Layout>
-        <Container>
-          <LoadingContainer>
+        <ContainerStyled>
+          <LoadingContainerStyled>
             <Spin size="large" />
-          </LoadingContainer>
-        </Container>
+          </LoadingContainerStyled>
+        </ContainerStyled>
       </Layout>
     );
   }
@@ -71,9 +71,9 @@ export const ProductDetailPage = () => {
   if (!product) {
     return (
       <Layout>
-        <Container>
+        <ContainerStyled>
           <Title level={3}>Product not found</Title>
-        </Container>
+        </ContainerStyled>
       </Layout>
     );
   }
@@ -83,7 +83,7 @@ export const ProductDetailPage = () => {
 
   return (
     <Layout>
-      <Container>
+      <ContainerStyled>
         <Breadcrumb
           items={[
             { title: <Link to="/">Home</Link> },
@@ -96,34 +96,34 @@ export const ProductDetailPage = () => {
         <Row gutter={[48, 48]}>
           <Col xs={24} md={12}>
             {images.length > 0 ? (
-              <ImageGallery>
+              <ImageGalleryStyled>
                 <Zoom>
-                  <MainImageContainer>
+                  <MainImageContainerStyled>
                     <img src={currentImage?.url} alt={currentImage?.alt_text || product.name} />
-                    <ZoomHint className="zoom-hint">
+                    <ZoomHintStyled className="zoom-hint">
                       <ZoomInOutlined /> Click to zoom
-                    </ZoomHint>
-                  </MainImageContainer>
+                    </ZoomHintStyled>
+                  </MainImageContainerStyled>
                 </Zoom>
 
                 {images.length > 1 && (
-                  <ThumbnailsContainer>
+                  <ThumbnailsContainerStyled>
                     {images.map((img, index) => (
-                      <Thumbnail
+                      <ThumbnailStyled
                         key={img.id}
                         active={index === selectedImageIndex}
                         onClick={() => setSelectedImageIndex(index)}
                       >
                         <img src={img.url} alt={img.alt_text || `${product.name} ${index + 1}`} />
-                      </Thumbnail>
+                      </ThumbnailStyled>
                     ))}
-                  </ThumbnailsContainer>
+                  </ThumbnailsContainerStyled>
                 )}
-              </ImageGallery>
+              </ImageGalleryStyled>
             ) : (
-              <MainImageContainer>
+              <MainImageContainerStyled>
                 <Text type="secondary">No Image Available</Text>
-              </MainImageContainer>
+              </MainImageContainerStyled>
             )}
           </Col>
 
@@ -142,17 +142,17 @@ export const ProductDetailPage = () => {
               </Text>
             )}
 
-            <PriceSection>
-              <Price>
+            <PriceSectionStyled>
+              <PriceStyled>
                 ${Number.parseFloat(product.price).toFixed(2)}
                 {product.compare_at_price &&
                   Number.parseFloat(product.compare_at_price) >
                     Number.parseFloat(product.price) && (
-                    <ComparePrice>
+                    <ComparePriceStyled>
                       ${Number.parseFloat(product.compare_at_price).toFixed(2)}
-                    </ComparePrice>
+                    </ComparePriceStyled>
                   )}
-              </Price>
+              </PriceStyled>
               {product.stock_quantity > 0 ? (
                 <Tag color="success" style={{ marginTop: 12 }}>
                   {product.stock_quantity} in stock
@@ -162,7 +162,7 @@ export const ProductDetailPage = () => {
                   Out of stock
                 </Tag>
               )}
-            </PriceSection>
+            </PriceSectionStyled>
 
             <Divider />
 
@@ -174,7 +174,7 @@ export const ProductDetailPage = () => {
               </>
             )}
 
-            <QuantityContainer>
+            <QuantityContainerStyled>
               <Text strong>Quantity:</Text>
               <InputNumber
                 min={1}
@@ -183,7 +183,7 @@ export const ProductDetailPage = () => {
                 onChange={(value) => setQuantity(value || 1)}
                 style={{ marginLeft: 16 }}
               />
-            </QuantityContainer>
+            </QuantityContainerStyled>
 
             <Button
               type="primary"
@@ -198,7 +198,7 @@ export const ProductDetailPage = () => {
             </Button>
           </Col>
         </Row>
-      </Container>
+      </ContainerStyled>
     </Layout>
   );
 };

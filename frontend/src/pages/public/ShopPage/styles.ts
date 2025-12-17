@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { Card } from 'antd';
 
-export const ShopHeader = styled.div<{ bgColor?: string; textColor?: string }>`
+export const ShopHeaderStyled = styled.div<{ bgColor?: string; textColor?: string }>`
   background: ${(props) => props.bgColor || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
   color: ${(props) => props.textColor || '#fff'};
   padding: 80px 50px;
@@ -14,7 +14,7 @@ export const ShopHeader = styled.div<{ bgColor?: string; textColor?: string }>`
   }
 `;
 
-export const BannerImage = styled.div<{ url?: string }>`
+export const BannerImageStyled = styled.div<{ url?: string }>`
   position: absolute;
   top: 0;
   left: 0;
@@ -27,18 +27,18 @@ export const BannerImage = styled.div<{ url?: string }>`
   z-index: 0;
 `;
 
-export const ShopContent = styled.div`
+export const ShopContentStyled = styled.div`
   position: relative;
   z-index: 1;
 `;
 
-export const Container = styled.div`
+export const ContainerStyled = styled.div`
   max-width: 1400px;
   margin: 0 auto;
   padding: 40px 20px;
 `;
 
-export const ShopLogo = styled.img`
+export const ShopLogoStyled = styled.img`
   width: 120px;
   height: 120px;
   border-radius: 50%;
@@ -49,7 +49,7 @@ export const ShopLogo = styled.img`
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 `;
 
-export const ProductCard = styled(Card)`
+export const ProductCardStyled = styled(Card)`
   height: 100%;
   transition:
     transform 0.3s,
@@ -74,33 +74,33 @@ export const ProductCard = styled(Card)`
   }
 `;
 
-export const ProductPrice = styled.div`
+export const ProductPriceStyled = styled.div`
   font-size: 24px;
   font-weight: bold;
   color: #1890ff;
   margin: 12px 0;
 `;
 
-export const LoadingContainer = styled.div`
+export const LoadingContainerStyled = styled.div`
   text-align: center;
   padding: 100px 0;
 `;
 
-export const NoImagePlaceholder = styled.div`
+export const NoImagePlaceholderStyled = styled.div`
   height: 250px;
   display: flex;
   align-items: center;
   justify-content: center;
 `;
 
-export const AboutCard = styled(Card)`
+export const AboutCardStyled = styled(Card)`
   margin-top: 24px;
 `;
 
-export const ShopInfoSection = styled.div`
+export const ShopInfoSectionStyled = styled.div`
   margin-top: 24px;
 `;
 
-export const ShopInfoContent = styled.div`
+export const ShopInfoContentStyled = styled.div`
   margin-top: 12px;
 `;

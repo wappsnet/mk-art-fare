@@ -1,16 +1,16 @@
 import styled from '@emotion/styled';
 import { Space } from 'antd';
 
-export const TopSpace = styled(Space)`
+export const TopSpaceStyled = styled(Space)`
   margin-bottom: 16px;
 `;
 
-export const ProductImage = styled.img`
+export const ProductImageStyled = styled.img`
   height: 200px;
   object-fit: cover;
 `;
 
-export const PlaceholderImage = styled.div`
+export const PlaceholderImageStyled = styled.div`
   height: 200px;
   background: #f5f5f5;
   display: flex;
@@ -18,11 +18,11 @@ export const PlaceholderImage = styled.div`
   justify-content: center;
 `;
 
-export const ProductActions = styled(Space)`
+export const ProductActionsStyled = styled(Space)`
   margin-top: 16px;
   width: 100%;
 `;
 
-export const FullWidthInput = styled.div`
+export const FullWidthInputStyled = styled.div`
   width: 100%;
 `;

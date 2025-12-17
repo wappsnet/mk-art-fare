@@ -239,6 +239,10 @@ router.get(
   asyncHandler(async (req, res) => {
     const { page, limit, offset } = getPaginationParams(req.query.page, req.query.limit);
 
+    // Ensure limit and offset are valid integers
+    const validLimit = Math.floor(Number(limit)) || 10;
+    const validOffset = Math.floor(Number(offset)) || 0;
+
     const orders = await query(
       `SELECT o.*,
        (SELECT COUNT(*) FROM order_items WHERE order_id = o.id) as product_count,
@@ -246,7 +250,7 @@ router.get(
        FROM orders o
        WHERE o.user_id = ?
        ORDER BY o.created_at DESC
-       LIMIT ${limit} OFFSET ${offset}`,
+       LIMIT ${validLimit} OFFSET ${validOffset}`,
       [req.user.userId]
     );
 
@@ -311,6 +315,10 @@ router.get(
       throw new AppError('Organization not found', 404);
     }
 
+    // Ensure limit and offset are valid integers
+    const validLimit = Math.floor(Number(limit)) || 10;
+    const validOffset = Math.floor(Number(offset)) || 0;
+
     // Get orders with both products and event tickets for this organization
     const orders = await query(
       `SELECT DISTINCT o.id, o.order_number, o.status, o.total, o.created_at,
@@ -333,7 +341,7 @@ router.get(
          WHERE oei.order_id = o.id AND e.organization_id = ?
        )
        ORDER BY o.created_at DESC
-       LIMIT ${limit} OFFSET ${offset}`,
+       LIMIT ${validLimit} OFFSET ${validOffset}`,
       [orgId, orgId, orgId, orgId, orgId, orgId]
     );
 
