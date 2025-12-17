@@ -237,7 +237,7 @@ export interface AnalyticsRevenueData {
 export interface AnalyticsStatusData {
   status: string;
   count: number;
-  revenue: string | number;
+  revenue: number;
 }
 
 export interface AnalyticsTopProduct {
@@ -245,7 +245,7 @@ export interface AnalyticsTopProduct {
   name: string;
   quantity_sold?: number;
   total_sold: number;
-  revenue: string | number;
+  revenue: number;
 }
 
 export interface AnalyticsData {

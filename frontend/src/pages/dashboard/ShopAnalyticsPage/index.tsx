@@ -85,7 +85,7 @@ export const ShopAnalyticsPage = () => {
                       <Tag color={getStatusTheme(item.status)}>{item.status.toUpperCase()}</Tag>
                       <Text>
                         {item.count} orders ($
-                        {(typeof item.revenue === 'number' ? item.revenue : 0).toFixed(2)})
+                        {item.revenue.toFixed(2)})
                       </Text>
                     </FlexBetweenStyled>
                   ))}
@@ -104,10 +104,7 @@ export const ShopAnalyticsPage = () => {
                       <Text strong>{product.name}</Text>
                       <Text>
                         {product.total_sold} sold ($
-                        {(typeof product.revenue === 'number'
-                          ? product.revenue
-                          : 0
-                        ).toFixed(2)}
+                        {product.revenue.toFixed(2)}
                         )
                       </Text>
                     </FlexBetweenStyled>

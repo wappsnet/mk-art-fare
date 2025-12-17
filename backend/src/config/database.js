@@ -14,6 +14,9 @@ const pool = mysql.createPool({
   queueLimit: 0,
   enableKeepAlive: true,
   keepAliveInitialDelay: 0,
+  decimalNumbers: true, // Return DECIMAL/DOUBLE as numbers instead of strings
+  supportBigNumbers: true,
+  bigNumberStrings: false, // Return big numbers as numbers, not strings
 });
 
 export const query = async (sql, params = []) => {
