@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 import {
   Row,
@@ -13,6 +13,7 @@ import {
   message,
   InputNumber,
   Select,
+  Divider,
 } from 'antd';
 import { PlusOutlined, PictureOutlined } from '@ant-design/icons';
 import {
@@ -21,9 +22,17 @@ import {
   useUpdateProductMutation,
   useDeleteProductMutation,
   useGetOrganizationCategoriesQuery,
+  useGetFieldGroupsQuery,
+  useGetProductFieldGroupsQuery,
+  useGetProductFieldValuesQuery,
+  useAssignFieldGroupToProductMutation,
+  useUnassignFieldGroupFromProductMutation,
+  useBatchUpdateProductFieldValuesMutation,
 } from '@/services/apiSlice';
 import { ProductImageManager } from '@/components/ProductImageManager';
+import DynamicFieldRenderer from '@/components/DynamicFieldRenderer';
 import { Product, ProductFormData } from '@/types/common';
+import { ProductFieldValues } from '@/types/customFields';
 import { getErrorMessage } from '@/types/errors';
 import {
   TopSpaceStyled,
@@ -44,16 +53,55 @@ export const ShopProductsPage = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isImageManagerOpen, setIsImageManagerOpen] = useState(false);
   const [managingImagesProduct, setManagingImagesProduct] = useState<Product | null>(null);
+  const [selectedFieldGroups, setSelectedFieldGroups] = useState<number[]>([]);
+  const [customFieldValues, setCustomFieldValues] = useState<ProductFieldValues>({});
   const [productForm] = Form.useForm();
 
   const { data: productsData } = useGetOrganizationProductsByIdQuery(orgId);
   const { data: categoriesData } = useGetOrganizationCategoriesQuery(orgId);
+  const { data: fieldGroupsData } = useGetFieldGroupsQuery({
+    organizationId: orgId,
+    includeFields: true,
+  });
+  const { data: productFieldGroups } = useGetProductFieldGroupsQuery(editingProduct?.id || 0, {
+    skip: !editingProduct?.id,
+  });
+  const { data: productFieldValues } = useGetProductFieldValuesQuery(editingProduct?.id || 0, {
+    skip: !editingProduct?.id,
+  });
+
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
   const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
   const [deleteProduct] = useDeleteProductMutation();
+  const [assignFieldGroup] = useAssignFieldGroupToProductMutation();
+  const [unassignFieldGroup] = useUnassignFieldGroupFromProductMutation();
+  const [batchUpdateFieldValues] = useBatchUpdateProductFieldValuesMutation();
 
   const products = Array.isArray(productsData?.data) ? productsData.data : [];
   const allCategories = Array.isArray(categoriesData?.data) ? categoriesData.data : [];
+
+  // Load field groups and values when editing a product
+  useEffect(() => {
+    if (productFieldGroups?.data) {
+      setSelectedFieldGroups(productFieldGroups.data.map((g) => g.id));
+    }
+  }, [productFieldGroups]);
+
+  useEffect(() => {
+    if (productFieldValues?.data) {
+      const fieldValuesMap: ProductFieldValues = {};
+      productFieldValues.data.forEach((fv) => {
+        fieldValuesMap[fv.field_definition_id] = fv.value;
+      });
+      setCustomFieldValues(fieldValuesMap);
+    }
+  }, [productFieldValues]);
+
+  // Get all fields from selected field groups
+  const allCustomFields =
+    fieldGroupsData?.data
+      ?.filter((group) => selectedFieldGroups.includes(group.id))
+      ?.flatMap((group) => group.fields || []) || [];
 
   const openProductModal = (product?: Product) => {
     setEditingProduct(product || null);
@@ -66,8 +114,11 @@ export const ShopProductsPage = () => {
         sku: product.sku,
         category_id: product.category_id,
       });
+      // Custom field groups and values will be loaded by useEffect hooks
     } else {
       productForm.resetFields();
+      setSelectedFieldGroups([]);
+      setCustomFieldValues({});
     }
     setIsProductModalOpen(true);
   };
@@ -79,15 +130,53 @@ export const ShopProductsPage = () => {
         price: String(values.price),
       };
 
+      let productId: number;
+
       if (editingProduct) {
         await updateProduct({ id: editingProduct.id, data: productData }).unwrap();
+        productId = editingProduct.id;
         message.success('Product updated successfully!');
       } else {
-        await createProduct({ organization_id: orgId, ...productData }).unwrap();
+        const result = await createProduct({ organization_id: orgId, ...productData }).unwrap();
+        productId = result.data.id;
         message.success('Product created successfully!');
       }
+
+      // Handle field group assignments
+      if (editingProduct) {
+        const currentGroups = productFieldGroups?.data?.map((g) => g.id) || [];
+        const added = selectedFieldGroups.filter((id) => !currentGroups.includes(id));
+        const removed = currentGroups.filter((id) => !selectedFieldGroups.includes(id));
+
+        // Assign new groups
+        for (const groupId of added) {
+          await assignFieldGroup({ productId, fieldGroupId: groupId }).unwrap();
+        }
+
+        // Unassign removed groups
+        for (const groupId of removed) {
+          await unassignFieldGroup({ productId, fieldGroupId: groupId }).unwrap();
+        }
+      } else {
+        // For new products, assign all selected field groups
+        for (const groupId of selectedFieldGroups) {
+          await assignFieldGroup({ productId, fieldGroupId: groupId }).unwrap();
+        }
+      }
+
+      // Save custom field values
+      if (Object.keys(customFieldValues).length > 0) {
+        await batchUpdateFieldValues({
+          productId,
+          fields: customFieldValues,
+        }).unwrap();
+        message.success('Custom fields saved successfully!');
+      }
+
       setIsProductModalOpen(false);
       productForm.resetFields();
+      setSelectedFieldGroups([]);
+      setCustomFieldValues({});
     } catch (error) {
       message.error(
         getErrorMessage(error) || `Failed to ${editingProduct ? 'update' : 'create'} product`
@@ -216,6 +305,40 @@ export const ShopProductsPage = () => {
               ))}
             </Select>
           </Form.Item>
+
+          <Divider>Custom Fields</Divider>
+
+          <Form.Item label="Field Groups">
+            <Select
+              mode="multiple"
+              placeholder="Select field groups to add custom fields"
+              value={selectedFieldGroups}
+              onChange={setSelectedFieldGroups}
+              options={fieldGroupsData?.data?.map((group) => ({
+                label: group.name,
+                value: group.id,
+              }))}
+            />
+          </Form.Item>
+
+          {allCustomFields.length > 0 && (
+            <>
+              {allCustomFields.map((field) => (
+                <DynamicFieldRenderer
+                  key={field.id}
+                  field={field}
+                  value={customFieldValues[field.id]}
+                  onChange={(value) =>
+                    setCustomFieldValues((prev) => ({
+                      ...prev,
+                      [field.id]: value,
+                    }))
+                  }
+                />
+              ))}
+            </>
+          )}
+
           <Form.Item>
             <Space>
               <Button type="primary" htmlType="submit" loading={isCreating || isUpdating}>
@@ -237,7 +360,9 @@ export const ShopProductsPage = () => {
         }}
         footer={null}
         width={900}
-        destroyOnHidden
+        destroyOnHidden={() => {
+          setIsImageManagerOpen(false);
+        }}
       >
         {managingImagesProduct && (
           <ProductImageManager

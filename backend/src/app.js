@@ -6,6 +6,7 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import passport from './config/passport.js';
 import { config } from './config/index.js';
+import { query } from './config/database.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
@@ -16,8 +17,13 @@ import orderRoutes from './routes/orderRoutes.js';
 import blogRoutes from './routes/blogRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import adminModerationRoutes from './routes/admin/moderationRoutes.js';
+import fieldGroupRoutes from './routes/fieldGroupRoutes.js';
+import productFieldRoutes from './routes/productFieldRoutes.js';
 
 const app = express();
+
+// Make database query function available to all routes
+app.locals.query = query;
 
 // Security middleware
 app.use(
@@ -83,6 +89,8 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/admin', adminModerationRoutes);
+app.use('/api/field-groups', fieldGroupRoutes);
+app.use('/api/products', productFieldRoutes);
 
 // Error handling
 app.use(notFoundHandler);

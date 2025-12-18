@@ -58,6 +58,10 @@ export const ShopManagementPage = () => {
       label: 'Analytics',
     },
     {
+      key: `/dashboard/shop/${id}/custom-fields`,
+      label: 'Custom Fields',
+    },
+    {
       key: `/dashboard/shop/${id}/settings`,
       label: 'Settings',
     },

@@ -8,6 +8,7 @@ import { ShopOrdersPage } from '@/pages/dashboard/ShopOrdersPage';
 import { ShopAnalyticsPage } from '@/pages/dashboard/ShopAnalyticsPage';
 import { ShopCategoriesPage } from '@/pages/dashboard/ShopCategoriesPage';
 import { ShopSettingsPage } from '@/pages/dashboard/ShopSettingsPage';
+import CustomFieldsPage from '@/pages/dashboard/CustomFieldsPage';
 
 export const dashboardRoutes: AppRouteObject[] = [
   {
@@ -56,6 +57,11 @@ export const dashboardRoutes: AppRouteObject[] = [
         path: 'settings',
         element: <ShopSettingsPage />,
         meta: { title: 'Settings - Shop Management' },
+      },
+      {
+        path: 'custom-fields',
+        element: <CustomFieldsPage />,
+        meta: { title: 'Custom Fields - Shop Management' },
       },
     ],
   },

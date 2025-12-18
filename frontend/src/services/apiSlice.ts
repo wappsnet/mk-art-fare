@@ -13,6 +13,14 @@ import {
   CreateAddressInput,
   RegisterFormData,
 } from '@/types/common';
+import {
+  FieldGroup,
+  FieldGroupFormData,
+  FieldDefinition,
+  FieldDefinitionFormData,
+  FieldValue,
+  ProductFieldValues,
+} from '@/types/customFields';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_URL,
@@ -90,6 +98,7 @@ export const api = createApi({
     'Organization',
     'Address',
     'Category',
+    'FieldGroup',
   ],
   endpoints: (builder) => ({
     // Auth endpoints
@@ -553,6 +562,158 @@ export const api = createApi({
       }),
       invalidatesTags: ['Product'],
     }),
+
+    // Field Group endpoints
+    getFieldGroups: builder.query<
+      ApiResponse<FieldGroup[]>,
+      { organizationId: number; includeFields?: boolean }
+    >({
+      query: ({ organizationId, includeFields }) => ({
+        url: '/field-groups',
+        params: { organizationId, includeFields },
+      }),
+      providesTags: ['FieldGroup'],
+    }),
+    getFieldGroup: builder.query<ApiResponse<FieldGroup>, number>({
+      query: (id) => `/field-groups/${id}`,
+      providesTags: ['FieldGroup'],
+    }),
+    createFieldGroup: builder.mutation<ApiResponse<FieldGroup>, FieldGroupFormData>({
+      query: (data) => ({
+        url: '/field-groups',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['FieldGroup'],
+    }),
+    updateFieldGroup: builder.mutation<
+      ApiResponse<FieldGroup>,
+      { id: number; data: Partial<FieldGroupFormData> }
+    >({
+      query: ({ id, data }) => ({
+        url: `/field-groups/${id}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: ['FieldGroup'],
+    }),
+    deleteFieldGroup: builder.mutation<ApiResponse<void>, number>({
+      query: (id) => ({
+        url: `/field-groups/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['FieldGroup'],
+    }),
+
+    // Field Definition endpoints
+    createFieldDefinition: builder.mutation<
+      ApiResponse<FieldDefinition>,
+      { fieldGroupId: number; data: FieldDefinitionFormData }
+    >({
+      query: ({ fieldGroupId, data }) => ({
+        url: `/field-groups/${fieldGroupId}/fields`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['FieldGroup'],
+    }),
+    updateFieldDefinition: builder.mutation<
+      ApiResponse<FieldDefinition>,
+      { fieldGroupId: number; fieldId: number; data: Partial<FieldDefinitionFormData> }
+    >({
+      query: ({ fieldGroupId, fieldId, data }) => ({
+        url: `/field-groups/${fieldGroupId}/fields/${fieldId}`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: ['FieldGroup'],
+    }),
+    deleteFieldDefinition: builder.mutation<
+      ApiResponse<void>,
+      { fieldGroupId: number; fieldId: number }
+    >({
+      query: ({ fieldGroupId, fieldId }) => ({
+        url: `/field-groups/${fieldGroupId}/fields/${fieldId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['FieldGroup'],
+    }),
+    reorderFieldDefinitions: builder.mutation<
+      ApiResponse<FieldDefinition[]>,
+      { fieldGroupId: number; fieldIds: number[] }
+    >({
+      query: ({ fieldGroupId, fieldIds }) => ({
+        url: `/field-groups/${fieldGroupId}/fields/reorder`,
+        method: 'PUT',
+        body: { fieldIds },
+      }),
+      invalidatesTags: ['FieldGroup'],
+    }),
+
+    // Product Field Group Assignment endpoints
+    assignFieldGroupToProduct: builder.mutation<
+      ApiResponse<void>,
+      { productId: number; fieldGroupId: number }
+    >({
+      query: ({ productId, fieldGroupId }) => ({
+        url: `/products/${productId}/field-groups`,
+        method: 'POST',
+        body: { fieldGroupId },
+      }),
+      invalidatesTags: ['Product'],
+    }),
+    unassignFieldGroupFromProduct: builder.mutation<
+      ApiResponse<void>,
+      { productId: number; fieldGroupId: number }
+    >({
+      query: ({ productId, fieldGroupId }) => ({
+        url: `/products/${productId}/field-groups/${fieldGroupId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Product'],
+    }),
+    getProductFieldGroups: builder.query<ApiResponse<FieldGroup[]>, number>({
+      query: (productId) => `/products/${productId}/field-groups`,
+      providesTags: ['Product'],
+    }),
+
+    // Product Field Values endpoints
+    getProductFieldValues: builder.query<ApiResponse<FieldValue[]>, number>({
+      query: (productId) => `/products/${productId}/fields`,
+      providesTags: ['Product'],
+    }),
+    batchUpdateProductFieldValues: builder.mutation<
+      ApiResponse<FieldValue[]>,
+      { productId: number; fields: ProductFieldValues }
+    >({
+      query: ({ productId, fields }) => ({
+        url: `/products/${productId}/fields`,
+        method: 'POST',
+        body: { fields },
+      }),
+      invalidatesTags: ['Product'],
+    }),
+    updateProductFieldValue: builder.mutation<
+      ApiResponse<FieldValue>,
+      { productId: number; fieldId: number; value: any }
+    >({
+      query: ({ productId, fieldId, value }) => ({
+        url: `/products/${productId}/fields/${fieldId}`,
+        method: 'PATCH',
+        body: { value },
+      }),
+      invalidatesTags: ['Product'],
+    }),
+    deleteProductFieldValue: builder.mutation<
+      ApiResponse<void>,
+      { productId: number; fieldId: number }
+    >({
+      query: ({ productId, fieldId }) => ({
+        url: `/products/${productId}/fields/${fieldId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Product'],
+    }),
   }),
 });
 
@@ -609,4 +770,20 @@ export const {
   useUpdateProductImageMutation,
   useDeleteProductImageMutation,
   useReorderProductImagesMutation,
+  useGetFieldGroupsQuery,
+  useGetFieldGroupQuery,
+  useCreateFieldGroupMutation,
+  useUpdateFieldGroupMutation,
+  useDeleteFieldGroupMutation,
+  useCreateFieldDefinitionMutation,
+  useUpdateFieldDefinitionMutation,
+  useDeleteFieldDefinitionMutation,
+  useReorderFieldDefinitionsMutation,
+  useAssignFieldGroupToProductMutation,
+  useUnassignFieldGroupFromProductMutation,
+  useGetProductFieldGroupsQuery,
+  useGetProductFieldValuesQuery,
+  useBatchUpdateProductFieldValuesMutation,
+  useUpdateProductFieldValueMutation,
+  useDeleteProductFieldValueMutation,
 } = api;
