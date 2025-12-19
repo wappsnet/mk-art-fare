@@ -11,9 +11,9 @@ export const RequireAuth = ({ children, redirectTo = '/login' }: RequireAuthProp
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const location = useLocation();
 
-  if (!isAuthenticated) {
-    return <Navigate to={redirectTo} state={{ from: location }} replace />;
+  if (isAuthenticated) {
+    return <>{children}</>;
   }
 
-  return <>{children}</>;
+  return <Navigate to={redirectTo} state={{ from: location }} replace />;
 };

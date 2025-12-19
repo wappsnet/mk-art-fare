@@ -1,4 +1,5 @@
 import { Badge, Avatar, Dropdown, Button, Space, Flex, Image } from 'antd';
+import type { MenuProps } from 'antd';
 import {
   ShoppingCartOutlined,
   UserOutlined,
@@ -24,7 +25,7 @@ export const Header = () => {
   };
 
   // Build user menu items based on role and permissions
-  const userMenuItems = [];
+  const userMenuItems: MenuProps['items'] = [];
 
   // Show Dashboard for artists, admins, or users who can create organizations
   if (
@@ -63,7 +64,7 @@ export const Header = () => {
     onClick: handleLogout,
   });
 
-  const menuItems = [
+  const menuItems: MenuProps['items'] = [
     {
       key: 'home',
       label: <Link to="/">Home</Link>,
@@ -90,7 +91,13 @@ export const Header = () => {
       <Flex align="center" justify="end" flex="auto" gap={8}>
         <Link to="/cart">
           <Badge count={cartData?.data?.items?.length || 0}>
-            <ShoppingCartOutlined />
+            <Button
+              variant="filled"
+              color="primary"
+              shape="circle"
+              size="large"
+              icon={<ShoppingCartOutlined />}
+            />
           </Badge>
         </Link>
 

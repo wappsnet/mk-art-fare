@@ -23,7 +23,7 @@ interface LoginFormValues {
   password: string;
 }
 
-export const LoginPage = () => {
+const LoginPage = () => {
   const [loginForm] = Form.useForm<LoginFormValues>();
   const navigate = useNavigate();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
@@ -73,7 +73,6 @@ export const LoginPage = () => {
               layout="vertical"
               onFinish={onFinish}
               autoComplete="off"
-              style={{ marginTop: '24px' }}
             >
               <Form.Item
                 name="email"
@@ -123,3 +122,5 @@ export const LoginPage = () => {
     </Layout>
   );
 };
+
+export default LoginPage;

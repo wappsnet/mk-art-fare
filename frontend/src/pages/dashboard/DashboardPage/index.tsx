@@ -24,7 +24,7 @@ interface CreateShopFormValues {
   description?: string;
 }
 
-export const DashboardPage = () => {
+const DashboardPage = () => {
   const navigate = useNavigate();
   const { user } = useAppSelector((state) => state.auth);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -106,7 +106,25 @@ export const DashboardPage = () => {
           setIsModalOpen(false);
           form.resetFields();
         }}
-        footer={null}
+        footer={[
+          <Button
+            key="cancel"
+            onClick={() => {
+              setIsModalOpen(false);
+              form.resetFields();
+            }}
+          >
+            Cancel
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            loading={isCreating}
+            onClick={() => form.submit()}
+          >
+            Create Shop
+          </Button>,
+        ]}
       >
         <Form form={form} layout="vertical" onFinish={handleCreateShop}>
           <Form.Item
@@ -131,24 +149,10 @@ export const DashboardPage = () => {
           <Form.Item name="description" label="Description">
             <Input.TextArea rows={4} placeholder="Tell customers about your shop..." />
           </Form.Item>
-
-          <Form.Item>
-            <ShopCardActionsStyled>
-              <Button type="primary" htmlType="submit" loading={isCreating}>
-                Create Shop
-              </Button>
-              <Button
-                onClick={() => {
-                  setIsModalOpen(false);
-                  form.resetFields();
-                }}
-              >
-                Cancel
-              </Button>
-            </ShopCardActionsStyled>
-          </Form.Item>
         </Form>
       </Modal>
     </Layout>
   );
 };
+
+export default DashboardPage;

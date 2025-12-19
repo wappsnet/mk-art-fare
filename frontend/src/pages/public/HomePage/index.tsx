@@ -23,7 +23,7 @@ import {
 
 const { Title, Paragraph } = Typography;
 
-export const HomePage = () => {
+const HomePage = () => {
   const features = [
     {
       icon: <ShoppingOutlined />,
@@ -81,7 +81,7 @@ export const HomePage = () => {
 
         <Row gutter={[32, 32]}>
           {withKeys(features).map((feature) => (
-            <Col xs={24} sm={12} lg={6} key={feature._key}>
+            <Col xs={24} sm={12} lg={8} key={feature._key}>
               <FeatureCardStyled>
                 <IconWrapperStyled>{feature.icon}</IconWrapperStyled>
                 <Title level={4}>{feature.title}</Title>
@@ -96,7 +96,7 @@ export const HomePage = () => {
         <StatsTitleStyled level={2}>Our Growing Community</StatsTitleStyled>
         <Row gutter={[32, 32]}>
           {withKeys(stats).map((stat) => (
-            <Col xs={12} sm={12} md={6} key={stat._key}>
+            <Col xs={12} sm={12} md={8} key={stat._key}>
               <StatNumberStyled>{stat.number}</StatNumberStyled>
               <StatLabelStyled>{stat.label}</StatLabelStyled>
             </Col>
@@ -125,3 +125,5 @@ export const HomePage = () => {
     </Layout>
   );
 };
+
+export default HomePage;

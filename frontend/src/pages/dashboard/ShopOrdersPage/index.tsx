@@ -4,7 +4,7 @@ import { useGetOrganizationOrdersQuery } from '@/services/apiSlice';
 import { PageTitleStyled } from './styles';
 import { getStatusTheme } from '@/utils/themeHelpers.ts';
 
-export const ShopOrdersPage = () => {
+const ShopOrdersPage = () => {
   const { id } = useParams<{ id: string }>();
   const orgId = Number.parseInt(id!);
 
@@ -67,3 +67,5 @@ export const ShopOrdersPage = () => {
     </div>
   );
 };
+
+export default ShopOrdersPage;

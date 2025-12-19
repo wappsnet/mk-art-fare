@@ -10,12 +10,45 @@ import { config } from '../config/index.js';
 
 const router = Router();
 
+// Get popular field definitions for filtering (public)
+router.get(
+  '/filter-fields',
+  asyncHandler(async (req, res) => {
+    // Get field definitions that are commonly used across products
+    // Limit to filterable field types (text, select, radio, number, toggle, color)
+    const filterableTypes = ['text', 'select', 'radio', 'number', 'toggle', 'color', 'date'];
+
+    const fields = await query(
+      `SELECT DISTINCT fd.id, fd.name, fd.label, fd.field_type, fd.options, fd.field_group_id,
+              fg.name as group_name
+       FROM field_definitions fd
+       INNER JOIN field_groups fg ON fd.field_group_id = fg.id
+       INNER JOIN product_field_group_assignments pfga ON fg.id = pfga.field_group_id
+       WHERE fd.field_type IN (${filterableTypes.map(() => '?').join(',')})
+         AND fg.is_active = TRUE
+       GROUP BY fd.id
+       HAVING COUNT(DISTINCT pfga.product_id) >= 1
+       ORDER BY COUNT(DISTINCT pfga.product_id) DESC, fg.name, fd.sort_order
+       LIMIT 20`,
+      filterableTypes
+    );
+
+    // Parse JSON options for select/radio fields
+    const fieldsWithOptions = fields.map((field) => ({
+      ...field,
+      options: field.options ? JSON.parse(field.options) : null,
+    }));
+
+    sendSuccess(res, fieldsWithOptions);
+  })
+);
+
 // Get all products (public)
 router.get(
   '/',
   asyncHandler(async (req, res) => {
     const { page, limit, offset } = getPaginationParams(req.query.page, req.query.limit);
-    const { organizationId, category, search, minPrice, maxPrice } = req.query;
+    const { organizationId, category, search, minPrice, maxPrice, customFields } = req.query;
 
     // Ensure limit and offset are valid integers
     const validLimit = Math.floor(Number(limit)) || 10;
@@ -32,7 +65,10 @@ router.get(
 
     // Handle multiple categories (comma-separated)
     if (category) {
-      const categories = category.split(',').map(c => c.trim()).filter(Boolean);
+      const categories = category
+        .split(',')
+        .map((c) => c.trim())
+        .filter(Boolean);
       if (categories.length > 0) {
         // Get category IDs from slugs
         const categoryPlaceholders = categories.map(() => '?').join(',');
@@ -40,7 +76,7 @@ router.get(
           `SELECT id FROM categories WHERE slug IN (${categoryPlaceholders})`,
           categories
         );
-        const categoryIds = categoryResults.map(c => c.id);
+        const categoryIds = categoryResults.map((c) => c.id);
 
         if (categoryIds.length > 0) {
           const placeholders = categoryIds.map(() => '?').join(',');
@@ -65,6 +101,34 @@ router.get(
       params.push(Number.parseFloat(maxPrice));
     }
 
+    // Custom fields filtering
+    // Format: customFields=fieldId1:value1,fieldId2:value2
+    if (customFields) {
+      const fieldFilters = customFields
+        .split(',')
+        .map((f) => {
+          const [fieldId, value] = f.split(':');
+          return { fieldId: Number.parseInt(fieldId), value: value?.trim() };
+        })
+        .filter((f) => f.fieldId && f.value);
+
+      if (fieldFilters.length > 0) {
+        // Use subquery to filter products that have matching field values
+        queryStr +=
+          ' AND p.id IN (SELECT DISTINCT pfv.product_id FROM product_field_values pfv WHERE ';
+        const fieldConditions = [];
+
+        for (const filter of fieldFilters) {
+          fieldConditions.push(
+            '(pfv.field_definition_id = ? AND (pfv.value_text LIKE ? OR pfv.value_longtext LIKE ?))'
+          );
+          params.push(filter.fieldId, `%${filter.value}%`, `%${filter.value}%`);
+        }
+
+        queryStr += fieldConditions.join(' OR ') + ')';
+      }
+    }
+
     queryStr += ` ORDER BY p.created_at DESC LIMIT ${validLimit} OFFSET ${validOffset}`;
 
     let products = await query(queryStr, params);
@@ -80,7 +144,9 @@ router.get(
     }
 
     // Transform product image URLs to full URLs for response
-    products = products.map(product => transformImageUrls(product, 'featured_image_url', 'products'));
+    products = products.map((product) =>
+      transformImageUrls(product, 'featured_image_url', 'products')
+    );
 
     // Build count query with same filters
     let countQuery = 'SELECT COUNT(*) as total FROM products p WHERE p.is_active = TRUE';
@@ -93,14 +159,17 @@ router.get(
 
     // Handle multiple categories in count query
     if (category) {
-      const categories = category.split(',').map(c => c.trim()).filter(Boolean);
+      const categories = category
+        .split(',')
+        .map((c) => c.trim())
+        .filter(Boolean);
       if (categories.length > 0) {
         const categoryPlaceholders = categories.map(() => '?').join(',');
         const categoryResults = await query(
           `SELECT id FROM categories WHERE slug IN (${categoryPlaceholders})`,
           categories
         );
-        const categoryIds = categoryResults.map(c => c.id);
+        const categoryIds = categoryResults.map((c) => c.id);
 
         if (categoryIds.length > 0) {
           const placeholders = categoryIds.map(() => '?').join(',');
@@ -125,6 +194,32 @@ router.get(
       countParams.push(Number.parseFloat(maxPrice));
     }
 
+    // Custom fields filtering in count query
+    if (customFields) {
+      const fieldFilters = customFields
+        .split(',')
+        .map((f) => {
+          const [fieldId, value] = f.split(':');
+          return { fieldId: Number.parseInt(fieldId), value: value?.trim() };
+        })
+        .filter((f) => f.fieldId && f.value);
+
+      if (fieldFilters.length > 0) {
+        countQuery +=
+          ' AND p.id IN (SELECT DISTINCT pfv.product_id FROM product_field_values pfv WHERE ';
+        const fieldConditions = [];
+
+        for (const filter of fieldFilters) {
+          fieldConditions.push(
+            '(pfv.field_definition_id = ? AND (pfv.value_text LIKE ? OR pfv.value_longtext LIKE ?))'
+          );
+          countParams.push(filter.fieldId, `%${filter.value}%`, `%${filter.value}%`);
+        }
+
+        countQuery += fieldConditions.join(' OR ') + ')';
+      }
+    }
+
     const countResult = await query(countQuery, countParams);
 
     // Format response to match frontend expectations
@@ -132,7 +227,7 @@ router.get(
       products,
       total: countResult[0].total,
       page,
-      limit
+      limit,
     };
 
     sendSuccess(res, responseData);
@@ -355,8 +450,8 @@ router.patch(
   authenticate,
   authorize(UserRole.ARTIST, UserRole.ADMIN),
   asyncHandler(async (req, res) => {
-    const productId = parseInt(req.params.productId);
-    const imageId = parseInt(req.params.imageId);
+    const productId = Number.parseInt(req.params.productId);
+    const imageId = Number.parseInt(req.params.imageId);
     const { url, alt_text, sort_order, is_thumbnail } = req.body;
 
     const product = await query(
@@ -424,8 +519,8 @@ router.delete(
   authenticate,
   authorize(UserRole.ARTIST, UserRole.ADMIN),
   asyncHandler(async (req, res) => {
-    const productId = parseInt(req.params.productId);
-    const imageId = parseInt(req.params.imageId);
+    const productId = Number.parseInt(req.params.productId);
+    const imageId = Number.parseInt(req.params.imageId);
 
     const product = await query(
       'SELECT p.*, o.owner_id FROM products p LEFT JOIN organizations o ON p.organization_id = o.id WHERE p.id = ?',
@@ -556,7 +651,12 @@ router.post(
 
     // Transform image URLs to full URLs for response
     const transformedImages = transformImageUrls(created, 'url', 'products');
-    sendSuccess(res, transformedImages.length === 1 ? transformedImages[0] : transformedImages, 'Image(s) uploaded successfully', 201);
+    sendSuccess(
+      res,
+      transformedImages.length === 1 ? transformedImages[0] : transformedImages,
+      'Image(s) uploaded successfully',
+      201
+    );
   })
 );
 

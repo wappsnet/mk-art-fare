@@ -23,6 +23,17 @@
    - DO NOT add docstrings to existing functions
    - DO NOT reorganize imports unless necessary
 
+4. **Styling Violations**
+   - DO NOT use inline styles (style={}) - use styled-components or Space/Flex
+   - DO NOT use HTML tags (h1-h6, p) - use Typography components (Title, Text, Paragraph)
+   - DO NOT add margins/padding inline - use Space component with size prop
+
+5. **Code Pattern Violations**
+   - DO NOT use negated conditions (if (!condition)) - use positive conditions instead
+   - DO NOT use Modals for forms - use Drawer with footer buttons instead
+   - DO NOT put buttons inside Form when using Drawer/Modal - use footer prop
+   - DO NOT use Form.Item for action buttons - they belong in Drawer/Modal footer
+
 ### ✅ ALWAYS DO
 
 1. **Code Quality**
@@ -84,11 +95,38 @@ src/
 
 ### Code Patterns
 
+#### Export Patterns
+
+**Pages: Use default exports**
+```typescript
+// pages/ProductsPage/index.tsx
+const ProductsPage = () => {
+  return <div>Products</div>;
+};
+
+export default ProductsPage;
+```
+
+**Components: Use named exports**
+```tsx
+// components/ProductCard/index.tsx
+export const ProductCard = ({ product }: ProductCardProps) => {
+  return <Card>{product.name}</Card>;
+};
+```
+
+**Route imports: Use default imports for pages**
+```typescript
+// routes/publicRoutes.tsx
+import ProductsPage from '@/pages/public/ProductsPage';
+import ProductDetailPage from '@/pages/public/ProductDetailPage';
+```
+
 #### Component Structure
 
 Every component/page follows this pattern:
 
-```typescript
+```tsx
 // ComponentName/index.tsx
 import { useState } from 'react';
 import { Button, Typography } from 'antd';
@@ -108,7 +146,7 @@ export const ComponentName = () => {
 };
 ```
 
-```typescript
+```tsx
 // ComponentName/styles.ts (only if needed)
 import styled from '@emotion/styled';
 
@@ -121,53 +159,208 @@ export const Container = styled.div`
 
 #### Styling Guidelines
 
+**CRITICAL: NO INLINE STYLES**
+
+Never use inline styles with the `style={}` prop. Instead:
+
+1. **For spacing (margins, padding, gaps):** Use Ant Design's Space component
+2. **For layout (flexbox, grid):** Create styled components
+3. **For component widths:** Create styled components that extend Ant Design components
+4. **For typography:** Use Ant Design Typography components (Title, Text, Paragraph) - NEVER use h1-h6 or p tags
+
 **Priority Order:**
 1. Use AntD components with built-in props
-2. Use inline styles for specific customizations
-3. Use theme configuration for global changes
-4. Use styled-components ONLY for layout/structure
+2. Use AntD Space/Flex components for spacing and layout
+3. Use styled-components for structural layout
+4. Use theme configuration for global changes
 
 **Examples:**
 
 ✅ **CORRECT:**
-```typescript
-// Use AntD component
-<Button type="primary" size="large" icon={<Icon />}>
-  Click Me
-</Button>
+```tsx
+// Use Space for spacing instead of margins
+<Space direction="vertical" size={24}>
+  <Title level={2}>Welcome</Title>
+  <Text>Description here</Text>
+</Space>
 
-// Inline styles for specific needs
-<Text strong style={{ fontSize: 16, color: '#1890ff' }}>
-  $99.99
-</Text>
-
-// Styled components for layout only
+// Use styled components for layout
 const Container = styled.div`
   display: flex;
-  gap: 16px;
+  justify-content: center;
+  align-items: center;
+  min-height: 70vh;
   padding: 20px;
 `;
+
+// Use styled components for width constraints
+const FormCard = styled(Card)`
+  max-width: 450px;
+  width: 100%;
+`;
+
+// Use Typography components, not HTML tags
+<Title level={2}>Heading</Title>
+<Text>Regular text</Text>
+<Paragraph>Long form content</Paragraph>
 ```
 
 ❌ **INCORRECT:**
-```typescript
-// Don't use custom HTML with AntD classes
-<button className="ant-btn ant-btn-primary">Click</button>
+```tsx
+// Don't use inline styles
+<div style={{ padding: '100px 20px', textAlign: 'center' }}>
+  <h2>Heading</h2>
+  <p>Text content</p>
+</div>
+
+// Don't use margin/padding inline
+<div style={{ marginBottom: 24 }}>Content</div>
+
+// Don't use HTML tags for text
+<h1>Title</h1>
+<h2>Subtitle</h2>
+<p>Paragraph</p>
 
 // Don't override AntD component styles
 const CustomButton = styled(Button)`
   background: red;
   &:hover { background: blue; }
 `;
+```
 
-// Don't style AntD typography
-const CustomText = styled(Text)`
-  &.ant-typography {
-    font-size: 16px;
-    color: #1890ff;
-  }
+**Space Component Usage:**
+```tsx
+// For width on Space (this is acceptable)
+<Space direction="vertical" size={24} style={{ width: '100%' }}>
+  {/* children */}
+</Space>
+
+// Better: Use a styled Space if reused multiple times
+const FullWidthSpace = styled(Space)`
+  width: 100%;
 `;
 ```
+
+#### Drawer Patterns
+
+**ALWAYS use Drawer (not Modal) for forms with footer buttons:**
+
+✅ **CORRECT:**
+```tsx
+<Drawer
+  title="Create Item"
+  open={isOpen}
+  onClose={() => setIsOpen(false)}
+  width={500}
+  footer={
+    <Space>
+      <Button onClick={() => setIsOpen(false)}>Cancel</Button>
+      <Button type="primary" onClick={() => form.submit()} loading={isLoading}>
+        Submit
+      </Button>
+    </Space>
+  }
+>
+  <Form form={form} layout="vertical" onFinish={handleSubmit}>
+    <Form.Item name="name" label="Name" rules={[{ required: true }]}>
+      <Input />
+    </Form.Item>
+    <Form.Item name="description" label="Description">
+      <Input.TextArea rows={3} />
+    </Form.Item>
+  </Form>
+</Drawer>
+```
+
+**Key Drawer Features:**
+- Use `width` prop for drawer size (e.g., 500, 700, 900)
+- Buttons always in `footer` prop wrapped in `Space`
+- Cancel button first, action button last
+- Use `onClose` instead of `onCancel`
+- Content scrolls automatically when height exceeds viewport
+
+❌ **INCORRECT:**
+```tsx
+<Modal title="Create Item" open={isOpen} onCancel={() => setIsOpen(false)} footer={null}>
+  <Form form={form} onFinish={handleSubmit}>
+    <Form.Item name="name" label="Name">
+      <Input />
+    </Form.Item>
+    {/* Don't put buttons inside Form */}
+    <Form.Item>
+      <Button type="primary" htmlType="submit">Submit</Button>
+      <Button onClick={() => setIsOpen(false)}>Cancel</Button>
+    </Form.Item>
+  </Form>
+</Modal>
+```
+
+**When to use Modal vs Drawer:**
+- Use **Drawer** for: Forms, editing, creating, managing data (most common)
+- Use **Modal.confirm()** for: Confirmations, destructive actions
+- Use **Modal.success/error/info()** for: Notifications with actions
+
+#### Conditional Logic Patterns
+
+**Avoid negated conditions - use positive conditions:**
+
+✅ **CORRECT:**
+```tsx
+// Use positive condition
+if (user) {
+  return <Dashboard user={user} />;
+}
+return <Login />;
+
+// Or use early return for error/empty states
+if (isLoading) return <Spinner />;
+if (error) return <Error />;
+return <Content data={data} />;
+```
+
+❌ **INCORRECT:**
+```tsx
+// Avoid negated conditions
+if (!user) {
+  return <Login />;
+}
+return <Dashboard user={user} />;
+
+// Avoid double negation
+if (!isLoading && !error) {
+  return <Content />;
+}
+```
+
+#### Navigation Patterns
+
+**Use React Router for navigation in components:**
+
+✅ **CORRECT:**
+```tsx
+import { useNavigate, Link } from 'react-router';
+
+// Programmatic navigation
+const navigate = useNavigate();
+navigate('/login');
+
+// Link component for anchors
+<Link to="/products">View Products</Link>
+```
+
+❌ **INCORRECT:**
+```tsx
+// Don't use window.location in components
+window.location.href = '/login';
+
+// Don't use <a> tags for internal links
+<a href="/products">View Products</a>
+```
+
+**Exception:** `window.location.href` is acceptable in non-React contexts:
+- API interceptors (e.g., `src/services/api.ts`)
+- Service classes outside React component tree
+- Utility functions that need full page reload
 
 #### State Management
 
@@ -197,27 +390,28 @@ All API calls use RTK Query in `services/apiSlice.ts`:
 
 ```typescript
 // Query (GET)
-getProducts: builder.query<ApiResponse<Product[]>, void>({
+
+getProducts = builder.query<ApiResponse<Product[]>, void>({
   query: () => '/products',
   providesTags: ['Product'],
 }),
 
 // Mutation (POST/PUT/DELETE)
-createProduct: builder.mutation<ApiResponse<Product>, Partial<Product>>({
+createProduct = builder.mutation<ApiResponse<Product>, Partial<Product>>({
   query: (data) => ({
     url: '/products',
     method: 'POST',
     body: data,
   }),
   invalidatesTags: ['Product'],
-}),
+});
 ```
 
 #### Type Safety
 
 Always define proper types:
 
-```typescript
+```tsx
 // Define interfaces
 interface Product {
   id: number;
@@ -249,7 +443,7 @@ try {
 ### Routing Patterns
 
 **Route Definition:**
-```typescript
+```tsx
 // routes/publicRoutes.tsx
 export const publicRoutes: AppRouteObject[] = [
   {
@@ -261,19 +455,19 @@ export const publicRoutes: AppRouteObject[] = [
 ```
 
 **With Guards:**
-```typescript
-{
-  path: '/admin',
+```tsx
+const Routes ={
+  path: '/admin', 
   element: (
-    <RequireRole allowedRoles={[UserRole.ADMIN]}>
-      <AdminPage />
-    </RequireRole>
+      <RequireRole allowedRoles={[UserRole.ADMIN]}>
+        <AdminPage />
+      </RequireRole>
   ),
   meta: {
     requiresAuth: true,
     allowedRoles: [UserRole.ADMIN],
     title: 'Admin - Art Fare',
-  },
+  }
 }
 ```
 
@@ -281,7 +475,7 @@ export const publicRoutes: AppRouteObject[] = [
 
 Use path aliases:
 
-```typescript
+```tsx
 // ✅ CORRECT
 import { Layout } from '@/components/Layout';
 import { useGetProductsQuery } from '@/services/apiSlice';
@@ -325,16 +519,18 @@ type ProductStatus = 'active' | 'inactive';
 2. Create `index.tsx` with component
 3. Create `styles.ts` if needed (layout only)
 4. Add route to appropriate route file
-5. Export from page for route usage
+5. Use default export for pages
 
-```typescript
+```tsx
 // 1. Create index.tsx
-export const ProductsPage = () => {
+const ProductsPage = () => {
   return <div>Products</div>;
 };
 
+export default ProductsPage;
+
 // 2. Add to routes
-import { ProductsPage } from '@/pages/public/ProductsPage';
+import ProductsPage from '@/pages/public/ProductsPage';
 
 export const publicRoutes: AppRouteObject[] = [
   {
@@ -352,7 +548,7 @@ export const publicRoutes: AppRouteObject[] = [
 3. Create `styles.ts` if needed
 4. Export from component
 
-```typescript
+```tsx
 // components/ProductCard/index.tsx
 export const ProductCard = ({ product }: ProductCardProps) => {
   return <Card>{product.name}</Card>;
@@ -371,7 +567,7 @@ getProducts: builder.query<ApiResponse<Product[]>, QueryParams>({
     params,
   }),
   providesTags: ['Product'],
-}),
+});
 ```
 
 ### Adding a Type
@@ -403,7 +599,7 @@ const handleClick = useCallback(() => action(), [dep]);
 ```
 
 3. **List Rendering**: Always use keys
-```typescript
+```tsx
 {products.map(product => (
   <ProductCard key={product.id} product={product} />
 ))}
@@ -488,6 +684,11 @@ const handleClick = useCallback(() => action(), [dep]);
 - **Code should explain itself**
 - **Follow existing patterns**
 - **Make minimal changes**
+- **Pages use default exports, components use named exports**
+- **NO inline styles - use styled-components or Space/Flex components**
+- **NO h1-h6 or p tags - use Typography components (Title, Text, Paragraph)**
+- **NO negated conditions (if (!x)) - use positive conditions instead**
+- **Modal buttons belong in footer prop, not inside Form**
 
 ---
 

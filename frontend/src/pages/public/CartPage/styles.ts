@@ -34,14 +34,27 @@ export const ProductImageStyled = styled.img`
   border-radius: 4px;
 `;
 
-// Simple wrappers without style overrides - using AntD theme instead
 export const ProductTitle = AntTitle;
-export const SmallText = Text;
-export const Price = Text;
-export const TotalPrice = Text;
-export const TotalTitle = AntTitle;
 
-// Only keep structural/layout styles
+export const SmallText = styled(Text)`
+  font-size: 12px;
+`;
+
+export const Price = styled(Text)`
+  font-size: 16px;
+  color: #1890ff;
+`;
+
+export const TotalPrice = styled(Text)`
+  font-size: 18px;
+`;
+
+export const TotalTitle = styled(AntTitle)`
+  &.ant-typography {
+    color: #1890ff;
+  }
+`;
+
 export const PriceWrapperStyled = styled.div`
   margin-top: 8px;
 `;

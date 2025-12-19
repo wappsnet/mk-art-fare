@@ -30,7 +30,7 @@ import { ContainerStyled, HeaderStyled } from './styles';
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 
-export const AdminProductModerationPage = () => {
+const AdminProductModerationPage = () => {
   const navigate = useNavigate();
   const [moderationModal, setModerationModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -274,3 +274,5 @@ export const AdminProductModerationPage = () => {
     </Layout>
   );
 };
+
+export default AdminProductModerationPage;

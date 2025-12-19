@@ -14,7 +14,7 @@ import { TopSpaceStyled } from './styles';
 
 const { Text } = Typography;
 
-export const ShopCategoriesPage = () => {
+const ShopCategoriesPage = () => {
   const { id } = useParams<{ id: string }>();
   const orgId = Number.parseInt(id!);
 
@@ -92,16 +92,14 @@ export const ShopCategoriesPage = () => {
       title: 'Actions',
       key: 'actions',
       render: (_: unknown, record: Category) => {
-        if (!record.organization_id) {
-          return <Text type="secondary">Global category</Text>;
-        }
-        return (
-          <Space>
-            <Button type="text" icon={<EditOutlined />} onClick={() => openCategoryModal(record)}>
-              Edit
-            </Button>
-            <Button
-              type="text"
+        if (record.organization_id) {
+          return (
+            <Space>
+              <Button type="text" icon={<EditOutlined />} onClick={() => openCategoryModal(record)}>
+                Edit
+              </Button>
+              <Button
+                type="text"
               danger
               icon={<DeleteOutlined />}
               onClick={() => {
@@ -115,7 +113,9 @@ export const ShopCategoriesPage = () => {
               Delete
             </Button>
           </Space>
-        );
+          );
+        }
+        return <Text type="secondary">Global category</Text>;
       },
     },
   ];
@@ -141,7 +141,25 @@ export const ShopCategoriesPage = () => {
           setIsCategoryModalOpen(false);
           categoryForm.resetFields();
         }}
-        footer={null}
+        footer={[
+          <Button
+            key="cancel"
+            onClick={() => {
+              setIsCategoryModalOpen(false);
+              categoryForm.resetFields();
+            }}
+          >
+            Cancel
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            loading={isCreating || isUpdating}
+            onClick={() => categoryForm.submit()}
+          >
+            {editingCategory ? 'Update' : 'Create'}
+          </Button>,
+        ]}
       >
         <Form form={categoryForm} layout="vertical" onFinish={handleCategorySubmit}>
           <Form.Item name="name" label="Category Name" rules={[{ required: true }]}>
@@ -150,16 +168,10 @@ export const ShopCategoriesPage = () => {
           <Form.Item name="description" label="Description">
             <Input.TextArea rows={3} />
           </Form.Item>
-          <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit" loading={isCreating || isUpdating}>
-                {editingCategory ? 'Update' : 'Create'}
-              </Button>
-              <Button onClick={() => setIsCategoryModalOpen(false)}>Cancel</Button>
-            </Space>
-          </Form.Item>
         </Form>
       </Modal>
     </div>
   );
 };
+
+export default ShopCategoriesPage;

@@ -18,7 +18,7 @@ interface RegisterFormValues {
   confirmPassword: string;
 }
 
-export const RegisterPage = () => {
+const RegisterPage = () => {
   const [registerForm] = Form.useForm<RegisterFormValues>();
   const navigate = useNavigate();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
@@ -55,7 +55,7 @@ export const RegisterPage = () => {
     <Layout>
       <ContainerStyled>
         <CardStyled>
-          <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          <Space direction="vertical" size="large" style={{ width: '100%' }} /* width needed for Space */>
             <CenterTextStyled>
               <Title level={2}>Create Account</Title>
               <Text type="secondary">Join Art Fare and start your journey</Text>
@@ -73,7 +73,6 @@ export const RegisterPage = () => {
               layout="vertical"
               onFinish={onFinish}
               autoComplete="off"
-              style={{ marginTop: '24px' }}
             >
               <Form.Item
                 name="email"
@@ -117,10 +116,10 @@ export const RegisterPage = () => {
                   { required: true, message: 'Please confirm your password!' },
                   ({ getFieldValue }) => ({
                     validator(_, value) {
-                      if (!value || getFieldValue('password') === value) {
-                        return Promise.resolve();
+                      if (value && getFieldValue('password') !== value) {
+                        return Promise.reject(new Error('Passwords do not match!'));
                       }
-                      return Promise.reject(new Error('Passwords do not match!'));
+                      return Promise.resolve();
                     },
                   }),
                 ]}
@@ -146,3 +145,5 @@ export const RegisterPage = () => {
     </Layout>
   );
 };
+
+export default RegisterPage;

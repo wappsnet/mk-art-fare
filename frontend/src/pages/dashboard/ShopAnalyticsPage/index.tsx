@@ -17,7 +17,7 @@ function isAnalyticsData(data: unknown): data is AnalyticsData {
   );
 }
 
-export const ShopAnalyticsPage = () => {
+const ShopAnalyticsPage = () => {
   const { id } = useParams<{ id: string }>();
   const orgId = Number.parseInt(id!);
 
@@ -120,3 +120,5 @@ export const ShopAnalyticsPage = () => {
     </div>
   );
 };
+
+export default ShopAnalyticsPage;

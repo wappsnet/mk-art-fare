@@ -2,11 +2,11 @@ import { useNavigate, Outlet, useLocation } from 'react-router';
 import { Card, Typography, Tabs } from 'antd';
 import { UserOutlined, LockOutlined, ShoppingOutlined } from '@ant-design/icons';
 import { Layout } from '@/components/Layout';
-import { ContainerStyled, HeaderStyled } from './styles';
+import { ContainerStyled, HeaderStyled, OutletContainer } from './styles';
 
 const { Title } = Typography;
 
-export const AccountPage = () => {
+const AccountPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -41,11 +41,13 @@ export const AccountPage = () => {
 
         <Card>
           <Tabs activeKey={location.pathname} onChange={handleTabChange} items={tabItems} />
-          <div style={{ marginTop: '24px' }}>
+          <OutletContainer>
             <Outlet />
-          </div>
+          </OutletContainer>
         </Card>
       </ContainerStyled>
     </Layout>
   );
 };
+
+export default AccountPage;

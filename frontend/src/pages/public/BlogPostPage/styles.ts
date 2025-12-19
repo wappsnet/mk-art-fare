@@ -1,4 +1,7 @@
 import styled from '@emotion/styled';
+import { Breadcrumb, Typography } from 'antd';
+
+const { Text } = Typography;
 
 export const ContainerStyled = styled.div`
   max-width: 900px;
@@ -58,4 +61,12 @@ export const CommentFormStyled = styled.div`
 
 export const SignInPromptStyled = styled.div`
   margin-bottom: 32px;
+`;
+
+export const BreadcrumbStyled = styled(Breadcrumb)`
+  margin-bottom: 24px;
+`;
+
+export const SmallSecondaryText = styled(Text)`
+  font-size: 12px;
 `;

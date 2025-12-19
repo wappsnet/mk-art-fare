@@ -1,13 +1,13 @@
 import type { AppRouteObject } from '@/types/routes';
 import { RequireAuth, RequireRole } from '@/guards';
 import { UserRole } from '@/types/common';
-import { DashboardPage } from '@/pages/dashboard/DashboardPage';
-import { ShopManagementPage } from '@/pages/dashboard/ShopManagementPage';
-import { ShopProductsPage } from '@/pages/dashboard/ShopProductsPage';
-import { ShopOrdersPage } from '@/pages/dashboard/ShopOrdersPage';
-import { ShopAnalyticsPage } from '@/pages/dashboard/ShopAnalyticsPage';
-import { ShopCategoriesPage } from '@/pages/dashboard/ShopCategoriesPage';
-import { ShopSettingsPage } from '@/pages/dashboard/ShopSettingsPage';
+import DashboardPage from '@/pages/dashboard/DashboardPage';
+import ShopManagementPage from '@/pages/dashboard/ShopManagementPage';
+import ShopProductsPage from '@/pages/dashboard/ShopProductsPage';
+import ShopOrdersPage from '@/pages/dashboard/ShopOrdersPage';
+import ShopAnalyticsPage from '@/pages/dashboard/ShopAnalyticsPage';
+import ShopCategoriesPage from '@/pages/dashboard/ShopCategoriesPage';
+import ShopSettingsPage from '@/pages/dashboard/ShopSettingsPage';
 import CustomFieldsPage from '@/pages/dashboard/CustomFieldsPage';
 
 export const dashboardRoutes: AppRouteObject[] = [
@@ -31,9 +31,6 @@ export const dashboardRoutes: AppRouteObject[] = [
     children: [
       {
         index: true,
-        element: <ShopProductsPage />,
-      },
-      {
         path: 'products',
         element: <ShopProductsPage />,
         meta: { title: 'Products - Shop Management' },

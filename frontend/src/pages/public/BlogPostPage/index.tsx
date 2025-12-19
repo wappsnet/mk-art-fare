@@ -1,18 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router';
 import { withKeys } from '@/utils/arrayHelpers';
-import {
-  Typography,
-  Avatar,
-  Divider,
-  Button,
-  Input,
-  List,
-  Form,
-  message,
-  Spin,
-  Breadcrumb,
-} from 'antd';
+import { Typography, Avatar, Divider, Button, Input, List, Form, message, Spin } from 'antd';
 import { Comment as AntComment } from '@ant-design/compatible';
 import { UserOutlined, CalendarOutlined, EyeOutlined } from '@ant-design/icons';
 import { Layout } from '@/components/Layout';
@@ -29,12 +18,14 @@ import {
   LoadingContainerStyled,
   CommentFormStyled,
   SignInPromptStyled,
+  BreadcrumbStyled,
+  SmallSecondaryText,
 } from './styles';
 
 const { Title, Paragraph, Text } = Typography;
 const { TextArea } = Input;
 
-export const BlogPostPage = () => {
+const BlogPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const [submitting, setSubmitting] = useState(false);
   const [form] = Form.useForm();
@@ -51,7 +42,7 @@ export const BlogPostPage = () => {
   const post = postData?.data;
 
   const handleSubmitComment = async (values: { content: string }) => {
-    if (!post) return;
+    if (post === null || post === undefined) return;
 
     setSubmitting(true);
     try {
@@ -98,7 +89,7 @@ export const BlogPostPage = () => {
     );
   }
 
-  if (!post) {
+  if (post === null || post === undefined) {
     return (
       <Layout>
         <ContainerStyled>
@@ -111,13 +102,12 @@ export const BlogPostPage = () => {
   return (
     <Layout>
       <ContainerStyled>
-        <Breadcrumb
+        <BreadcrumbStyled
           items={[
             { title: <Link to="/">Home</Link> },
             { title: <Link to="/blog">Blog</Link> },
             { title: post.title },
           ]}
-          style={{ marginBottom: 24 }}
         />
 
         {post.featured_image_url && (
@@ -134,9 +124,7 @@ export const BlogPostPage = () => {
                 {post.first_name} {post.last_name}
               </Text>
               <br />
-              <Text type="secondary" style={{ fontSize: 12 }}>
-                Author
-              </Text>
+              <SmallSecondaryText type="secondary">Author</SmallSecondaryText>
             </div>
           </AuthorInfoStyled>
 
@@ -196,9 +184,9 @@ export const BlogPostPage = () => {
                   avatar={<Avatar src={comment.avatar_url} icon={<UserOutlined />} />}
                   content={<Paragraph>{comment.content}</Paragraph>}
                   datetime={
-                    <Text type="secondary" style={{ fontSize: 12 }}>
+                    <SmallSecondaryText type="secondary">
                       {formatDate(comment.created_at)}
-                    </Text>
+                    </SmallSecondaryText>
                   }
                 />
               )}
@@ -211,3 +199,5 @@ export const BlogPostPage = () => {
     </Layout>
   );
 };
+
+export default BlogPostPage;

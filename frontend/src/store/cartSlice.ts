@@ -7,10 +7,11 @@ interface CartState {
 
 const getSessionId = () => {
   let sessionId = localStorage.getItem('cartSessionId');
-  if (!sessionId) {
-    sessionId = uuidv4();
-    localStorage.setItem('cartSessionId', sessionId);
+  if (sessionId) {
+    return sessionId;
   }
+  sessionId = uuidv4();
+  localStorage.setItem('cartSessionId', sessionId);
   return sessionId;
 };
 

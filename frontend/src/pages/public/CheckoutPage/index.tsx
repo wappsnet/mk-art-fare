@@ -49,7 +49,7 @@ interface CheckoutFormValues extends CreateAddressInput {
   notes?: string;
 }
 
-export const CheckoutPage = () => {
+const CheckoutPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const [form] = Form.useForm();
@@ -69,25 +69,23 @@ export const CheckoutPage = () => {
   const addresses = useMemo(() => addressesData?.data || [], [addressesData?.data]);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      message.info('Please login to proceed with checkout');
-      navigate('/login');
-      return;
-    }
-
-    if (items.length === 0) {
+    if (isAuthenticated) {
+      if (items.length > 0) {
+        // Auto-select first shipping address
+        if (addresses.length > 0 && selectedAddress === null) {
+          const shippingAddress = addresses.find((addr) => addr.address_type === 'shipping');
+          if (shippingAddress) {
+            setSelectedAddress(shippingAddress.id);
+          }
+        }
+        return;
+      }
       message.info('Your cart is empty');
       navigate('/cart');
       return;
     }
-
-    // Auto-select first shipping address
-    if (addresses.length > 0 && !selectedAddress) {
-      const shippingAddress = addresses.find((addr) => addr.address_type === 'shipping');
-      if (shippingAddress) {
-        setSelectedAddress(shippingAddress.id);
-      }
-    }
+    message.info('Please login to proceed with checkout');
+    navigate('/login');
   }, [isAuthenticated, navigate, items, addresses, selectedAddress]);
 
   const handlePlaceOrder = async (values: CheckoutFormValues) => {
@@ -112,46 +110,45 @@ export const CheckoutPage = () => {
         }
       }
 
-      if (!shippingAddressId) {
-        message.error('Please select or enter a shipping address');
+      if (shippingAddressId) {
+        // Create order
+        const orderResponse = await createOrder({
+          shipping_address_id: shippingAddressId,
+          payment_method: paymentMethod,
+          notes: values.notes || '',
+        }).unwrap();
+
+        if (orderResponse.data) {
+          // Clear cart
+          await clearCart('').unwrap();
+
+          // Show success modal
+          Modal.success({
+            title: 'Order Placed Successfully!',
+            content: (
+              <div>
+                <p>
+                  Order Number: <strong>{orderResponse.data.order_number}</strong>
+                </p>
+                <p>
+                  Total: <strong>${orderResponse.data.total.toFixed(2)}</strong>
+                </p>
+                <p>We'll send you an email confirmation shortly.</p>
+              </div>
+            ),
+            onOk: () => navigate('/dashboard'),
+          });
+        }
         return;
       }
-
-      // Create order
-      const orderResponse = await createOrder({
-        shipping_address_id: shippingAddressId,
-        payment_method: paymentMethod,
-        notes: values.notes || '',
-      }).unwrap();
-
-      if (orderResponse.data) {
-        // Clear cart
-        await clearCart('').unwrap();
-
-        // Show success modal
-        Modal.success({
-          title: 'Order Placed Successfully!',
-          content: (
-            <div>
-              <p>
-                Order Number: <strong>{orderResponse.data.order_number}</strong>
-              </p>
-              <p>
-                Total: <strong>${orderResponse.data.total.toFixed(2)}</strong>
-              </p>
-              <p>We'll send you an email confirmation shortly.</p>
-            </div>
-          ),
-          onOk: () => navigate('/dashboard'),
-        });
-      }
+      message.error('Please select or enter a shipping address');
     } catch (error) {
       message.error(getErrorMessage(error) || 'Failed to place order');
     }
   };
 
   const subtotal = total;
-  const shipping = 10.0; // Flat rate for now
+  const shipping = 10; // Flat rate for now
   const tax = subtotal * 0.08; // 8% tax
   const orderTotal = subtotal + shipping + tax;
 
@@ -395,3 +392,5 @@ export const CheckoutPage = () => {
     </Layout>
   );
 };
+
+export default CheckoutPage;

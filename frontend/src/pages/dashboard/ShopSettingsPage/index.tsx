@@ -1,18 +1,30 @@
 import { useState } from 'react';
 import { useParams } from 'react-router';
 import {
-  Card,
   Typography,
   Button,
   Space,
-  Modal,
+  Drawer,
   Form,
   Input,
   message,
   Upload,
   ColorPicker,
+  Row,
+  Col,
+  Divider,
+  Tag,
+  Descriptions,
 } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import type { Color } from 'antd/es/color-picker';
+import {
+  UploadOutlined,
+  ShopOutlined,
+  BgColorsOutlined,
+  PictureOutlined,
+  EditOutlined,
+  LinkOutlined,
+} from '@ant-design/icons';
 import {
   useGetOrganizationByIdQuery,
   useUpdateOrganizationMutation,
@@ -21,11 +33,22 @@ import {
   useUploadOrganizationBannerMutation,
 } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
-import { FullWidthSpaceStyled, LogoImageStyled, BannerImageStyled } from './styles';
+import {
+  PageContainer,
+  SectionCard,
+  LogoImageStyled,
+  BannerImageStyled,
+  ColorSwatchContainer,
+  ColorSwatch,
+  ImagePreviewContainer,
+  EmptyImageContainer,
+  FullWidthSpace,
+  CenteredSpace,
+} from './styles';
 
-const { Title, Text } = Typography;
+const { Title, Text, Paragraph } = Typography;
 
-export const ShopSettingsPage = () => {
+const ShopSettingsPage = () => {
   const { id } = useParams<{ id: string }>();
   const orgId = Number.parseInt(id!);
 
@@ -50,6 +73,11 @@ export const ShopSettingsPage = () => {
     description?: string;
   }
 
+  interface BrandingUpdateValues {
+    primaryColor: string | Color;
+    secondaryColor: string | Color;
+  }
+
   const handleShopUpdate = async (values: ShopUpdateValues) => {
     try {
       await updateOrganization({ id: orgId, data: values }).unwrap();
@@ -60,42 +88,17 @@ export const ShopSettingsPage = () => {
     }
   };
 
-  const handleBrandingUpdate = async (values: Record<string, unknown>) => {
+  const toHexString = (color: string | Color): string => {
+    return typeof color === 'string' ? color : color.toHexString();
+  };
+
+  const handleBrandingUpdate = async (values: BrandingUpdateValues) => {
     try {
-      const getPrimaryColor = (): string => {
-        const color = values.primaryColor;
-        if (
-          color &&
-          typeof color === 'object' &&
-          'toHexString' in color &&
-          typeof color.toHexString === 'function'
-        ) {
-          return color.toHexString();
-        }
-        return typeof color === 'string' ? color : '#1890ff';
-      };
-
-      const getSecondaryColor = (): string => {
-        const color = values.secondaryColor;
-        if (
-          color &&
-          typeof color === 'object' &&
-          'toHexString' in color &&
-          typeof color.toHexString === 'function'
-        ) {
-          return color.toHexString();
-        }
-        return typeof color === 'string' ? color : '#52c41a';
-      };
-
-      const primaryColor = getPrimaryColor();
-      const secondaryColor = getSecondaryColor();
-
       await updateTheme({
         id: orgId,
         theme: {
-          primaryColor,
-          secondaryColor,
+          primaryColor: toHexString(values.primaryColor),
+          secondaryColor: toHexString(values.secondaryColor),
         },
       }).unwrap();
 
@@ -116,51 +119,172 @@ export const ShopSettingsPage = () => {
     }
   };
 
-  if (!organization) {
+  if (organization === null || organization === undefined) {
     return <div>Loading...</div>;
   }
 
   return (
-    <div>
-      <Card>
-        <FullWidthSpaceStyled direction="vertical" size="large">
-          <div>
-            <Title level={4}>Basic Information</Title>
-            <Button type="primary" onClick={() => setIsShopModalOpen(true)}>
-              Edit Shop Details
-            </Button>
-          </div>
+    <PageContainer>
+      <Space direction="vertical" size="large">
+        <div>
+          <Title level={2}>
+            <ShopOutlined /> Shop Settings
+          </Title>
+          <Paragraph type="secondary">
+            Manage your shop information, branding, and appearance
+          </Paragraph>
+        </div>
 
-          <div>
-            <Title level={4}>Shop Information</Title>
-            <Space direction="vertical">
-              <Text>
-                <strong>Name:</strong> {organization.name}
-              </Text>
-              <Text>
-                <strong>URL:</strong> artfare.com/{organization.slug}
-              </Text>
-              <Text>
-                <strong>Description:</strong> {organization.description || 'No description'}
-              </Text>
-            </Space>
-          </div>
+        <Row gutter={[24, 24]}>
+          <Col xs={24} lg={12}>
+            {/* Basic Information Card */}
+            <SectionCard
+              title={
+                <Space>
+                  <ShopOutlined />
+                  <span>Basic Information</span>
+                </Space>
+              }
+              extra={
+                <Button
+                  type="primary"
+                  icon={<EditOutlined />}
+                  onClick={() => setIsShopModalOpen(true)}
+                >
+                  Edit
+                </Button>
+              }
+            >
+              <Descriptions column={1} bordered>
+                <Descriptions.Item label="Shop Name">
+                  <Text strong>{organization.name}</Text>
+                </Descriptions.Item>
+                <Descriptions.Item
+                  label={
+                    <Space>
+                      <LinkOutlined /> Shop URL
+                    </Space>
+                  }
+                >
+                  <Tag color="blue">artfare.com/{organization.slug}</Tag>
+                </Descriptions.Item>
+                <Descriptions.Item label="Description">
+                  {organization.description || <Text type="secondary">No description</Text>}
+                </Descriptions.Item>
+              </Descriptions>
+            </SectionCard>
 
-          <div>
-            <Title level={4}>Branding & Theme</Title>
-            <Button type="primary" onClick={() => setIsBrandingModalOpen(true)}>
-              Update Branding
-            </Button>
-          </div>
-        </FullWidthSpaceStyled>
-      </Card>
+            {/* Theme Colors Card */}
+            <SectionCard
+              title={
+                <Space>
+                  <BgColorsOutlined />
+                  <span>Theme Colors</span>
+                </Space>
+              }
+              extra={
+                <Button
+                  type="primary"
+                  icon={<EditOutlined />}
+                  onClick={() => setIsBrandingModalOpen(true)}
+                >
+                  Edit
+                </Button>
+              }
+            >
+              <Paragraph type="secondary">Customize your shop's color scheme</Paragraph>
+              <ColorSwatchContainer>
+                <ColorSwatch $color={organization.primary_color || '#1890ff'}>
+                  <div className="color-box" />
+                  <CenteredSpace>
+                    <Space direction="vertical" size={0}>
+                      <Text strong>Primary</Text>
+                      <Text type="secondary">{organization.primary_color || '#1890ff'}</Text>
+                    </Space>
+                  </CenteredSpace>
+                </ColorSwatch>
+                <ColorSwatch $color={organization.secondary_color || '#52c41a'}>
+                  <div className="color-box" />
+                  <CenteredSpace>
+                    <Space direction="vertical" size={0}>
+                      <Text strong>Secondary</Text>
+                      <Text type="secondary">{organization.secondary_color || '#52c41a'}</Text>
+                    </Space>
+                  </CenteredSpace>
+                </ColorSwatch>
+              </ColorSwatchContainer>
+            </SectionCard>
+          </Col>
 
-      {/* Shop Details Modal */}
-      <Modal
+          <Col xs={24} lg={12}>
+            {/* Branding Images Card */}
+            <SectionCard
+              title={
+                <Space>
+                  <PictureOutlined />
+                  <span>Branding Images</span>
+                </Space>
+              }
+              extra={
+                <Button
+                  type="primary"
+                  icon={<EditOutlined />}
+                  onClick={() => setIsBrandingModalOpen(true)}
+                >
+                  Edit
+                </Button>
+              }
+            >
+              <Space direction="vertical" size="large">
+                <FullWidthSpace>
+                  <Text strong>Logo</Text>
+                  <ImagePreviewContainer>
+                    {organization.logo_url ? (
+                      <LogoImageStyled src={organization.logo_url} alt="Shop logo" />
+                    ) : (
+                      <EmptyImageContainer>
+                        <PictureOutlined className="empty-icon" />
+                        <div>No logo uploaded</div>
+                      </EmptyImageContainer>
+                    )}
+                  </ImagePreviewContainer>
+                </FullWidthSpace>
+
+                <Divider />
+
+                <FullWidthSpace>
+                  <Text strong>Banner</Text>
+                  <ImagePreviewContainer>
+                    {organization.banner_url ? (
+                      <BannerImageStyled src={organization.banner_url} alt="Shop banner" />
+                    ) : (
+                      <EmptyImageContainer>
+                        <PictureOutlined className="empty-icon" />
+                        <div>No banner uploaded</div>
+                      </EmptyImageContainer>
+                    )}
+                  </ImagePreviewContainer>
+                </FullWidthSpace>
+              </Space>
+            </SectionCard>
+          </Col>
+        </Row>
+      </Space>
+
+      {/* Shop Details Drawer */}
+      <Drawer
         title="Edit Shop Details"
         open={isShopModalOpen}
-        onCancel={() => setIsShopModalOpen(false)}
-        footer={null}
+        onClose={() => setIsShopModalOpen(false)}
+        width={500}
+        footer={
+          <Space>
+            <Button onClick={() => setIsShopModalOpen(false)}>Cancel</Button>
+            <Button type="primary" onClick={() => shopForm.submit()} loading={isUpdatingOrg}>
+              Update
+            </Button>
+          </Space>
+        }
       >
         <Form
           form={shopForm}
@@ -177,23 +301,27 @@ export const ShopSettingsPage = () => {
           <Form.Item name="description" label="Description">
             <Input.TextArea rows={4} />
           </Form.Item>
-          <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit" loading={isUpdatingOrg}>
-                Update
-              </Button>
-              <Button onClick={() => setIsShopModalOpen(false)}>Cancel</Button>
-            </Space>
-          </Form.Item>
         </Form>
-      </Modal>
+      </Drawer>
 
-      {/* Branding Modal */}
-      <Modal
+      {/* Branding Drawer */}
+      <Drawer
         title="Update Branding"
         open={isBrandingModalOpen}
-        onCancel={() => setIsBrandingModalOpen(false)}
-        footer={null}
+        onClose={() => setIsBrandingModalOpen(false)}
+        width={600}
+        footer={
+          <Space>
+            <Button onClick={() => setIsBrandingModalOpen(false)}>Cancel</Button>
+            <Button
+              type="primary"
+              onClick={() => brandingForm.submit()}
+              loading={isUpdatingTheme || isUploadingLogo || isUploadingBanner}
+            >
+              Update
+            </Button>
+          </Space>
+        }
       >
         <Form
           form={brandingForm}
@@ -241,21 +369,10 @@ export const ShopSettingsPage = () => {
           <Form.Item name="secondaryColor" label="Secondary Color">
             <ColorPicker showText />
           </Form.Item>
-
-          <Form.Item>
-            <Space>
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={isUpdatingTheme || isUploadingLogo || isUploadingBanner}
-              >
-                Update
-              </Button>
-              <Button onClick={() => setIsBrandingModalOpen(false)}>Cancel</Button>
-            </Space>
-          </Form.Item>
         </Form>
-      </Modal>
-    </div>
+      </Drawer>
+    </PageContainer>
   );
 };
+
+export default ShopSettingsPage;

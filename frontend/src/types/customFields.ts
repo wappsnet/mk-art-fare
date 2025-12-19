@@ -145,14 +145,19 @@ export interface FieldValue {
   id?: number;
   product_id: number;
   field_definition_id: number;
-  value: any; // Can be string, number, boolean, array, object depending on field type
+  value: unknown; // Can be string, number, boolean, array, object depending on field type
   field_definition?: FieldDefinition;
+  // Additional properties from JOIN with field_definitions
+  name?: string;
+  label?: string;
+  field_type?: FieldType;
+  options?: FieldOption[];
   created_at?: string;
   updated_at?: string;
 }
 
 export interface ProductFieldValues {
-  [fieldDefinitionId: number]: any;
+  [fieldDefinitionId: number]: unknown;
 }
 
 // ==================== FILE/IMAGE METADATA ====================

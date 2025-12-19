@@ -520,7 +520,22 @@ class CustomFieldService {
     } else if (fieldType === 'time') {
       actualValue = value.value_time;
     } else if (['checkbox', 'image', 'file'].includes(fieldType)) {
-      actualValue = value.value_json ? JSON.parse(value.value_json) : null;
+      if (value.value_json) {
+        try {
+          actualValue = JSON.parse(value.value_json);
+        } catch (error) {
+          console.error('Failed to parse JSON field value:', {
+            fieldType,
+            fieldId: value.field_definition_id,
+            productId: value.product_id,
+            rawValue: value.value_json,
+            error: error.message,
+          });
+          actualValue = null;
+        }
+      } else {
+        actualValue = null;
+      }
     } else if (fieldType === 'richtext') {
       actualValue = value.value_longtext;
     } else {

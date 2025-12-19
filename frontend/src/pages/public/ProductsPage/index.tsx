@@ -11,11 +11,17 @@ import {
   Pagination,
   Drawer,
   Select,
+  Space,
 } from 'antd';
 import { SearchOutlined, ShoppingCartOutlined, FilterOutlined } from '@ant-design/icons';
 import { Link } from 'react-router';
 import { Layout } from '@/components/Layout';
-import { useGetProductsQuery, useGetGlobalCategoriesQuery } from '@/services/apiSlice';
+import {
+  useGetProductsQuery,
+  useGetGlobalCategoriesQuery,
+  useGetProductFilterFieldsQuery,
+} from '@/services/apiSlice';
+import { CustomFieldFilter } from '@/components/CustomFieldFilter';
 import {
   PageContainerStyled,
   PageHeaderStyled,
@@ -37,17 +43,21 @@ import {
 const { Title, Text } = Typography;
 const { Search } = Input;
 
-export const ProductsPage = () => {
+const ProductsPage = () => {
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
+  const [customFieldFilters, setCustomFieldFilters] = useState<Record<string, string>>({});
   const [page, setPage] = useState(1);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const limit = 12;
 
   const { data: categoriesData } = useGetGlobalCategoriesQuery();
   const categories = categoriesData?.data || [];
+
+  const { data: filterFieldsData } = useGetProductFilterFieldsQuery();
+  const filterFields = filterFieldsData?.data || [];
 
   // Debounce search input
   useEffect(() => {
@@ -59,11 +69,18 @@ export const ProductsPage = () => {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
+  // Build custom fields query string (format: fieldId1:value1,fieldId2:value2)
+  const customFieldsQuery = Object.entries(customFieldFilters)
+    .filter(([_, value]) => value.trim())
+    .map(([fieldId, value]) => `${fieldId}:${value}`)
+    .join(',');
+
   const { data: productsData, isLoading: loading } = useGetProductsQuery({
     search,
     category: selectedCategories.length > 0 ? selectedCategories.join(',') : undefined,
     minPrice: priceRange[0],
     maxPrice: priceRange[1],
+    customFields: customFieldsQuery || undefined,
     page,
     limit,
   });
@@ -92,6 +109,7 @@ export const ProductsPage = () => {
     setSearch('');
     setSelectedCategories([]);
     setPriceRange([0, 10000]);
+    setCustomFieldFilters({});
     setPage(1);
   };
 
@@ -145,6 +163,32 @@ export const ProductsPage = () => {
           />
         </PriceSliderWrapperStyled>
       </FilterSectionStyled>
+
+      {filterFields.length > 0 && (
+        <FilterSectionStyled>
+          <Title level={5}>Custom Filters</Title>
+          <Space direction="vertical" style={{ width: '100%' }} size="middle">
+            {filterFields.map((field) => (
+              <div key={field.id}>
+                <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
+                  {field.label || field.name}
+                </Text>
+                <CustomFieldFilter
+                  field={field}
+                  value={customFieldFilters[field.id] || ''}
+                  onChange={(value) => {
+                    setCustomFieldFilters((prev) => ({
+                      ...prev,
+                      [field.id]: value,
+                    }));
+                    setPage(1);
+                  }}
+                />
+              </div>
+            ))}
+          </Space>
+        </FilterSectionStyled>
+      )}
 
       <Button block onClick={handleClearFilters}>
         Clear All Filters
@@ -240,9 +284,7 @@ export const ProductsPage = () => {
                             <Title level={5} ellipsis={{ rows: 2 }}>
                               {product.name}
                             </Title>
-                            <ProductPriceStyled>
-                              ${product.price.toFixed(2)}
-                            </ProductPriceStyled>
+                            <ProductPriceStyled>${product.price.toFixed(2)}</ProductPriceStyled>
                             <Button type="primary" icon={<ShoppingCartOutlined />} block>
                               Add to Cart
                             </Button>
@@ -271,3 +313,5 @@ export const ProductsPage = () => {
     </Layout>
   );
 };
+
+export default ProductsPage;

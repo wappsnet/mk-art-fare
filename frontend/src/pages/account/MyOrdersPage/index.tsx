@@ -1,13 +1,12 @@
 import { Card, Table, Tag, Typography, Empty, Space } from 'antd';
-import { ShoppingOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useGetOrdersQuery } from '@/services/apiSlice';
 import { Order, OrderStatus } from '@/types/common';
-import { OrdersContainerStyled } from './styles';
+import { OrdersContainerStyled, PriceTextStyled, EmptyIcon } from './styles';
 
 const { Title, Text } = Typography;
 
-export const MyOrdersPage = () => {
+const MyOrdersPage = () => {
   const { data: ordersData, isLoading } = useGetOrdersQuery();
   const orders = ordersData?.data || [];
 
@@ -37,9 +36,7 @@ export const MyOrdersPage = () => {
       dataIndex: 'total',
       key: 'total',
       render: (total: number) => (
-        <Text strong style={{ color: '#52c41a' }}>
-          ${total?.toFixed(2) || '0.00'}
-        </Text>
+        <PriceTextStyled strong>${total?.toFixed(2) || '0.00'}</PriceTextStyled>
       ),
     },
     {
@@ -82,7 +79,7 @@ export const MyOrdersPage = () => {
       ) : (
         <Card>
           <Empty
-            image={<ShoppingOutlined style={{ fontSize: 64, color: '#bfbfbf' }} />}
+            image={<EmptyIcon />}
             description={
               <Space direction="vertical">
                 <Title level={4}>No orders yet</Title>
@@ -95,3 +92,5 @@ export const MyOrdersPage = () => {
     </OrdersContainerStyled>
   );
 };
+
+export default MyOrdersPage;

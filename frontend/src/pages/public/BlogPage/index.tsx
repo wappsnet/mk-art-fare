@@ -20,7 +20,7 @@ import {
 const { Title, Paragraph, Text } = Typography;
 const { Search } = Input;
 
-export const BlogPage = () => {
+const BlogPage = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const limit = 9;
@@ -153,3 +153,5 @@ export const BlogPage = () => {
     </Layout>
   );
 };
+
+export default BlogPage;

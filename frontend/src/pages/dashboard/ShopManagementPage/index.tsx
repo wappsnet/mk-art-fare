@@ -4,10 +4,11 @@ import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Layout } from '@/components/Layout';
 import { useGetOrganizationByIdQuery } from '@/services/apiSlice';
 import { ContainerStyled, HeaderStyled, OutletWrapperStyled } from './styles';
+import { useMemo } from 'react';
 
 const { Title } = Typography;
 
-export const ShopManagementPage = () => {
+const ShopManagementPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -20,6 +21,36 @@ export const ShopManagementPage = () => {
     navigate(path);
   };
 
+  const tabItems = useMemo(
+    () => [
+      {
+        key: `/dashboard/shop/${id}/products`,
+        label: 'Products',
+      },
+      {
+        key: `/dashboard/shop/${id}/categories`,
+        label: 'Categories',
+      },
+      {
+        key: `/dashboard/shop/${id}/orders`,
+        label: 'Orders',
+      },
+      {
+        key: `/dashboard/shop/${id}/analytics`,
+        label: 'Analytics',
+      },
+      {
+        key: `/dashboard/shop/${id}/custom-fields`,
+        label: 'Custom Fields',
+      },
+      {
+        key: `/dashboard/shop/${id}/settings`,
+        label: 'Settings',
+      },
+    ],
+    [id]
+  );
+
   if (isLoading) {
     return (
       <Layout>
@@ -30,7 +61,7 @@ export const ShopManagementPage = () => {
     );
   }
 
-  if (!organization) {
+  if (organization === null || organization === undefined) {
     return (
       <Layout>
         <ContainerStyled>
@@ -39,33 +70,6 @@ export const ShopManagementPage = () => {
       </Layout>
     );
   }
-
-  const tabItems = [
-    {
-      key: `/dashboard/shop/${id}/products`,
-      label: 'Products',
-    },
-    {
-      key: `/dashboard/shop/${id}/categories`,
-      label: 'Categories',
-    },
-    {
-      key: `/dashboard/shop/${id}/orders`,
-      label: 'Orders',
-    },
-    {
-      key: `/dashboard/shop/${id}/analytics`,
-      label: 'Analytics',
-    },
-    {
-      key: `/dashboard/shop/${id}/custom-fields`,
-      label: 'Custom Fields',
-    },
-    {
-      key: `/dashboard/shop/${id}/settings`,
-      label: 'Settings',
-    },
-  ];
 
   return (
     <Layout>
@@ -86,7 +90,12 @@ export const ShopManagementPage = () => {
         </HeaderStyled>
 
         <Card>
-          <Tabs activeKey={location.pathname} onChange={handleTabChange} items={tabItems} />
+          <Tabs
+            defaultActiveKey={tabItems[0].key}
+            activeKey={location.pathname}
+            onChange={handleTabChange}
+            items={tabItems}
+          />
 
           <OutletWrapperStyled>
             <Outlet />
@@ -96,3 +105,5 @@ export const ShopManagementPage = () => {
     </Layout>
   );
 };
+
+export default ShopManagementPage;

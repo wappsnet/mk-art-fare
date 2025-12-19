@@ -11,12 +11,18 @@ import {
   Spin,
   message,
   Breadcrumb,
+  Descriptions,
 } from 'antd';
 import { ShoppingCartOutlined, ShopOutlined, ZoomInOutlined } from '@ant-design/icons';
 import Zoom from 'react-medium-image-zoom';
 import 'react-medium-image-zoom/dist/styles.css';
 import { Layout } from '@/components/Layout';
-import { useGetProductQuery, useAddToCartMutation } from '@/services/apiSlice';
+import {
+  useGetProductQuery,
+  useAddToCartMutation,
+  useGetProductFieldValuesQuery,
+} from '@/services/apiSlice';
+import { FieldValueDisplay } from '@/components/FieldValueDisplay';
 import {
   ContainerStyled,
   ImageGalleryStyled,
@@ -33,7 +39,7 @@ import {
 
 const { Title, Paragraph, Text } = Typography;
 
-export const ProductDetailPage = () => {
+const ProductDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -45,14 +51,20 @@ export const ProductDetailPage = () => {
 
   const product = productData?.data;
 
-  const handleAddToCart = async () => {
-    if (!product) return;
+  // Fetch custom field values for the product
+  const { data: fieldValuesData } = useGetProductFieldValuesQuery(product?.id || 0, {
+    skip: !product?.id,
+  });
+  const fieldValues = fieldValuesData?.data || [];
 
-    try {
-      await addToCart({ productId: product.id, quantity }).unwrap();
-      message.success('Added to cart!');
-    } catch {
-      message.error('Failed to add to cart');
+  const handleAddToCart = async () => {
+    if (product) {
+      try {
+        await addToCart({ productId: product.id, quantity }).unwrap();
+        message.success('Added to cart!');
+      } catch {
+        message.error('Failed to add to cart');
+      }
     }
   };
 
@@ -68,20 +80,11 @@ export const ProductDetailPage = () => {
     );
   }
 
-  if (!product) {
+  if (product) {
+    const images = product.images || [];
+    const currentImage = images[selectedImageIndex];
+
     return (
-      <Layout>
-        <ContainerStyled>
-          <Title level={3}>Product not found</Title>
-        </ContainerStyled>
-      </Layout>
-    );
-  }
-
-  const images = product.images || [];
-  const currentImage = images[selectedImageIndex];
-
-  return (
     <Layout>
       <ContainerStyled>
         <Breadcrumb
@@ -174,6 +177,20 @@ export const ProductDetailPage = () => {
               </>
             )}
 
+            {fieldValues.length > 0 && (
+              <>
+                <Title level={5}>Product Details</Title>
+                <Descriptions column={1} bordered size="small">
+                  {fieldValues.map((field) => (
+                    <Descriptions.Item key={field.id} label={field.label || field.name}>
+                      <FieldValueDisplay field={field} />
+                    </Descriptions.Item>
+                  ))}
+                </Descriptions>
+                <Divider />
+              </>
+            )}
+
             <QuantityContainerStyled>
               <Text strong>Quantity:</Text>
               <InputNumber
@@ -200,5 +217,16 @@ export const ProductDetailPage = () => {
         </Row>
       </ContainerStyled>
     </Layout>
+    );
+  }
+
+  return (
+    <Layout>
+      <ContainerStyled>
+        <Title level={3}>Product not found</Title>
+      </ContainerStyled>
+    </Layout>
   );
 };
+
+export default ProductDetailPage;

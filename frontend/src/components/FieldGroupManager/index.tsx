@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Button, Table, Space, Modal, Form, Input, message, Popconfirm } from 'antd';
+import { Card, Button, Table, Space, Drawer, Form, Input, message, Popconfirm } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SettingOutlined } from '@ant-design/icons';
 import {
   useGetFieldGroupsQuery,
@@ -145,12 +145,23 @@ const FieldGroupManager: React.FC<FieldGroupManagerProps> = ({ organizationId })
         />
       </Card>
 
-      <Modal
+      <Drawer
         title={editingGroup ? 'Edit Field Group' : 'Create Field Group'}
         open={isModalOpen}
-        onOk={form.submit}
-        onCancel={() => setIsModalOpen(false)}
-        confirmLoading={isCreating || isUpdating}
+        onClose={() => setIsModalOpen(false)}
+        width={500}
+        footer={
+          <Space>
+            <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
+            <Button
+              type="primary"
+              onClick={() => form.submit()}
+              loading={isCreating || isUpdating}
+            >
+              {editingGroup ? 'Update' : 'Create'}
+            </Button>
+          </Space>
+        }
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Form.Item
@@ -167,7 +178,7 @@ const FieldGroupManager: React.FC<FieldGroupManagerProps> = ({ organizationId })
             />
           </Form.Item>
         </Form>
-      </Modal>
+      </Drawer>
 
       {selectedGroup && (
         <FieldDefinitionBuilder

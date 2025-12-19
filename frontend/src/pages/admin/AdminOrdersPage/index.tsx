@@ -15,7 +15,7 @@ import { ContainerStyled, HeaderStyled, StatCardStyled } from './styles';
 const { Title, Text } = Typography;
 const { Option } = Select;
 
-export const AdminOrdersPage = () => {
+const AdminOrdersPage = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const { data: ordersData, isLoading } = useGetOrdersQuery();
@@ -192,3 +192,5 @@ export const AdminOrdersPage = () => {
     </Layout>
   );
 };
+
+export default AdminOrdersPage;

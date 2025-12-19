@@ -12,6 +12,8 @@ import {
   Address,
   CreateAddressInput,
   RegisterFormData,
+  OrganizationTheme,
+  ProductImage,
 } from '@/types/common';
 import {
   FieldGroup,
@@ -92,6 +94,8 @@ export const api = createApi({
   tagTypes: [
     'User',
     'Product',
+    'ProductFieldGroups',
+    'ProductFieldValues',
     'Cart',
     'Order',
     'Blog',
@@ -130,12 +134,32 @@ export const api = createApi({
       }),
       invalidatesTags: ['User', 'Cart', 'Order'],
     }),
+    forgotPassword: builder.mutation<ApiResponse<{ message: string }>, { email: string }>({
+      query: (data) => ({
+        url: '/auth/forgot-password',
+        method: 'POST',
+        body: data,
+      }),
+    }),
+    resetPassword: builder.mutation<
+      ApiResponse<{ message: string }>,
+      { token: string; password: string }
+    >({
+      query: (data) => ({
+        url: '/auth/reset-password',
+        method: 'POST',
+        body: data,
+      }),
+    }),
     getProfile: builder.query<ApiResponse<User>, void>({
       query: () => '/auth/profile',
       providesTags: ['User'],
     }),
 
     // Product endpoints
+    getProductFilterFields: builder.query<ApiResponse<FieldDefinition[]>, void>({
+      query: () => '/products/filter-fields',
+    }),
     getProducts: builder.query<
       ApiResponse<{ products: Product[]; total: number; page: number; limit: number }>,
       {
@@ -143,6 +167,7 @@ export const api = createApi({
         minPrice?: number;
         maxPrice?: number;
         category?: string;
+        customFields?: string;
         page?: number;
         limit?: number;
       }
@@ -152,6 +177,7 @@ export const api = createApi({
         if (params.search) queryParams.append('search', params.search);
         if (params.minPrice) queryParams.append('minPrice', params.minPrice.toString());
         if (params.maxPrice) queryParams.append('maxPrice', params.maxPrice.toString());
+        if (params.customFields) queryParams.append('customFields', params.customFields);
         if (params.category) queryParams.append('category', params.category);
         if (params.page) queryParams.append('page', params.page.toString());
         if (params.limit) queryParams.append('limit', params.limit.toString());
@@ -174,7 +200,7 @@ export const api = createApi({
     updateProduct: builder.mutation<ApiResponse<Product>, { id: number; data: Partial<Product> }>({
       query: ({ id, data }) => ({
         url: `/products/${id}`,
-        method: 'PUT',
+        method: 'PATCH',
         body: data,
       }),
       invalidatesTags: ['Product'],
@@ -311,7 +337,6 @@ export const api = createApi({
       invalidatesTags: ['Blog'],
     }),
 
-
     // Organization endpoints
     getOrganizations: builder.query<ApiResponse<Organization[]>, void>({
       query: () => '/organizations',
@@ -358,7 +383,7 @@ export const api = createApi({
     }),
     updateOrganizationTheme: builder.mutation<
       ApiResponse<unknown>,
-      { id: number; theme: Record<string, unknown> }
+      { id: number; theme: OrganizationTheme }
     >({
       query: ({ id, theme }) => ({
         url: `/organizations/${id}/theme`,
@@ -517,7 +542,7 @@ export const api = createApi({
 
     // Product Image endpoints
     addProductImage: builder.mutation<
-      ApiResponse<unknown>,
+      ApiResponse<ProductImage>,
       { productId: number; data: { url: string; alt_text?: string; is_thumbnail?: boolean } }
     >({
       query: ({ productId, data }) => ({
@@ -528,7 +553,7 @@ export const api = createApi({
       invalidatesTags: ['Product'],
     }),
     updateProductImage: builder.mutation<
-      ApiResponse<unknown>,
+      ApiResponse<ProductImage>,
       {
         productId: number;
         imageId: number;
@@ -552,7 +577,7 @@ export const api = createApi({
       }
     ),
     reorderProductImages: builder.mutation<
-      ApiResponse<unknown>,
+      ApiResponse<ProductImage[]>,
       { productId: number; imageOrders: { id: number; sort_order: number }[] }
     >({
       query: ({ productId, imageOrders }) => ({
@@ -660,7 +685,10 @@ export const api = createApi({
         method: 'POST',
         body: { fieldGroupId },
       }),
-      invalidatesTags: ['Product'],
+      invalidatesTags: (_result, _error, { productId }) => [
+        { type: 'Product', id: productId },
+        { type: 'ProductFieldGroups', id: productId },
+      ],
     }),
     unassignFieldGroupFromProduct: builder.mutation<
       ApiResponse<void>,
@@ -670,17 +698,21 @@ export const api = createApi({
         url: `/products/${productId}/field-groups/${fieldGroupId}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ['Product'],
+      invalidatesTags: (_result, _error, { productId }) => [
+        { type: 'Product', id: productId },
+        { type: 'ProductFieldGroups', id: productId },
+        { type: 'ProductFieldValues', id: productId },
+      ],
     }),
     getProductFieldGroups: builder.query<ApiResponse<FieldGroup[]>, number>({
       query: (productId) => `/products/${productId}/field-groups`,
-      providesTags: ['Product'],
+      providesTags: (_result, _error, productId) => [{ type: 'ProductFieldGroups', id: productId }],
     }),
 
     // Product Field Values endpoints
     getProductFieldValues: builder.query<ApiResponse<FieldValue[]>, number>({
       query: (productId) => `/products/${productId}/fields`,
-      providesTags: ['Product'],
+      providesTags: (_result, _error, productId) => [{ type: 'ProductFieldValues', id: productId }],
     }),
     batchUpdateProductFieldValues: builder.mutation<
       ApiResponse<FieldValue[]>,
@@ -691,18 +723,24 @@ export const api = createApi({
         method: 'POST',
         body: { fields },
       }),
-      invalidatesTags: ['Product'],
+      invalidatesTags: (_result, _error, { productId }) => [
+        { type: 'Product', id: productId },
+        { type: 'ProductFieldValues', id: productId },
+      ],
     }),
     updateProductFieldValue: builder.mutation<
       ApiResponse<FieldValue>,
-      { productId: number; fieldId: number; value: any }
+      { productId: number; fieldId: number; value: unknown }
     >({
       query: ({ productId, fieldId, value }) => ({
         url: `/products/${productId}/fields/${fieldId}`,
         method: 'PATCH',
         body: { value },
       }),
-      invalidatesTags: ['Product'],
+      invalidatesTags: (_result, _error, { productId }) => [
+        { type: 'Product', id: productId },
+        { type: 'ProductFieldValues', id: productId },
+      ],
     }),
     deleteProductFieldValue: builder.mutation<
       ApiResponse<void>,
@@ -712,7 +750,10 @@ export const api = createApi({
         url: `/products/${productId}/fields/${fieldId}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ['Product'],
+      invalidatesTags: (_result, _error, { productId }) => [
+        { type: 'Product', id: productId },
+        { type: 'ProductFieldValues', id: productId },
+      ],
     }),
   }),
 });
@@ -722,6 +763,7 @@ export const {
   useRegisterMutation,
   useLogoutMutation,
   useGetProfileQuery,
+  useGetProductFilterFieldsQuery,
   useGetProductsQuery,
   useGetProductQuery,
   useCreateProductMutation,
@@ -757,6 +799,8 @@ export const {
   useUpdateUserMutation,
   useUpdateProfileMutation,
   useChangePasswordMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation,
   useGetUserAddressesQuery,
   useCreateUserAddressMutation,
   useGetDashboardStatsQuery,

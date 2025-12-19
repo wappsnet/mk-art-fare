@@ -83,14 +83,15 @@ app.get('/health', (_req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/organizations', organizationRoutes);
-app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/admin', adminModerationRoutes);
 app.use('/api/field-groups', fieldGroupRoutes);
+// Product routes must come after productFieldRoutes to avoid route conflicts
 app.use('/api/products', productFieldRoutes);
+app.use('/api/products', productRoutes);
 
 // Error handling
 app.use(notFoundHandler);

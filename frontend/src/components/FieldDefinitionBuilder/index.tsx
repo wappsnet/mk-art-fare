@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
 import {
-  Modal,
+  Drawer,
   Form,
   Input,
   Select,
   Switch,
   Button,
   Space,
-  Card,
   List,
   InputNumber,
   message,
   Divider,
+  Typography,
 } from 'antd';
 import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { FieldCard, FullWidthSpace, FieldMeta, FieldHelp } from './styles';
 import {
   useGetFieldGroupQuery,
   useCreateFieldDefinitionMutation,
@@ -130,30 +131,27 @@ const FieldDefinitionBuilder: React.FC<FieldDefinitionBuilderProps> = ({ fieldGr
   const needsOptions = [FieldType.SELECT, FieldType.RADIO, FieldType.CHECKBOX].includes(fieldType);
 
   return (
-    <Modal
+    <Drawer
       title={`Manage Fields - ${fieldGroup.name}`}
       open={true}
-      onCancel={onClose}
-      footer={null}
+      onClose={onClose}
       width={800}
+      footer={
+        <Space>
+          <Button onClick={onClose}>Close</Button>
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleAddField}>
+            Add Field
+          </Button>
+        </Space>
+      }
     >
-      <Button
-        type="primary"
-        icon={<PlusOutlined />}
-        onClick={handleAddField}
-        style={{ marginBottom: 16 }}
-      >
-        Add Field
-      </Button>
-
       <List
         loading={isLoading}
         dataSource={fields}
         renderItem={(field) => (
-          <Card
+          <FieldCard
             key={field.id}
             size="small"
-            style={{ marginBottom: 8 }}
             extra={
               <Space>
                 <Button
@@ -172,29 +170,33 @@ const FieldDefinitionBuilder: React.FC<FieldDefinitionBuilderProps> = ({ fieldGr
               </Space>
             }
           >
-            <Space direction="vertical" style={{ width: '100%' }}>
-              <div>
+            <FullWidthSpace direction="vertical">
+              <Typography.Text>
                 <strong>{field.label}</strong> ({field.name})
-              </div>
-              <div style={{ fontSize: 12, color: '#666' }}>
+              </Typography.Text>
+              <FieldMeta>
                 Type: {field.field_type} | Searchable: {field.is_searchable ? 'Yes' : 'No'} |
                 Filterable: {field.is_filterable ? 'Yes' : 'No'}
-              </div>
-              {field.help_text && (
-                <div style={{ fontSize: 12, fontStyle: 'italic' }}>{field.help_text}</div>
-              )}
-            </Space>
-          </Card>
+              </FieldMeta>
+              {field.help_text && <FieldHelp>{field.help_text}</FieldHelp>}
+            </FullWidthSpace>
+          </FieldCard>
         )}
       />
 
-      <Modal
+      <Drawer
         title={editingField ? 'Edit Field' : 'Add Field'}
         open={isFieldModalOpen}
-        onOk={form.submit}
-        onCancel={() => setIsFieldModalOpen(false)}
-        confirmLoading={isCreating || isUpdating}
+        onClose={() => setIsFieldModalOpen(false)}
         width={700}
+        footer={
+          <Space>
+            <Button onClick={() => setIsFieldModalOpen(false)}>Cancel</Button>
+            <Button type="primary" onClick={() => form.submit()} loading={isCreating || isUpdating}>
+              {editingField ? 'Update Field' : 'Create Field'}
+            </Button>
+          </Space>
+        }
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Form.Item
@@ -245,7 +247,7 @@ const FieldDefinitionBuilder: React.FC<FieldDefinitionBuilderProps> = ({ fieldGr
               <Form.List name="options">
                 {(fields, { add, remove }) => (
                   <>
-                    {fields.map((field, index) => (
+                    {fields.map((field) => (
                       <Space key={field.key} style={{ marginBottom: 8 }}>
                         <Form.Item
                           {...field}
@@ -330,8 +332,8 @@ const FieldDefinitionBuilder: React.FC<FieldDefinitionBuilderProps> = ({ fieldGr
             <Switch />
           </Form.Item>
         </Form>
-      </Modal>
-    </Modal>
+      </Drawer>
+    </Drawer>
   );
 };
 

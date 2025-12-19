@@ -4,6 +4,8 @@ import { dashboardRoutes } from './dashboardRoutes';
 import { accountRoutes } from './accountRoutes';
 import { adminRoutes } from './adminRoutes';
 import { convertRoutes } from '@/utils/routeHelpers.ts';
+import NotFoundPage from '@/pages/errors/NotFoundPage';
+import ForbiddenPage from '@/pages/errors/ForbiddenPage';
 
 const router = createBrowserRouter(
   [
@@ -12,8 +14,12 @@ const router = createBrowserRouter(
     ...convertRoutes(accountRoutes),
     ...convertRoutes(adminRoutes),
     {
+      path: '/403',
+      element: <ForbiddenPage />,
+    },
+    {
       path: '*',
-      element: <div>404 - Page Not Found</div>,
+      element: <NotFoundPage />,
     },
   ],
   {

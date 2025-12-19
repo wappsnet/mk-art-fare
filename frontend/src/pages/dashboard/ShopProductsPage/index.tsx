@@ -7,6 +7,7 @@ import {
   Typography,
   Button,
   Space,
+  Drawer,
   Modal,
   Form,
   Input,
@@ -45,7 +46,7 @@ import {
 const { Text } = Typography;
 const { Option } = Select;
 
-export const ShopProductsPage = () => {
+const ShopProductsPage = () => {
   const { id } = useParams<{ id: string }>();
   const orgId = Number.parseInt(id!);
 
@@ -83,19 +84,37 @@ export const ShopProductsPage = () => {
   // Load field groups and values when editing a product
   useEffect(() => {
     if (productFieldGroups?.data) {
+      console.log('Loading field groups for product:', editingProduct?.id, productFieldGroups.data);
       setSelectedFieldGroups(productFieldGroups.data.map((g) => g.id));
     }
-  }, [productFieldGroups]);
+  }, [productFieldGroups, editingProduct?.id]);
 
   useEffect(() => {
     if (productFieldValues?.data) {
+      console.log('Loading field values for product:', editingProduct?.id, productFieldValues.data);
       const fieldValuesMap: ProductFieldValues = {};
       productFieldValues.data.forEach((fv) => {
-        fieldValuesMap[fv.field_definition_id] = fv.value;
+        let parsedValue = fv.value;
+
+        // Try to parse JSON strings back to arrays/objects
+        if (
+          typeof fv.value === 'string' &&
+          (fv.value.startsWith('[') || fv.value.startsWith('{'))
+        ) {
+          try {
+            parsedValue = JSON.parse(fv.value);
+          } catch (e) {
+            // If parsing fails, keep the original string value
+            console.warn('Failed to parse field value:', fv.value, e);
+          }
+        }
+
+        fieldValuesMap[fv.field_definition_id] = parsedValue;
       });
+      console.log('Field values map:', fieldValuesMap);
       setCustomFieldValues(fieldValuesMap);
     }
-  }, [productFieldValues]);
+  }, [productFieldValues, editingProduct?.id]);
 
   // Get all fields from selected field groups
   const allCustomFields =
@@ -105,6 +124,9 @@ export const ShopProductsPage = () => {
 
   const openProductModal = (product?: Product) => {
     setEditingProduct(product || null);
+    setSelectedFieldGroups([]);
+    setCustomFieldValues({});
+
     if (product) {
       productForm.setFieldsValue({
         name: product.name,
@@ -117,8 +139,6 @@ export const ShopProductsPage = () => {
       // Custom field groups and values will be loaded by useEffect hooks
     } else {
       productForm.resetFields();
-      setSelectedFieldGroups([]);
-      setCustomFieldValues({});
     }
     setIsProductModalOpen(true);
   };
@@ -127,7 +147,6 @@ export const ShopProductsPage = () => {
     try {
       const productData = {
         ...values,
-        price: String(values.price),
       };
 
       let productId: number;
@@ -138,7 +157,7 @@ export const ShopProductsPage = () => {
         message.success('Product updated successfully!');
       } else {
         const result = await createProduct({ organization_id: orgId, ...productData }).unwrap();
-        productId = result.data.id;
+        productId = result.data!.id;
         message.success('Product created successfully!');
       }
 
@@ -166,17 +185,34 @@ export const ShopProductsPage = () => {
 
       // Save custom field values
       if (Object.keys(customFieldValues).length > 0) {
-        await batchUpdateFieldValues({
+        console.log('Saving custom field values for product:', productId, customFieldValues);
+
+        // Convert arrays and objects to JSON strings for backend storage
+        const processedFields: ProductFieldValues = {};
+        for (const [fieldId, value] of Object.entries(customFieldValues)) {
+          if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
+            processedFields[fieldId] = JSON.stringify(value);
+          } else {
+            processedFields[fieldId] = value;
+          }
+        }
+        console.log('Processed field values:', processedFields);
+
+        const result = await batchUpdateFieldValues({
           productId,
-          fields: customFieldValues,
+          fields: processedFields,
         }).unwrap();
+        console.log('Save result:', result);
         message.success('Custom fields saved successfully!');
+      } else {
+        console.log('No custom field values to save');
       }
 
       setIsProductModalOpen(false);
-      productForm.resetFields();
+      setEditingProduct(null);
       setSelectedFieldGroups([]);
       setCustomFieldValues({});
+      productForm.resetFields();
     } catch (error) {
       message.error(
         getErrorMessage(error) || `Failed to ${editingProduct ? 'update' : 'create'} product`
@@ -266,15 +302,40 @@ export const ShopProductsPage = () => {
         <Text type="secondary">No products yet. Create your first product!</Text>
       )}
 
-      {/* Product Modal */}
-      <Modal
+      {/* Product Drawer */}
+      <Drawer
         title={editingProduct ? 'Edit Product' : 'Create Product'}
         open={isProductModalOpen}
-        onCancel={() => {
+        onClose={() => {
           setIsProductModalOpen(false);
+          setEditingProduct(null);
+          setSelectedFieldGroups([]);
+          setCustomFieldValues({});
           productForm.resetFields();
         }}
-        footer={null}
+        width={700}
+        footer={
+          <Space>
+            <Button
+              onClick={() => {
+                setIsProductModalOpen(false);
+                setEditingProduct(null);
+                setSelectedFieldGroups([]);
+                setCustomFieldValues({});
+                productForm.resetFields();
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="primary"
+              onClick={() => productForm.submit()}
+              loading={isCreating || isUpdating}
+            >
+              {editingProduct ? 'Update' : 'Create'}
+            </Button>
+          </Space>
+        }
       >
         <Form form={productForm} layout="vertical" onFinish={handleProductSubmit}>
           <Form.Item name="name" label="Product Name" rules={[{ required: true }]}>
@@ -285,12 +346,12 @@ export const ShopProductsPage = () => {
           </Form.Item>
           <Form.Item name="price" label="Price" rules={[{ required: true }]}>
             <FullWidthInputStyled>
-              <InputNumber min={0} step={0.01} style={{ width: '100%' }} prefix="$" />
+              <InputNumber min={0} step={0.01} prefix="$" />
             </FullWidthInputStyled>
           </Form.Item>
           <Form.Item name="stock_quantity" label="Stock Quantity" rules={[{ required: true }]}>
             <FullWidthInputStyled>
-              <InputNumber min={0} style={{ width: '100%' }} />
+              <InputNumber min={0} />
             </FullWidthInputStyled>
           </Form.Item>
           <Form.Item name="sku" label="SKU">
@@ -338,31 +399,29 @@ export const ShopProductsPage = () => {
               ))}
             </>
           )}
-
-          <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit" loading={isCreating || isUpdating}>
-                {editingProduct ? 'Update' : 'Create'}
-              </Button>
-              <Button onClick={() => setIsProductModalOpen(false)}>Cancel</Button>
-            </Space>
-          </Form.Item>
         </Form>
-      </Modal>
+      </Drawer>
 
       {/* Image Manager */}
-      <Modal
+      <Drawer
         title={`Manage Images - ${managingImagesProduct?.name || 'Product'}`}
         open={isImageManagerOpen}
-        onCancel={() => {
+        onClose={() => {
           setIsImageManagerOpen(false);
           setManagingImagesProduct(null);
         }}
-        footer={null}
         width={900}
-        destroyOnHidden={() => {
-          setIsImageManagerOpen(false);
-        }}
+        destroyOnHidden
+        footer={
+          <Button
+            onClick={() => {
+              setIsImageManagerOpen(false);
+              setManagingImagesProduct(null);
+            }}
+          >
+            Close
+          </Button>
+        }
       >
         {managingImagesProduct && (
           <ProductImageManager
@@ -375,7 +434,9 @@ export const ShopProductsPage = () => {
             }}
           />
         )}
-      </Modal>
+      </Drawer>
     </div>
   );
 };
+
+export default ShopProductsPage;

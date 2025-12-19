@@ -13,3 +13,7 @@ export const HeaderStyled = styled.div`
     margin: 0;
   }
 `;
+
+export const OutletContainer = styled.div`
+  margin-top: 24px;
+`;

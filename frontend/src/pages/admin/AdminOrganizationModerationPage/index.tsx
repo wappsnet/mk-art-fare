@@ -18,7 +18,7 @@ import { ContainerStyled, HeaderStyled } from './styles';
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 
-export const AdminOrganizationModerationPage = () => {
+const AdminOrganizationModerationPage = () => {
   const navigate = useNavigate();
   const [moderationModal, setModerationModal] = useState(false);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
@@ -178,7 +178,30 @@ export const AdminOrganizationModerationPage = () => {
             setModerationNote('');
             setSelectedOrg(null);
           }}
-          footer={null}
+          footer={
+            selectedOrg
+              ? [
+                  <Button
+                    key="decline"
+                    danger
+                    icon={<CloseOutlined />}
+                    onClick={() => handleModerate(selectedOrg.id, 'declined')}
+                    loading={isModerating}
+                  >
+                    Decline
+                  </Button>,
+                  <Button
+                    key="approve"
+                    type="primary"
+                    icon={<CheckOutlined />}
+                    onClick={() => handleModerate(selectedOrg.id, 'approved')}
+                    loading={isModerating}
+                  >
+                    Approve
+                  </Button>,
+                ]
+              : null
+          }
           width={600}
         >
           {selectedOrg && (
@@ -198,25 +221,6 @@ export const AdminOrganizationModerationPage = () => {
                   placeholder="Add a note about this moderation decision..."
                 />
               </div>
-
-              <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
-                <Button
-                  danger
-                  icon={<CloseOutlined />}
-                  onClick={() => handleModerate(selectedOrg.id, 'declined')}
-                  loading={isModerating}
-                >
-                  Decline
-                </Button>
-                <Button
-                  type="primary"
-                  icon={<CheckOutlined />}
-                  onClick={() => handleModerate(selectedOrg.id, 'approved')}
-                  loading={isModerating}
-                >
-                  Approve
-                </Button>
-              </Space>
             </Space>
           )}
         </Modal>
@@ -224,3 +228,5 @@ export const AdminOrganizationModerationPage = () => {
     </Layout>
   );
 };
+
+export default AdminOrganizationModerationPage;

@@ -269,12 +269,14 @@ export interface ProductFormData {
   category_id?: number;
 }
 
+export interface OrganizationTheme {
+  primaryColor: string;
+  secondaryColor: string;
+}
+
 export interface OrganizationThemeData {
   id: number;
-  theme: {
-    primaryColor: string;
-    secondaryColor: string;
-  };
+  theme: OrganizationTheme;
 }
 
 export interface OrganizationLogoData {

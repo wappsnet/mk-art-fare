@@ -1,9 +1,9 @@
 import type { AppRouteObject } from '@/types/routes';
 import { RequireAuth } from '@/guards';
-import { AccountPage } from '@/pages/account/AccountPage';
-import { ProfilePage } from '@/pages/account/ProfilePage';
-import { ChangePasswordPage } from '@/pages/account/ChangePasswordPage';
-import { MyOrdersPage } from '@/pages/account/MyOrdersPage';
+import AccountPage from '@/pages/account/AccountPage';
+import ProfilePage from '@/pages/account/ProfilePage';
+import ChangePasswordPage from '@/pages/account/ChangePasswordPage';
+import MyOrdersPage from '@/pages/account/MyOrdersPage';
 
 export const accountRoutes: AppRouteObject[] = [
   {

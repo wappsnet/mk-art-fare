@@ -1,7 +1,9 @@
 import { ReactNode } from 'react';
 import { Navigate } from 'react-router';
+import { Spin, Flex } from 'antd';
 import { useAppSelector } from '@/hooks/useRedux.ts';
 import { UserRole } from '@/types/common.ts';
+import { useGetProfileQuery } from '@/services/apiSlice';
 
 interface RequireRoleProps {
   children: ReactNode;
@@ -9,16 +11,27 @@ interface RequireRoleProps {
   fallbackPath?: string;
 }
 
-export const RequireRole = ({ children, allowedRoles, fallbackPath = '/' }: RequireRoleProps) => {
+export const RequireRole = ({ children, allowedRoles, fallbackPath = '/403' }: RequireRoleProps) => {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+  const token = localStorage.getItem('accessToken');
+  const { isLoading } = useGetProfileQuery(undefined, { skip: !token });
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  // Wait for profile to load if authenticated but user data not available yet
+  if (isAuthenticated && !user && isLoading) {
+    return (
+      <Flex justify="center" align="center" style={{ minHeight: '100vh' }}>
+        <Spin size="large" />
+      </Flex>
+    );
   }
 
-  if (user && !allowedRoles.includes(user.role)) {
+  if (isAuthenticated && user && allowedRoles.includes(user.role)) {
+    return <>{children}</>;
+  }
+
+  if (isAuthenticated) {
     return <Navigate to={fallbackPath} replace />;
   }
 
-  return <>{children}</>;
+  return <Navigate to="/login" replace />;
 };

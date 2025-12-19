@@ -31,21 +31,6 @@ interface ProductImageManagerProps {
   onUpdate: () => void;
 }
 
-function isProductImage(data: unknown): data is ProductImage {
-  return (
-    typeof data === 'object' &&
-    data !== null &&
-    'id' in data &&
-    'product_id' in data &&
-    'url' in data &&
-    'sort_order' in data &&
-    typeof data.id === 'number' &&
-    typeof data.product_id === 'number' &&
-    typeof data.url === 'string' &&
-    typeof data.sort_order === 'number'
-  );
-}
-
 export const ProductImageManager: FC<ProductImageManagerProps> = ({
   productId,
   images,
@@ -71,25 +56,20 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
   }, [images]);
 
   const handleAddImage = async () => {
-    if (!imageUrl) {
-      message.error('Please enter an image URL');
-      return;
-    }
+    if (imageUrl) {
+      try {
+        const resp = await addImage({
+          productId,
+          data: {
+            url: imageUrl,
+            alt_text: altText || undefined,
+            is_thumbnail: isThumbnail,
+          },
+        }).unwrap();
+        message.success('Image added successfully!');
 
-    try {
-      const resp = await addImage({
-        productId,
-        data: {
-          url: imageUrl,
-          alt_text: altText || undefined,
-          is_thumbnail: isThumbnail,
-        },
-      }).unwrap();
-      message.success('Image added successfully!');
-
-      if (resp && typeof resp === 'object' && 'data' in resp) {
         const created = resp.data;
-        if (isProductImage(created)) {
+        if (created) {
           setLocalImages((prev) => {
             const next = [...prev];
             if (created.is_thumbnail) {
@@ -101,15 +81,17 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
             return next;
           });
         }
-      }
 
-      setImageUrl('');
-      setAltText('');
-      setIsThumbnail(false);
-      onUpdate();
-    } catch (error) {
-      message.error(getErrorMessage(error) || 'Failed to add image');
+        setImageUrl('');
+        setAltText('');
+        setIsThumbnail(false);
+        onUpdate();
+      } catch (error) {
+        message.error(getErrorMessage(error) || 'Failed to add image');
+      }
+      return;
     }
+    message.error('Please enter an image URL');
   };
 
   const handleSetThumbnail = async (imageId: number, currentStatus: boolean) => {
@@ -170,36 +152,32 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
   };
 
   const handleUploadSelected = async () => {
-    if (!fileList.length) {
-      message.error('Please select image file(s)');
-      return;
-    }
-    setUploading(true);
-    const formData = new FormData();
-    // Append as multiple under 'images' field to leverage backend multi-upload
-    fileList.forEach((f) => {
-      const origin = f.originFileObj;
-      if (origin && origin instanceof File) {
-        formData.append('images', origin);
-        // Append matching alt text per file (backend supports multiple alt_text fields)
-        formData.append('alt_text', altTexts[f.uid] || '');
-      }
-    });
-    formData.append('is_thumbnail', isThumbnail.toString());
-
-    try {
-      const token = localStorage.getItem('accessToken');
-      const apiUrl = import.meta.env.VITE_API_URL;
-      const resp = await axios.post(`${apiUrl}/products/${productId}/images/upload`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`,
-        },
+    if (fileList.length > 0) {
+      setUploading(true);
+      const formData = new FormData();
+      // Append as multiple under 'images' field to leverage backend multi-upload
+      fileList.forEach((f) => {
+        const origin = f.originFileObj;
+        if (origin && origin instanceof File) {
+          formData.append('images', origin);
+          // Append matching alt text per file (backend supports multiple alt_text fields)
+          formData.append('alt_text', altTexts[f.uid] || '');
+        }
       });
-      message.success('Image(s) uploaded successfully!');
+      formData.append('is_thumbnail', isThumbnail.toString());
 
-      if (resp.data && typeof resp.data === 'object' && 'data' in resp.data) {
-        const created = resp.data.data;
+      try {
+        const token = localStorage.getItem('accessToken');
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const resp = await axios.post(`${apiUrl}/products/${productId}/images/upload`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        message.success('Image(s) uploaded successfully!');
+
+        const created = resp.data?.data as ProductImage | ProductImage[] | undefined;
         if (created) {
           setLocalImages((prev) => {
             const next = [...prev];
@@ -211,28 +189,30 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
               }
               next.push(img);
             };
+
             if (Array.isArray(created)) {
-              for (const img of created) {
-                addOne(img);
-              }
-            } else if (typeof created === 'object' && 'id' in created) {
+              created.forEach(addOne);
+            } else {
               addOne(created);
             }
+
             return next;
           });
         }
-      }
 
-      setFileList([]);
-      setAltTexts({});
-      setAltText('');
-      setIsThumbnail(false);
-      onUpdate();
-    } catch (error) {
-      message.error(getErrorMessage(error) || 'Failed to upload image(s)');
-    } finally {
-      setUploading(false);
+        setFileList([]);
+        setAltTexts({});
+        setAltText('');
+        setIsThumbnail(false);
+        onUpdate();
+      } catch (error) {
+        message.error(getErrorMessage(error) || 'Failed to upload image(s)');
+      } finally {
+        setUploading(false);
+      }
+      return;
     }
+    message.error('Please select image file(s)');
   };
 
   return (

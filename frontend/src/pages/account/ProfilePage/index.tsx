@@ -1,10 +1,15 @@
 import { useState } from 'react';
-import { Form, Input, Button, message, Avatar, Upload, Space } from 'antd';
+import { Form, Input, Button, message, Avatar, Upload } from 'antd';
 import { UserOutlined, UploadOutlined } from '@ant-design/icons';
 import { useAppSelector } from '@/hooks/useRedux';
 import { useUpdateProfileMutation } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
-import { ProfileContainerStyled, AvatarSectionStyled } from './styles';
+import {
+  ProfileContainerStyled,
+  AvatarSectionStyled,
+  UploadButtonStyled,
+  FullWidthSpace,
+} from './styles';
 
 interface ProfileFormValues {
   first_name: string;
@@ -14,7 +19,7 @@ interface ProfileFormValues {
   bio?: string;
 }
 
-export const ProfilePage = () => {
+const ProfilePage = () => {
   const { user } = useAppSelector((state) => state.auth);
   const [form] = Form.useForm();
   const [updateProfile, { isLoading }] = useUpdateProfileMutation();
@@ -39,18 +44,12 @@ export const ProfilePage = () => {
     <ProfileContainerStyled>
       <AvatarSectionStyled>
         <Avatar size={100} src={avatarUrl} icon={<UserOutlined />} />
-        <Upload
-          accept="image/*"
-          showUploadList={false}
-          beforeUpload={handleAvatarUpload}
-        >
-          <Button icon={<UploadOutlined />} style={{ marginTop: 16 }}>
-            Change Avatar
-          </Button>
+        <Upload accept="image/*" showUploadList={false} beforeUpload={handleAvatarUpload}>
+          <UploadButtonStyled icon={<UploadOutlined />}>Change Avatar</UploadButtonStyled>
         </Upload>
       </AvatarSectionStyled>
 
-      <Form
+      <Form<ProfileFormValues>
         form={form}
         layout="vertical"
         initialValues={{
@@ -60,9 +59,8 @@ export const ProfilePage = () => {
           phone: user?.phone || '',
         }}
         onFinish={handleSubmit}
-        style={{ maxWidth: 600 }}
       >
-        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+        <FullWidthSpace direction="vertical" size="large">
           <Form.Item
             name="first_name"
             label="First Name"
@@ -99,8 +97,10 @@ export const ProfilePage = () => {
               Save Changes
             </Button>
           </Form.Item>
-        </Space>
+        </FullWidthSpace>
       </Form>
     </ProfileContainerStyled>
   );
 };
+
+export default ProfilePage;

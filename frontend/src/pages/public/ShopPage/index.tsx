@@ -20,7 +20,7 @@ import {
 
 const { Title, Paragraph, Text } = Typography;
 
-export const ShopPage = () => {
+const ShopPage = () => {
   const { slug } = useParams<{ slug: string }>();
 
   const { data: shopData, isLoading: shopLoading } = useGetOrganizationQuery(slug || '', {
@@ -47,17 +47,8 @@ export const ShopPage = () => {
     );
   }
 
-  if (!shop) {
-    return (
-      <Layout>
-        <ContainerStyled>
-          <Title level={3}>Shop not found</Title>
-        </ContainerStyled>
-      </Layout>
-    );
-  }
-
-  const tabItems = [
+  if (shop) {
+    const tabItems = [
     {
       key: 'products',
       label: `Products (${products.length})`,
@@ -151,5 +142,16 @@ export const ShopPage = () => {
         <Tabs items={tabItems} />
       </ContainerStyled>
     </Layout>
+    );
+  }
+
+  return (
+    <Layout>
+      <ContainerStyled>
+        <Title level={3}>Shop not found</Title>
+      </ContainerStyled>
+    </Layout>
   );
 };
+
+export default ShopPage;

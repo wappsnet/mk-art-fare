@@ -1,15 +1,5 @@
 import { Link, useNavigate } from 'react-router';
-import {
-  Col,
-  Typography,
-  InputNumber,
-  List,
-  Empty,
-  Divider,
-  Space,
-  message,
-  Button,
-} from 'antd';
+import { Col, Typography, InputNumber, List, Empty, Divider, Space, message, Button } from 'antd';
 import { DeleteOutlined, ShoppingOutlined } from '@ant-design/icons';
 import { Layout } from '@/components/Layout';
 import { useAppSelector } from '@/hooks/useRedux';
@@ -27,7 +17,6 @@ import {
   ProductImageStyled,
   ProductTitle,
   SmallText,
-  PriceWrapperStyled,
   Price,
   RightAlignColStyled,
   TotalPrice,
@@ -41,7 +30,7 @@ import {
 
 const { Title, Text } = Typography;
 
-export const CartPage = () => {
+const CartPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
@@ -80,12 +69,12 @@ export const CartPage = () => {
   };
 
   const handleCheckout = () => {
-    if (!isAuthenticated) {
-      message.info('Please login to checkout');
-      navigate('/login');
+    if (isAuthenticated) {
+      navigate('/checkout');
       return;
     }
-    navigate('/checkout');
+    message.info('Please login to checkout');
+    navigate('/login');
   };
 
   if (loading) {
@@ -102,7 +91,9 @@ export const CartPage = () => {
 
   const hasProducts = cart?.items && cart.items.length > 0;
 
-  if (!cart || !hasProducts) {
+  if (cart && hasProducts) {
+    // Cart has products, continue to render below
+  } else {
     return (
       <Layout>
         <ContainerStyled>
@@ -118,10 +109,7 @@ export const CartPage = () => {
     );
   }
 
-  const subtotal = cart.items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const tax = subtotal * 0.1;
   const shipping = 9.99;
   const total = subtotal + tax + shipping;
@@ -152,19 +140,13 @@ export const CartPage = () => {
                       />
                     </Col>
                     <Col xs={18} sm={12}>
-                      <Link to={`/products/${item.slug}`}>
-                        <ProductTitle level={5} style={{ marginBottom: 4 }}>
-                          {item.name}
-                        </ProductTitle>
-                      </Link>
-                      <SmallText type="secondary" style={{ fontSize: 12 }}>
-                        by {item.organization_name}
-                      </SmallText>
-                      <PriceWrapperStyled>
-                        <Price strong style={{ fontSize: 16, color: '#1890ff' }}>
-                          ${item.price.toFixed(2)}
-                        </Price>
-                      </PriceWrapperStyled>
+                      <Space direction="vertical" size={4}>
+                        <Link to={`/products/${item.slug}`}>
+                          <ProductTitle level={5}>{item.name}</ProductTitle>
+                        </Link>
+                        <SmallText type="secondary">by {item.organization_name}</SmallText>
+                        <Price strong>${item.price.toFixed(2)}</Price>
+                      </Space>
                     </Col>
                     <Col xs={12} sm={4}>
                       <InputNumber
@@ -176,9 +158,7 @@ export const CartPage = () => {
                     <Col xs={12} sm={4}>
                       <RightAlignColStyled>
                         <Space direction="vertical" align="end">
-                          <TotalPrice strong style={{ fontSize: 18 }}>
-                            ${(item.price * item.quantity).toFixed(2)}
-                          </TotalPrice>
+                          <TotalPrice strong>${(item.price * item.quantity).toFixed(2)}</TotalPrice>
                           <Button
                             type="text"
                             danger
@@ -217,9 +197,7 @@ export const CartPage = () => {
               <Divider />
               <SummaryRowStyled>
                 <Title level={4}>Total:</Title>
-                <TotalTitle level={4} style={{ color: '#1890ff' }}>
-                  ${total.toFixed(2)}
-                </TotalTitle>
+                <TotalTitle level={4}>${total.toFixed(2)}</TotalTitle>
               </SummaryRowStyled>
               <CheckoutButtonStyled type="primary" size="large" block onClick={handleCheckout}>
                 Proceed to Checkout
@@ -234,3 +212,5 @@ export const CartPage = () => {
     </Layout>
   );
 };
+
+export default CartPage;

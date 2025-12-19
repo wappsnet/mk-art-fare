@@ -1,15 +1,16 @@
 import type { AppRouteObject } from '@/types/routes';
 import { RequireGuest } from '@/guards';
-import { HomePage } from '@/pages/public/HomePage';
-import { LoginPage } from '@/pages/public/LoginPage';
-import { RegisterPage } from '@/pages/public/RegisterPage';
-import { ProductsPage } from '@/pages/public/ProductsPage';
-import { ProductDetailPage } from '@/pages/public/ProductDetailPage';
-import { ShopPage } from '@/pages/public/ShopPage';
-import { CartPage } from '@/pages/public/CartPage';
-import { CheckoutPage } from '@/pages/public/CheckoutPage';
-import { BlogPage } from '@/pages/public/BlogPage';
-import { BlogPostPage } from '@/pages/public/BlogPostPage';
+import HomePage from '@/pages/public/HomePage';
+import LoginPage from '@/pages/public/LoginPage';
+import RegisterPage from '@/pages/public/RegisterPage';
+import ForgotPasswordPage from '@/pages/public/ForgotPasswordPage';
+import ProductsPage from '@/pages/public/ProductsPage';
+import ProductDetailPage from '@/pages/public/ProductDetailPage';
+import ShopPage from '@/pages/public/ShopPage';
+import CartPage from '@/pages/public/CartPage';
+import CheckoutPage from '@/pages/public/CheckoutPage';
+import BlogPage from '@/pages/public/BlogPage';
+import BlogPostPage from '@/pages/public/BlogPostPage';
 
 export const publicRoutes: AppRouteObject[] = [
   {
@@ -34,6 +35,15 @@ export const publicRoutes: AppRouteObject[] = [
       </RequireGuest>
     ),
     meta: { requiresGuest: true, title: 'Register - Art Fare' },
+  },
+  {
+    path: '/forgot-password',
+    element: (
+      <RequireGuest>
+        <ForgotPasswordPage />
+      </RequireGuest>
+    ),
+    meta: { requiresGuest: true, title: 'Forgot Password - Art Fare' },
   },
   {
     path: '/products',

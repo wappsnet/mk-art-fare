@@ -156,42 +156,42 @@ const DynamicFieldRenderer: React.FC<DynamicFieldRendererProps> = ({
         );
 
       case FieldType.RICHTEXT:
-        if (!ReactQuill) {
+        if (ReactQuill) {
           return (
-            <>
-              <Alert
-                message="Rich Text Editor Not Available"
-                description="Install react-quill to use rich text fields: npm install react-quill @types/react-quill"
-                type="warning"
-                showIcon
-                style={{ marginBottom: 8 }}
-              />
-              <Input.TextArea
-                value={value || ''}
-                onChange={(e) => onChange?.(e.target.value)}
-                disabled={disabled}
-                rows={6}
-                placeholder="Rich text editor requires react-quill package"
-              />
-            </>
+            <ReactQuill
+              value={value || ''}
+              onChange={onChange}
+              readOnly={disabled}
+              theme="snow"
+              modules={{
+                toolbar: [
+                  [{ header: [1, 2, 3, false] }],
+                  ['bold', 'italic', 'underline', 'strike'],
+                  [{ list: 'ordered' }, { list: 'bullet' }],
+                  ['link'],
+                  ['clean'],
+                ],
+              }}
+            />
           );
         }
         return (
-          <ReactQuill
-            value={value || ''}
-            onChange={onChange}
-            readOnly={disabled}
-            theme="snow"
-            modules={{
-              toolbar: [
-                [{ header: [1, 2, 3, false] }],
-                ['bold', 'italic', 'underline', 'strike'],
-                [{ list: 'ordered' }, { list: 'bullet' }],
-                ['link'],
-                ['clean'],
-              ],
-            }}
-          />
+          <>
+            <Alert
+              message="Rich Text Editor Not Available"
+              description="Install react-quill to use rich text fields: npm install react-quill @types/react-quill"
+              type="warning"
+              showIcon
+              style={{ marginBottom: 8 }}
+            />
+            <Input.TextArea
+              value={value || ''}
+              onChange={(e) => onChange?.(e.target.value)}
+              disabled={disabled}
+              rows={6}
+              placeholder="Rich text editor requires react-quill package"
+            />
+          </>
         );
 
       case FieldType.IMAGE:

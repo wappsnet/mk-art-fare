@@ -66,7 +66,7 @@ interface PlatformStats {
   totalBlogPosts: number;
 }
 
-export const AdminPage = () => {
+const AdminPage = () => {
   const navigate = useNavigate();
   const [editUserModal, setEditUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -101,22 +101,22 @@ export const AdminPage = () => {
   };
 
   const handleUpdateUser = async (values: User) => {
-    if (!selectedUser) return;
+    if (selectedUser) {
+      try {
+        await updateUser({
+          id: selectedUser.id,
+          data: {
+            role: values.role,
+            is_active: values.is_active,
+          },
+        }).unwrap();
 
-    try {
-      await updateUser({
-        id: selectedUser.id,
-        data: {
-          role: values.role,
-          is_active: values.is_active,
-        },
-      }).unwrap();
-
-      message.success('User updated successfully');
-      setEditUserModal(false);
-      form.resetFields();
-    } catch (error) {
-      message.error(getErrorMessage(error) || 'Failed to update user');
+        message.success('User updated successfully');
+        setEditUserModal(false);
+        form.resetFields();
+      } catch (error) {
+        message.error(getErrorMessage(error) || 'Failed to update user');
+      }
     }
   };
 
@@ -432,3 +432,5 @@ export const AdminPage = () => {
     </Layout>
   );
 };
+
+export default AdminPage;
