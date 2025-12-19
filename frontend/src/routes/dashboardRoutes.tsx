@@ -31,6 +31,10 @@ export const dashboardRoutes: AppRouteObject[] = [
     children: [
       {
         index: true,
+        element: <ShopSettingsPage />,
+        meta: { title: 'Settings - Shop Management' },
+      },
+      {
         path: 'products',
         element: <ShopProductsPage />,
         meta: { title: 'Products - Shop Management' },
@@ -49,11 +53,6 @@ export const dashboardRoutes: AppRouteObject[] = [
         path: 'analytics',
         element: <ShopAnalyticsPage />,
         meta: { title: 'Analytics - Shop Management' },
-      },
-      {
-        path: 'settings',
-        element: <ShopSettingsPage />,
-        meta: { title: 'Settings - Shop Management' },
       },
       {
         path: 'custom-fields',

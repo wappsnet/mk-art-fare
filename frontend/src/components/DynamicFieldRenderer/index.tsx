@@ -1,35 +1,22 @@
 import React from 'react';
-import {
-  Form,
-  Input,
-  InputNumber,
-  Select,
-  Checkbox,
-  Radio,
-  Switch,
-  DatePicker,
-  TimePicker,
-  Upload,
-  Button,
-  Space,
-  Alert,
-} from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import { Form } from 'antd';
 import { FieldDefinition, FieldType } from '@/types/customFields';
-
-// Dynamic import for ReactQuill to handle when it's not installed
-let ReactQuill: any = null;
-try {
-  ReactQuill = require('react-quill');
-  require('react-quill/dist/quill.snow.css');
-} catch (e) {
-  console.warn('react-quill not installed. Rich text editor will not be available.');
-}
+import { TextField } from './Addons/components/TextField';
+import { NumberField } from './Addons/components/NumberField';
+import { SelectField } from './Addons/components/SelectField';
+import { RadioField } from './Addons/components/RadioField';
+import { CheckboxField } from './Addons/components/CheckboxField';
+import { ToggleField } from './Addons/components/ToggleField';
+import { DateField } from './Addons/components/DateField';
+import { TimeField } from './Addons/components/TimeField';
+import { ColorField } from './Addons/components/ColorField';
+import { RichTextField } from './Addons/components/RichTextField';
+import { FileField } from './Addons/components/FileField';
 
 interface DynamicFieldRendererProps {
   field: FieldDefinition;
-  value?: any;
-  onChange?: (value: any) => void;
+  value?: unknown;
+  onChange?: (value: unknown) => void;
   disabled?: boolean;
 }
 
@@ -45,10 +32,10 @@ const DynamicFieldRenderer: React.FC<DynamicFieldRendererProps> = ({
     switch (field_type) {
       case FieldType.TEXT:
         return (
-          <Input
+          <TextField
             placeholder={placeholder}
             value={value}
-            onChange={(e) => onChange?.(e.target.value)}
+            onChange={onChange}
             disabled={disabled}
             maxLength={validation_rules?.maxLength}
           />
@@ -56,7 +43,7 @@ const DynamicFieldRenderer: React.FC<DynamicFieldRendererProps> = ({
 
       case FieldType.NUMBER:
         return (
-          <InputNumber
+          <NumberField
             placeholder={placeholder}
             value={value}
             onChange={onChange}
@@ -64,167 +51,108 @@ const DynamicFieldRenderer: React.FC<DynamicFieldRendererProps> = ({
             min={validation_rules?.min}
             max={validation_rules?.max}
             step={validation_rules?.step}
-            style={{ width: '100%' }}
           />
         );
 
       case FieldType.SELECT:
         return (
-          <Select
-            placeholder={placeholder || 'Select an option'}
+          <SelectField
+            placeholder={placeholder}
             value={value}
             onChange={onChange}
             disabled={disabled}
-            options={options?.map((opt) => ({
-              label: opt.label,
-              value: opt.value,
-            }))}
+            options={options}
           />
         );
 
       case FieldType.RADIO:
         return (
-          <Radio.Group value={value} onChange={(e) => onChange?.(e.target.value)} disabled={disabled}>
-            <Space direction="vertical">
-              {options?.map((opt) => (
-                <Radio key={opt.value} value={opt.value}>
-                  {opt.label}
-                </Radio>
-              ))}
-            </Space>
-          </Radio.Group>
+          <RadioField
+            value={value}
+            onChange={onChange}
+            disabled={disabled}
+            options={options}
+          />
         );
 
       case FieldType.CHECKBOX:
         return (
-          <Checkbox.Group
-            value={value || []}
+          <CheckboxField
+            value={value}
             onChange={onChange}
             disabled={disabled}
-            options={options?.map((opt) => ({
-              label: opt.label,
-              value: opt.value,
-            }))}
+            options={options}
           />
         );
 
       case FieldType.TOGGLE:
         return (
-          <Switch checked={value} onChange={onChange} disabled={disabled} />
+          <ToggleField
+            value={value}
+            onChange={onChange}
+            disabled={disabled}
+          />
         );
 
       case FieldType.DATE:
         return (
-          <DatePicker
-            value={value}
+          <DateField
             onChange={onChange}
             disabled={disabled}
-            style={{ width: '100%' }}
-            format="YYYY-MM-DD"
           />
         );
 
       case FieldType.TIME:
         return (
-          <TimePicker
-            value={value}
+          <TimeField
             onChange={onChange}
             disabled={disabled}
-            style={{ width: '100%' }}
-            format="HH:mm"
           />
         );
 
       case FieldType.COLOR:
         return (
-          <Space>
-            <Input
-              type="color"
-              value={value || '#000000'}
-              onChange={(e) => onChange?.(e.target.value)}
-              disabled={disabled}
-              style={{ width: 60, padding: 4 }}
-            />
-            <Input
-              value={value}
-              onChange={(e) => onChange?.(e.target.value)}
-              disabled={disabled}
-              placeholder="#000000"
-              style={{ width: 120 }}
-            />
-          </Space>
+          <ColorField
+            value={value}
+            onChange={onChange}
+            disabled={disabled}
+          />
         );
 
       case FieldType.RICHTEXT:
-        if (ReactQuill) {
-          return (
-            <ReactQuill
-              value={value || ''}
-              onChange={onChange}
-              readOnly={disabled}
-              theme="snow"
-              modules={{
-                toolbar: [
-                  [{ header: [1, 2, 3, false] }],
-                  ['bold', 'italic', 'underline', 'strike'],
-                  [{ list: 'ordered' }, { list: 'bullet' }],
-                  ['link'],
-                  ['clean'],
-                ],
-              }}
-            />
-          );
-        }
         return (
-          <>
-            <Alert
-              message="Rich Text Editor Not Available"
-              description="Install react-quill to use rich text fields: npm install react-quill @types/react-quill"
-              type="warning"
-              showIcon
-              style={{ marginBottom: 8 }}
-            />
-            <Input.TextArea
-              value={value || ''}
-              onChange={(e) => onChange?.(e.target.value)}
-              disabled={disabled}
-              rows={6}
-              placeholder="Rich text editor requires react-quill package"
-            />
-          </>
+          <RichTextField
+            placeholder={placeholder}
+            value={value}
+            onChange={onChange}
+            disabled={disabled}
+          />
         );
 
       case FieldType.IMAGE:
+        return (
+          <FileField
+            onChange={onChange}
+            disabled={disabled}
+            isImage={true}
+          />
+        );
+
       case FieldType.FILE:
         return (
-          <Upload
-            listType={field_type === FieldType.IMAGE ? 'picture-card' : 'text'}
-            fileList={value ? [value] : []}
-            onChange={(info) => {
-              if (info.fileList.length > 0) {
-                onChange?.(info.fileList[0]);
-              } else {
-                onChange?.(null);
-              }
-            }}
+          <FileField
+            onChange={onChange}
             disabled={disabled}
-            maxCount={1}
-            beforeUpload={() => false} // Prevent auto upload
-          >
-            {!value && (
-              <Button icon={<UploadOutlined />} disabled={disabled}>
-                Upload {field_type === FieldType.IMAGE ? 'Image' : 'File'}
-              </Button>
-            )}
-          </Upload>
+            isImage={false}
+          />
         );
 
       default:
         return (
-          <Input
+          <TextField
             placeholder={placeholder}
             value={value}
-            onChange={(e) => onChange?.(e.target.value)}
+            onChange={onChange}
             disabled={disabled}
           />
         );

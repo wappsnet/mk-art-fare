@@ -68,7 +68,7 @@ export type LogicType = 'AND' | 'OR';
 export interface ConditionalRule {
   field_id: number;
   operator: ConditionalOperator;
-  value: any;
+  value: unknown;
 }
 
 export interface ConditionalRuleGroup {
@@ -111,7 +111,7 @@ export interface FieldDefinitionFormData {
   placeholder?: string;
   help_text?: string;
   default_value?: string;
-  options?: FieldOption[];
+  options?: FieldOption[] | string;
   validation_rules?: ValidationRules;
   conditional_logic?: ConditionalLogic;
   is_searchable?: boolean;
@@ -199,11 +199,11 @@ export interface CustomFieldFilter {
   field_id: number;
   field_type: FieldType;
   operator: FilterOperator;
-  value: any;
+  value: unknown;
 }
 
 export interface FilterOption {
-  value: any;
+  value: unknown;
   count: number;
 }
 
@@ -264,4 +264,4 @@ export type FieldValueByType<T extends FieldType> = T extends FieldType.TEXT
   ? FileMetadata
   : T extends FieldType.RICHTEXT
   ? string
-  : any;
+  : unknown;

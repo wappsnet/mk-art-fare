@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Alert, Form, Space } from 'antd';
+import { Alert, Space } from 'antd';
 
 export const PasswordContainerStyled = styled.div`
   padding: 24px 0;
@@ -10,7 +10,7 @@ export const AlertStyled = styled(Alert)`
   max-width: 600px;
 `;
 
-export const FormStyled = styled(Form)`
+export const FormContainer = styled.div`
   max-width: 600px;
 `;
 

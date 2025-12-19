@@ -27,10 +27,20 @@ import {
   FieldType,
   FieldDefinitionFormData,
 } from '@/types/customFields';
+import { getErrorMessage } from '@/types/errors';
 
 interface FieldDefinitionBuilderProps {
   fieldGroup: FieldGroup;
   onClose: () => void;
+}
+
+interface FieldFormValues extends Omit<FieldDefinitionFormData, 'validation_rules'> {
+  required?: boolean;
+  min?: number;
+  max?: number;
+  minLength?: number;
+  maxLength?: number;
+  step?: number;
 }
 
 const FieldDefinitionBuilder: React.FC<FieldDefinitionBuilderProps> = ({ fieldGroup, onClose }) => {
@@ -79,12 +89,12 @@ const FieldDefinitionBuilder: React.FC<FieldDefinitionBuilderProps> = ({ fieldGr
     try {
       await deleteField({ fieldGroupId: fieldGroup.id, fieldId }).unwrap();
       message.success('Field deleted successfully');
-    } catch (error: any) {
-      message.error(error?.data?.message || 'Failed to delete field');
+    } catch (error: unknown) {
+      message.error(getErrorMessage(error) || 'Failed to delete field');
     }
   };
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: FieldFormValues) => {
     try {
       const fieldData: FieldDefinitionFormData = {
         name: values.name,
@@ -93,7 +103,9 @@ const FieldDefinitionBuilder: React.FC<FieldDefinitionBuilderProps> = ({ fieldGr
         placeholder: values.placeholder,
         help_text: values.help_text,
         default_value: values.default_value,
-        options: values.options,
+        options: values.options && Array.isArray(values.options)
+          ? JSON.stringify(values.options)
+          : values.options,
         is_searchable: values.is_searchable || false,
         is_filterable: values.is_filterable || false,
         sort_order: editingField?.sort_order || fields.length,
@@ -123,8 +135,8 @@ const FieldDefinitionBuilder: React.FC<FieldDefinitionBuilderProps> = ({ fieldGr
 
       setIsFieldModalOpen(false);
       form.resetFields();
-    } catch (error: any) {
-      message.error(error?.data?.message || 'Failed to save field');
+    } catch (error: unknown) {
+      message.error(getErrorMessage(error) || 'Failed to save field');
     }
   };
 

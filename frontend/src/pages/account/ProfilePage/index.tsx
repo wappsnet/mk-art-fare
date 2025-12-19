@@ -21,7 +21,7 @@ interface ProfileFormValues {
 
 const ProfilePage = () => {
   const { user } = useAppSelector((state) => state.auth);
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<ProfileFormValues>();
   const [updateProfile, { isLoading }] = useUpdateProfileMutation();
   const [avatarUrl] = useState(user?.avatar_url);
 

@@ -8,6 +8,7 @@ import {
   useDeleteFieldGroupMutation,
 } from '@/services/apiSlice';
 import { FieldGroup, FieldGroupFormData } from '@/types/customFields';
+import { getErrorMessage } from '@/types/errors';
 import FieldDefinitionBuilder from '../FieldDefinitionBuilder';
 
 interface FieldGroupManagerProps {
@@ -47,8 +48,8 @@ const FieldGroupManager: React.FC<FieldGroupManagerProps> = ({ organizationId })
     try {
       await deleteFieldGroup(id).unwrap();
       message.success('Field group deleted successfully');
-    } catch (error: any) {
-      message.error(error?.data?.message || 'Failed to delete field group');
+    } catch (error: unknown) {
+      message.error(getErrorMessage(error) || 'Failed to delete field group');
     }
   };
 
@@ -73,8 +74,8 @@ const FieldGroupManager: React.FC<FieldGroupManagerProps> = ({ organizationId })
 
       setIsModalOpen(false);
       form.resetFields();
-    } catch (error: any) {
-      message.error(error?.data?.message || 'Failed to save field group');
+    } catch (error: unknown) {
+      message.error(getErrorMessage(error) || 'Failed to save field group');
     }
   };
 
@@ -98,7 +99,7 @@ const FieldGroupManager: React.FC<FieldGroupManagerProps> = ({ organizationId })
     {
       title: 'Actions',
       key: 'actions',
-      render: (_: any, record: FieldGroup) => (
+      render: (_text: unknown, record: FieldGroup) => (
         <Space>
           <Button
             type="link"

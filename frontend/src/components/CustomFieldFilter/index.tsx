@@ -20,7 +20,7 @@ export const CustomFieldFilter: React.FC<CustomFieldFilterProps> = ({ field, val
               placeholder={`Select ${field.label || field.name}`}
               allowClear
               value={value}
-              onChange={(val) => onChange(val || '')}
+              onChange={(val) => onChange(typeof val === 'string' ? val : '')}
             >
               {field.options.map((option) => (
                 <Select.Option key={option.value} value={option.value}>
@@ -64,7 +64,18 @@ export const CustomFieldFilter: React.FC<CustomFieldFilterProps> = ({ field, val
           <FullWidthDatePicker
             placeholder={`Select ${field.label || field.name}`}
             value={value}
-            onChange={(date) => onChange(date ? date.format('YYYY-MM-DD') : '')}
+            onChange={(date) => {
+              if (
+                date &&
+                typeof date === 'object' &&
+                'format' in date &&
+                typeof date.format === 'function'
+              ) {
+                onChange(String(date.format('YYYY-MM-DD')));
+              } else {
+                onChange('');
+              }
+            }}
             allowClear
           />
         );

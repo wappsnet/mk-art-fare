@@ -46,6 +46,45 @@ import {
 const { Text } = Typography;
 const { Option } = Select;
 
+// Helper function to process field value for backend storage
+const processFieldValue = (value: unknown): unknown => {
+  // eslint-disable-next-line no-console
+  console.log('📦 processFieldValue called with:', value, 'type:', typeof value, 'isArray:', Array.isArray(value));
+
+  // Handle null/undefined
+  if (value === null || value === undefined) {
+    return value;
+  }
+
+  // Handle arrays (checkbox, multi-select) - send as-is, backend will stringify
+  if (Array.isArray(value)) {
+    // eslint-disable-next-line no-console
+    console.log('📦 Array kept as-is for backend validation:', value);
+    return value;
+  }
+
+  // Handle date/time objects (dayjs objects from DatePicker/TimePicker)
+  if (typeof value === 'object') {
+    // Check if it's a dayjs/moment object with format method
+    if ('format' in value && typeof value.format === 'function') {
+      const formatted = String(value.format('YYYY-MM-DD HH:mm:ss'));
+      // eslint-disable-next-line no-console
+      console.log('📦 Date formatted to:', formatted);
+      return formatted;
+    }
+
+    // For file/image objects, keep as-is (backend expects objects)
+    // eslint-disable-next-line no-console
+    console.log('📦 Object kept as-is:', value);
+    return value;
+  }
+
+  // Handle primitive values (string, number, boolean)
+  // eslint-disable-next-line no-console
+  console.log('📦 Primitive value, keeping as is:', value);
+  return value;
+};
+
 const ShopProductsPage = () => {
   const { id } = useParams<{ id: string }>();
   const orgId = Number.parseInt(id!);
@@ -84,14 +123,12 @@ const ShopProductsPage = () => {
   // Load field groups and values when editing a product
   useEffect(() => {
     if (productFieldGroups?.data) {
-      console.log('Loading field groups for product:', editingProduct?.id, productFieldGroups.data);
       setSelectedFieldGroups(productFieldGroups.data.map((g) => g.id));
     }
   }, [productFieldGroups, editingProduct?.id]);
 
   useEffect(() => {
     if (productFieldValues?.data) {
-      console.log('Loading field values for product:', editingProduct?.id, productFieldValues.data);
       const fieldValuesMap: ProductFieldValues = {};
       productFieldValues.data.forEach((fv) => {
         let parsedValue = fv.value;
@@ -103,15 +140,13 @@ const ShopProductsPage = () => {
         ) {
           try {
             parsedValue = JSON.parse(fv.value);
-          } catch (e) {
+          } catch {
             // If parsing fails, keep the original string value
-            console.warn('Failed to parse field value:', fv.value, e);
           }
         }
 
         fieldValuesMap[fv.field_definition_id] = parsedValue;
       });
-      console.log('Field values map:', fieldValuesMap);
       setCustomFieldValues(fieldValuesMap);
     }
   }, [productFieldValues, editingProduct?.id]);
@@ -185,27 +220,34 @@ const ShopProductsPage = () => {
 
       // Save custom field values
       if (Object.keys(customFieldValues).length > 0) {
-        console.log('Saving custom field values for product:', productId, customFieldValues);
-
         // Convert arrays and objects to JSON strings for backend storage
         const processedFields: ProductFieldValues = {};
-        for (const [fieldId, value] of Object.entries(customFieldValues)) {
-          if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
-            processedFields[fieldId] = JSON.stringify(value);
-          } else {
-            processedFields[fieldId] = value;
-          }
-        }
-        console.log('Processed field values:', processedFields);
 
-        const result = await batchUpdateFieldValues({
+        // eslint-disable-next-line no-console
+        console.log('🔍 Raw customFieldValues:', customFieldValues);
+
+        for (const [fieldIdStr, value] of Object.entries(customFieldValues)) {
+          const fieldId = Number.parseInt(fieldIdStr, 10);
+          const processedValue = processFieldValue(value);
+          processedFields[fieldId] = processedValue;
+
+          // eslint-disable-next-line no-console
+          console.log(`🔍 Field ${fieldId}:`, {
+            original: value,
+            processed: processedValue,
+            isArray: Array.isArray(value),
+            type: typeof processedValue,
+          });
+        }
+
+        // eslint-disable-next-line no-console
+        console.log('🔍 Sending to API:', { productId, fields: processedFields });
+
+        await batchUpdateFieldValues({
           productId,
           fields: processedFields,
         }).unwrap();
-        console.log('Save result:', result);
         message.success('Custom fields saved successfully!');
-      } else {
-        console.log('No custom field values to save');
       }
 
       setIsProductModalOpen(false);

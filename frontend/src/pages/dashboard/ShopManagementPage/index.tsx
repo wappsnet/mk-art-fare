@@ -24,6 +24,10 @@ const ShopManagementPage = () => {
   const tabItems = useMemo(
     () => [
       {
+        key: `/dashboard/shop/${id}`,
+        label: 'Settings',
+      },
+      {
         key: `/dashboard/shop/${id}/products`,
         label: 'Products',
       },
@@ -42,10 +46,6 @@ const ShopManagementPage = () => {
       {
         key: `/dashboard/shop/${id}/custom-fields`,
         label: 'Custom Fields',
-      },
-      {
-        key: `/dashboard/shop/${id}/settings`,
-        label: 'Settings',
       },
     ],
     [id]
@@ -70,6 +70,8 @@ const ShopManagementPage = () => {
       </Layout>
     );
   }
+
+  console.info(location);
 
   return (
     <Layout>

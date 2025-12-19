@@ -1,12 +1,11 @@
 import { Router } from 'express';
 import { query } from '../config/database.js';
 import { authenticate, authorize } from '../middleware/auth.js';
-import { sendSuccess, sendPaginated } from '../utils/response.js';
+import { sendSuccess } from '../utils/response.js';
 import { UserRole } from '../types/index.js';
 import { AppError, asyncHandler } from '../middleware/errorHandler.js';
 import { generateSlug, getPaginationParams, transformImageUrls } from '../utils/helpers.js';
 import { upload } from '../config/multer.js';
-import { config } from '../config/index.js';
 
 const router = Router();
 
@@ -34,10 +33,26 @@ router.get(
     );
 
     // Parse JSON options for select/radio fields
-    const fieldsWithOptions = fields.map((field) => ({
-      ...field,
-      options: field.options ? JSON.parse(field.options) : null,
-    }));
+    const fieldsWithOptions = fields.map((field) => {
+      let parsedOptions = null;
+      if (field.options) {
+        try {
+          parsedOptions = JSON.parse(field.options);
+        } catch (error) {
+          console.error('Failed to parse field options:', {
+            fieldId: field.id,
+            fieldName: field.name,
+            rawOptions: field.options,
+            error: error.message,
+          });
+          parsedOptions = null;
+        }
+      }
+      return {
+        ...field,
+        options: parsedOptions,
+      };
+    });
 
     sendSuccess(res, fieldsWithOptions);
   })

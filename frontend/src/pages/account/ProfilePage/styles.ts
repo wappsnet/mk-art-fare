@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Button, Form, Space } from 'antd';
+import { Button, Space } from 'antd';
 
 export const ProfileContainerStyled = styled.div`
   padding: 24px 0;

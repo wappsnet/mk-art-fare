@@ -7,7 +7,7 @@ module.exports = {
     'plugin:react-hooks/recommended',
     'plugin:react/recommended',
     'plugin:react/jsx-runtime',
-    'prettier', // Must be last to override other configs
+    'prettier',
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs', 'vite.config.ts'],
   parser: '@typescript-eslint/parser',
@@ -26,6 +26,8 @@ module.exports = {
     },
   },
   rules: {
+    'max-depth': 'error',
+    complexity: 'error',
     // React specific rules
     'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     'react/prop-types': 'off', // We use TypeScript for prop validation
@@ -39,7 +41,7 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'error',
 
     // General rules
-    'no-console': ['warn', { allow: ['warn', 'error'] }],
+    'no-console': ['error', { allow: ['warn', 'info', 'error'] }],
     'prefer-const': 'error',
     'no-var': 'error',
   },

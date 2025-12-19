@@ -521,16 +521,23 @@ class CustomFieldService {
       actualValue = value.value_time;
     } else if (['checkbox', 'image', 'file'].includes(fieldType)) {
       if (value.value_json) {
-        try {
-          actualValue = JSON.parse(value.value_json);
-        } catch (error) {
-          console.error('Failed to parse JSON field value:', {
-            fieldType,
-            fieldId: value.field_definition_id,
-            productId: value.product_id,
-            rawValue: value.value_json,
-            error: error.message,
-          });
+        // Check if it's already parsed (MySQL JSON column returns objects/arrays directly)
+        if (typeof value.value_json === 'object') {
+          actualValue = value.value_json;
+        } else if (typeof value.value_json === 'string') {
+          try {
+            actualValue = JSON.parse(value.value_json);
+          } catch (error) {
+            console.error('Failed to parse JSON field value:', {
+              fieldType,
+              fieldId: value.field_definition_id,
+              productId: value.product_id,
+              rawValue: value.value_json,
+              error: error.message,
+            });
+            actualValue = null;
+          }
+        } else {
           actualValue = null;
         }
       } else {

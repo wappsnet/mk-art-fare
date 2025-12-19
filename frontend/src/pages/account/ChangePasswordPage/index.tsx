@@ -2,7 +2,7 @@ import { Form, Input, Button, message } from 'antd';
 import { LockOutlined } from '@ant-design/icons';
 import { useChangePasswordMutation } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
-import { PasswordContainerStyled, AlertStyled, FormStyled, FullWidthSpace } from './styles';
+import { PasswordContainerStyled, AlertStyled, FullWidthSpace, FormContainer } from './styles';
 
 interface ChangePasswordFormValues {
   current_password: string;
@@ -11,7 +11,7 @@ interface ChangePasswordFormValues {
 }
 
 const ChangePasswordPage = () => {
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<ChangePasswordFormValues>();
   const [changePassword, { isLoading }] = useChangePasswordMutation();
 
   const handleSubmit = async (values: ChangePasswordFormValues) => {
@@ -36,7 +36,8 @@ const ChangePasswordPage = () => {
         showIcon
       />
 
-      <FormStyled form={form} layout="vertical" onFinish={handleSubmit}>
+      <FormContainer>
+        <Form<ChangePasswordFormValues> form={form} layout="vertical" onFinish={handleSubmit}>
         <FullWidthSpace direction="vertical" size="large">
           <Form.Item
             name="current_password"
@@ -86,7 +87,8 @@ const ChangePasswordPage = () => {
             </Button>
           </Form.Item>
         </FullWidthSpace>
-      </FormStyled>
+        </Form>
+      </FormContainer>
     </PasswordContainerStyled>
   );
 };

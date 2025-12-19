@@ -34,6 +34,17 @@
    - DO NOT put buttons inside Form when using Drawer/Modal - use footer prop
    - DO NOT use Form.Item for action buttons - they belong in Drawer/Modal footer
 
+6. **TypeScript Type Safety Violations**
+   - DO NOT use `any` type - use `unknown` or define proper types/interfaces
+   - DO NOT use type assertions/coercion (as, <Type>) - use type guards and runtime checks instead
+   - DO NOT use array index as key in React lists - use `withKeys` helper from `@/utils/arrayHelpers`
+   - DO NOT wrap styled components around generic Ant Design components (Form, etc.) - it breaks type inference
+
+7. **Component Complexity Violations**
+   - DO NOT create components with high complexity (ESLint max complexity: 20)
+   - DO NOT put all rendering logic in large switch/if-else statements
+   - DO NOT leave complex components unreduced when complexity errors appear
+
 ### ✅ ALWAYS DO
 
 1. **Code Quality**
@@ -42,12 +53,21 @@
    - Follow existing code patterns in the project
    - Maintain TypeScript strict type safety
 
-2. **File Organization**
+2. **TypeScript Best Practices**
+   - Define proper types and interfaces for all data structures
+   - Use type guards (`typeof`, `instanceof`, `in` operator) instead of type assertions
+   - Use `unknown` instead of `any` for truly dynamic values, then narrow with type guards
+   - Specify generic types for Forms, hooks, and components: `Form.useForm<FormValues>()`
+   - Remove unused imports and variables to keep code clean
+
+3. **File Organization**
    - Follow the project structure patterns
    - Place files in appropriate directories
    - Use index.tsx pattern for components and pages
+   - When components exceed complexity limits, create subcomponents in `Addons/components/` folder
+   - Extract each case/variant into its own component file to reduce complexity
 
-3. **Confirmation**
+4. **Confirmation**
    - Ask before creating new files or major refactoring
    - Clarify ambiguous requirements
    - Present options when multiple approaches exist
@@ -156,6 +176,93 @@ export const Container = styled.div`
   margin: 0 auto;
 `;
 ```
+
+#### Component Complexity Reduction
+
+When a component exceeds ESLint complexity limits (max: 20), extract logic into subcomponents:
+
+**Folder Structure:**
+```
+ComponentName/
+├── index.tsx                    # Main component (orchestration)
+├── styles.ts                    # Styled components
+└── Addons/
+    └── components/              # Subcomponents for complexity reduction
+        ├── VariantA.tsx
+        ├── VariantB.tsx
+        └── VariantC.tsx
+```
+
+**Example - DynamicFieldRenderer:**
+
+Before (High Complexity):
+```tsx
+// DynamicFieldRenderer/index.tsx
+const renderField = () => {
+  switch (field_type) {
+    case FieldType.TEXT:
+      return (
+        <Input
+          placeholder={placeholder}
+          value={typeof value === 'string' ? value : ''}
+          onChange={(e) => onChange?.(e.target.value)}
+          disabled={disabled}
+        />
+      );
+    case FieldType.NUMBER:
+      return (
+        <InputNumber
+          value={typeof value === 'number' ? value : undefined}
+          onChange={(val) => onChange?.(val)}
+          disabled={disabled}
+        />
+      );
+    // ... 10 more cases
+  }
+};
+```
+
+After (Reduced Complexity):
+```tsx
+// DynamicFieldRenderer/index.tsx
+import { TextField } from './Addons/components/TextField';
+import { NumberField } from './Addons/components/NumberField';
+
+const renderField = () => {
+  switch (field_type) {
+    case FieldType.TEXT:
+      return <TextField placeholder={placeholder} value={value} onChange={onChange} disabled={disabled} />;
+    case FieldType.NUMBER:
+      return <NumberField value={value} onChange={onChange} disabled={disabled} />;
+    // ... simplified cases
+  }
+};
+
+// DynamicFieldRenderer/Addons/components/TextField.tsx
+interface TextFieldProps {
+  placeholder?: string;
+  value: unknown;
+  onChange?: (value: unknown) => void;
+  disabled?: boolean;
+}
+
+export const TextField = ({ placeholder, value, onChange, disabled }: TextFieldProps) => {
+  return (
+    <Input
+      placeholder={placeholder}
+      value={typeof value === 'string' ? value : ''}
+      onChange={(e) => onChange?.(e.target.value)}
+      disabled={disabled}
+    />
+  );
+};
+```
+
+**Benefits:**
+- Reduces cyclomatic complexity to pass ESLint rules
+- Improves code organization and readability
+- Makes components easier to test individually
+- Follows single responsibility principle
 
 #### Styling Guidelines
 
@@ -409,23 +516,69 @@ createProduct = builder.mutation<ApiResponse<Product>, Partial<Product>>({
 
 #### Type Safety
 
-Always define proper types:
+Always define proper types and avoid `any`:
 
 ```tsx
-// Define interfaces
+// ✅ CORRECT: Define proper interfaces
 interface Product {
   id: number;
   name: string;
   price: number;
 }
 
-// Use in components
+// ✅ CORRECT: Use in components with proper types
 const ProductCard = ({ product }: { product: Product }) => {
   // ...
 };
 
-// Use with hooks
+// ✅ CORRECT: Use with hooks
 const [products, setProducts] = useState<Product[]>([]);
+
+// ✅ CORRECT: Use unknown for truly dynamic values, then narrow
+function handleValue(value: unknown) {
+  if (typeof value === 'string') {
+    return value.toUpperCase();
+  }
+  if (typeof value === 'number') {
+    return value.toFixed(2);
+  }
+  return '';
+}
+
+// ❌ INCORRECT: Using any type
+const data: any = fetchData(); // Don't do this
+
+// ❌ INCORRECT: Using type assertions
+const value = data as string; // Don't do this
+
+// ✅ CORRECT: Use type guards
+if (typeof data === 'string') {
+  const value = data; // TypeScript knows it's a string
+}
+```
+
+**Using withKeys Helper for React Lists:**
+
+When rendering lists without stable IDs, use the `withKeys` helper instead of array index:
+
+```tsx
+import { withKeys } from '@/utils/arrayHelpers';
+
+// ❌ INCORRECT: Using array index as key
+items.map((item, index) => <div key={index}>{item}</div>)
+
+// ✅ CORRECT: Using withKeys helper
+withKeys(items).map((item) => <div key={item._key}>{item.value}</div>)
+
+// ✅ CORRECT: For objects, withKeys adds _key property
+interface Item {
+  name: string;
+}
+const items: Item[] = [{ name: 'A' }, { name: 'B' }];
+withKeys(items).map((item) => <div key={item._key}>{item.name}</div>)
+
+// ✅ BEST: Use stable IDs when available
+items.map((item) => <div key={item.id}>{item.name}</div>)
 ```
 
 #### Error Handling
