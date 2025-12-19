@@ -4,6 +4,7 @@ import AccountPage from '@/pages/account/AccountPage';
 import ProfilePage from '@/pages/account/ProfilePage';
 import ChangePasswordPage from '@/pages/account/ChangePasswordPage';
 import MyOrdersPage from '@/pages/account/MyOrdersPage';
+import SubscriptionPage from '@/pages/account/SubscriptionPage';
 
 export const accountRoutes: AppRouteObject[] = [
   {
@@ -21,10 +22,6 @@ export const accountRoutes: AppRouteObject[] = [
       {
         index: true,
         element: <ProfilePage />,
-      },
-      {
-        path: 'profile',
-        element: <ProfilePage />,
         meta: { title: 'Profile - Account' },
       },
       {
@@ -36,6 +33,11 @@ export const accountRoutes: AppRouteObject[] = [
         path: 'orders',
         element: <MyOrdersPage />,
         meta: { title: 'My Orders - Account' },
+      },
+      {
+        path: 'subscription',
+        element: <SubscriptionPage />,
+        meta: { title: 'Subscription - Account' },
       },
     ],
   },

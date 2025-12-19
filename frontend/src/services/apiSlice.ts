@@ -14,6 +14,9 @@ import {
   RegisterFormData,
   OrganizationTheme,
   ProductImage,
+  SubscriptionPlan,
+  SubscriptionResponse,
+  SubscriptionHistory,
 } from '@/types/common';
 import {
   FieldGroup,
@@ -103,6 +106,7 @@ export const api = createApi({
     'Address',
     'Category',
     'FieldGroup',
+    'Subscription',
   ],
   endpoints: (builder) => ({
     // Auth endpoints
@@ -755,6 +759,33 @@ export const api = createApi({
         { type: 'ProductFieldValues', id: productId },
       ],
     }),
+
+    // Subscription endpoints
+    getSubscriptionPlans: builder.query<ApiResponse<SubscriptionPlan[]>, void>({
+      query: () => '/subscriptions/plans',
+    }),
+    getCurrentSubscription: builder.query<ApiResponse<SubscriptionResponse>, void>({
+      query: () => '/subscriptions/current',
+      providesTags: ['Subscription'],
+    }),
+    upgradeSubscription: builder.mutation<ApiResponse<SubscriptionResponse>, void>({
+      query: () => ({
+        url: '/subscriptions/upgrade',
+        method: 'POST',
+      }),
+      invalidatesTags: ['Subscription', 'User'],
+    }),
+    downgradeSubscription: builder.mutation<ApiResponse<SubscriptionResponse>, void>({
+      query: () => ({
+        url: '/subscriptions/downgrade',
+        method: 'POST',
+      }),
+      invalidatesTags: ['Subscription', 'User'],
+    }),
+    getSubscriptionHistory: builder.query<ApiResponse<SubscriptionHistory[]>, void>({
+      query: () => '/subscriptions/history',
+      providesTags: ['Subscription'],
+    }),
   }),
 });
 
@@ -830,4 +861,9 @@ export const {
   useBatchUpdateProductFieldValuesMutation,
   useUpdateProductFieldValueMutation,
   useDeleteProductFieldValueMutation,
+  useGetSubscriptionPlansQuery,
+  useGetCurrentSubscriptionQuery,
+  useUpgradeSubscriptionMutation,
+  useDowngradeSubscriptionMutation,
+  useGetSubscriptionHistoryQuery,
 } = api;

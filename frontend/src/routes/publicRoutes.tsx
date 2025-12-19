@@ -11,6 +11,8 @@ import CartPage from '@/pages/public/CartPage';
 import CheckoutPage from '@/pages/public/CheckoutPage';
 import BlogPage from '@/pages/public/BlogPage';
 import BlogPostPage from '@/pages/public/BlogPostPage';
+import PricingPage from '@/pages/public/PricingPage';
+import HelpCenterPage from '@/pages/public/HelpCenterPage';
 
 export const publicRoutes: AppRouteObject[] = [
   {
@@ -79,5 +81,15 @@ export const publicRoutes: AppRouteObject[] = [
     path: '/blog/:slug',
     element: <BlogPostPage />,
     meta: { title: 'Blog Post - Art Fare' },
+  },
+  {
+    path: '/pricing',
+    element: <PricingPage />,
+    meta: { title: 'Pricing - Art Fare' },
+  },
+  {
+    path: '/help',
+    element: <HelpCenterPage />,
+    meta: { title: 'Help Center - Art Fare' },
   },
 ];

@@ -6,6 +6,7 @@ import { UserRole } from '../types/index.js';
 import { AppError, asyncHandler } from '../middleware/errorHandler.js';
 import { generateSlug, getPaginationParams, transformImageUrls } from '../utils/helpers.js';
 import { upload } from '../config/multer.js';
+import { subscriptionService } from '../services/subscriptionService.js';
 
 const router = Router();
 
@@ -301,6 +302,15 @@ router.post(
     ]);
     if (org.length === 0) {
       throw new AppError('Organization not found or not authorized', 403);
+    }
+
+    // Check subscription limits
+    const canCreate = await subscriptionService.canCreateProduct(
+      req.user.userId,
+      organizationId
+    );
+    if (!canCreate.allowed) {
+      throw new AppError(canCreate.reason, 403);
     }
 
     const slug = generateSlug(name);

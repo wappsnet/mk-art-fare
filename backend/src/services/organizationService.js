@@ -1,9 +1,16 @@
 import { query, getConnection } from '../config/database.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { generateSlug, transformImageUrls } from '../utils/helpers.js';
+import { subscriptionService } from './subscriptionService.js';
 
 export class OrganizationService {
   async createOrganization(ownerId, data) {
+    // Check subscription limits
+    const canCreate = await subscriptionService.canCreateOrganization(ownerId);
+    if (!canCreate.allowed) {
+      throw new AppError(canCreate.reason, 403);
+    }
+
     const slug = data.slug || generateSlug(data.name);
 
     const existing = await query('SELECT * FROM organizations WHERE slug = ?', [slug]);

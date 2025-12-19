@@ -29,6 +29,7 @@ import {
   SidebarStyled,
   MainContentStyled,
   FilterSectionStyled,
+  SearchCompactStyled,
   PriceRangeText,
   PriceSliderWrapperStyled,
   MobileFilterButtonStyled,
@@ -41,7 +42,6 @@ import {
 } from './styles';
 
 const { Title, Text } = Typography;
-const { Search } = Input;
 
 const ProductsPage = () => {
   const [searchInput, setSearchInput] = useState('');
@@ -117,14 +117,20 @@ const ProductsPage = () => {
     <>
       <FilterSectionStyled>
         <Title level={5}>Search</Title>
-        <Search
-          placeholder="Search artworks..."
-          allowClear
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          onSearch={handleSearch}
-          enterButton={<SearchOutlined />}
-        />
+        <SearchCompactStyled>
+          <Input
+            placeholder="Search artworks..."
+            allowClear
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onPressEnter={() => handleSearch(searchInput)}
+          />
+          <Button
+            type="primary"
+            icon={<SearchOutlined />}
+            onClick={() => handleSearch(searchInput)}
+          />
+        </SearchCompactStyled>
       </FilterSectionStyled>
 
       <FilterSectionStyled>

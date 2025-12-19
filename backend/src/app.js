@@ -19,6 +19,7 @@ import categoryRoutes from './routes/categoryRoutes.js';
 import adminModerationRoutes from './routes/admin/moderationRoutes.js';
 import fieldGroupRoutes from './routes/fieldGroupRoutes.js';
 import productFieldRoutes from './routes/productFieldRoutes.js';
+import subscriptionRoutes from './routes/subscriptionRoutes.js';
 
 const app = express();
 
@@ -89,6 +90,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/admin', adminModerationRoutes);
 app.use('/api/field-groups', fieldGroupRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
 // Product routes must come after productFieldRoutes to avoid route conflicts
 app.use('/api/products', productFieldRoutes);
 app.use('/api/products', productRoutes);

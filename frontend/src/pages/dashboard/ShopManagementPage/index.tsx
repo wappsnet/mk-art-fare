@@ -71,8 +71,6 @@ const ShopManagementPage = () => {
     );
   }
 
-  console.info(location);
-
   return (
     <Layout>
       <ContainerStyled>

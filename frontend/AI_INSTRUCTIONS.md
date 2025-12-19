@@ -337,16 +337,46 @@ const CustomButton = styled(Button)`
 
 **Space Component Usage:**
 ```tsx
-// For width on Space (this is acceptable)
+// ❌ INCORRECT: Inline styles
 <Space direction="vertical" size={24} style={{ width: '100%' }}>
   {/* children */}
 </Space>
 
-// Better: Use a styled Space if reused multiple times
+// ✅ CORRECT: Use a styled Space
 const FullWidthSpace = styled(Space)`
   width: 100%;
 `;
 ```
+
+**Migrating from Deprecated Ant Design Patterns:**
+
+When migrating from deprecated Ant Design components, always use styled components instead of inline styles:
+
+```tsx
+// ❌ INCORRECT: Using deprecated Input.Search with enterButton
+<Input.Search enterButton={<SearchOutlined />} />
+
+// ❌ INCORRECT: Using Space.Compact with inline styles
+<Space.Compact style={{ width: '100%' }}>
+  <Input />
+  <Button />
+</Space.Compact>
+
+// ✅ CORRECT: Use styled Space.Compact
+const SearchCompactStyled = styled(Space.Compact)`
+  width: 100%;
+`;
+
+<SearchCompactStyled>
+  <Input placeholder="Search..." />
+  <Button type="primary" icon={<SearchOutlined />} />
+</SearchCompactStyled>
+```
+
+**Common Deprecations to Migrate:**
+- `Input.Search` with `enterButton` → Use `Space.Compact` with `Input` + `Button`
+- `Input` with `addonBefore`/`addonAfter` → Use `Space.Compact` with multiple components
+- Always create styled components instead of using inline `style` prop
 
 #### Drawer Patterns
 

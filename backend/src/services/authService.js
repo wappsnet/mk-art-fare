@@ -1,9 +1,10 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { config } from '../config/index.js';
 import { query } from '../config/database.js';
 import { AppError } from '../middleware/errorHandler.js';
+import { subscriptionService } from './subscriptionService.js';
 
 export class AuthService {
   async hashPassword(password) {
@@ -128,6 +129,9 @@ export class AuthService {
     if (!user) {
       throw new AppError('Failed to create user');
     }
+
+    // Create default Basic subscription for new user
+    await subscriptionService.createDefaultSubscription(user.id);
 
     return user;
   }

@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Card, Button, Typography } from 'antd';
+import { Card, Button, Typography, Space } from 'antd';
 
 const { Text: AntText } = Typography;
 
@@ -47,6 +47,10 @@ export const FilterSectionStyled = styled.div`
   padding: 24px;
   border-radius: 8px;
   margin-bottom: 24px;
+`;
+
+export const SearchCompactStyled = styled(Space.Compact)`
+  width: 100%;
 `;
 
 // Use AntD Text directly - apply styles via props

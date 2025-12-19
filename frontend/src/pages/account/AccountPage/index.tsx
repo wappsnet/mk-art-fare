@@ -1,6 +1,6 @@
 import { useNavigate, Outlet, useLocation } from 'react-router';
 import { Card, Typography, Tabs } from 'antd';
-import { UserOutlined, LockOutlined, ShoppingOutlined } from '@ant-design/icons';
+import { UserOutlined, LockOutlined, ShoppingOutlined, CrownOutlined } from '@ant-design/icons';
 import { Layout } from '@/components/Layout';
 import { ContainerStyled, HeaderStyled, OutletContainer } from './styles';
 
@@ -16,7 +16,7 @@ const AccountPage = () => {
 
   const tabItems = [
     {
-      key: '/account/profile',
+      key: '/account',
       label: 'Profile',
       icon: <UserOutlined />,
     },
@@ -30,6 +30,11 @@ const AccountPage = () => {
       label: 'My Orders',
       icon: <ShoppingOutlined />,
     },
+    {
+      key: '/account/subscription',
+      label: 'Subscription',
+      icon: <CrownOutlined />,
+    },
   ];
 
   return (
@@ -40,7 +45,12 @@ const AccountPage = () => {
         </HeaderStyled>
 
         <Card>
-          <Tabs activeKey={location.pathname} onChange={handleTabChange} items={tabItems} />
+          <Tabs
+            defaultActiveKey={tabItems[0].key}
+            activeKey={location.pathname}
+            onChange={handleTabChange}
+            items={tabItems}
+          />
           <OutletContainer>
             <Outlet />
           </OutletContainer>
