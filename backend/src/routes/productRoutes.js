@@ -7,6 +7,7 @@ import { AppError, asyncHandler } from '../middleware/errorHandler.js';
 import { generateSlug, getPaginationParams, transformImageUrls } from '../utils/helpers.js';
 import { upload } from '../config/multer.js';
 import { subscriptionService } from '../services/subscriptionService.js';
+import { buildProductQuery, buildProductCountQuery } from '../utils/productQueryBuilder.js';
 
 const router = Router();
 
@@ -70,175 +71,33 @@ router.get(
     const validLimit = Math.floor(Number(limit)) || 10;
     const validOffset = Math.floor(Number(offset)) || 0;
 
-    let queryStr =
-      'SELECT p.*, o.name as organization_name, o.slug as organization_slug FROM products p LEFT JOIN organizations o ON p.organization_id = o.id WHERE p.is_active = TRUE';
-    const params = [];
+    // Build product query using helper functions
+    const filters = { organizationId, category, search, minPrice, maxPrice, customFields };
+    const { queryStr, params } = await buildProductQuery(filters);
 
-    if (organizationId) {
-      queryStr += ' AND p.organization_id = ?';
-      params.push(organizationId);
-    }
+    // Execute main query with pagination
+    const finalQuery = `${queryStr} ORDER BY p.created_at DESC LIMIT ${validLimit} OFFSET ${validOffset}`;
+    let products = await query(finalQuery, params);
 
-    // Handle multiple categories (comma-separated)
-    if (category) {
-      const categories = category
-        .split(',')
-        .map((c) => c.trim())
-        .filter(Boolean);
-      if (categories.length > 0) {
-        // Get category IDs from slugs
-        const categoryPlaceholders = categories.map(() => '?').join(',');
-        const categoryResults = await query(
-          `SELECT id FROM categories WHERE slug IN (${categoryPlaceholders})`,
-          categories
-        );
-        const categoryIds = categoryResults.map((c) => c.id);
-
-        if (categoryIds.length > 0) {
-          const placeholders = categoryIds.map(() => '?').join(',');
-          queryStr += ` AND p.category_id IN (${placeholders})`;
-          params.push(...categoryIds);
-        }
-      }
-    }
-
-    if (search) {
-      queryStr += ' AND (p.name LIKE ? OR p.description LIKE ?)';
-      params.push(`%${search}%`, `%${search}%`);
-    }
-
-    // Price filtering
-    if (minPrice !== undefined && minPrice !== null && minPrice !== '') {
-      queryStr += ' AND p.price >= ?';
-      params.push(Number.parseFloat(minPrice));
-    }
-    if (maxPrice !== undefined && maxPrice !== null && maxPrice !== '') {
-      queryStr += ' AND p.price <= ?';
-      params.push(Number.parseFloat(maxPrice));
-    }
-
-    // Custom fields filtering
-    // Format: customFields=fieldId1:value1,fieldId2:value2
-    if (customFields) {
-      const fieldFilters = customFields
-        .split(',')
-        .map((f) => {
-          const [fieldId, value] = f.split(':');
-          return { fieldId: Number.parseInt(fieldId), value: value?.trim() };
-        })
-        .filter((f) => f.fieldId && f.value);
-
-      if (fieldFilters.length > 0) {
-        // Use subquery to filter products that have matching field values
-        queryStr +=
-          ' AND p.id IN (SELECT DISTINCT pfv.product_id FROM product_field_values pfv WHERE ';
-        const fieldConditions = [];
-
-        for (const filter of fieldFilters) {
-          fieldConditions.push(
-            '(pfv.field_definition_id = ? AND (pfv.value_text LIKE ? OR pfv.value_longtext LIKE ?))'
-          );
-          params.push(filter.fieldId, `%${filter.value}%`, `%${filter.value}%`);
-        }
-
-        queryStr += fieldConditions.join(' OR ') + ')';
-      }
-    }
-
-    queryStr += ` ORDER BY p.created_at DESC LIMIT ${validLimit} OFFSET ${validOffset}`;
-
-    let products = await query(queryStr, params);
-
-    // Fetch images for each product
-    for (let product of products) {
-      let images = await query(
+    // Fetch and transform images for each product
+    for (const product of products) {
+      const images = await query(
         'SELECT * FROM product_images WHERE product_id = ? ORDER BY sort_order',
         [product.id]
       );
-      // Transform image URLs to full URLs
       product.images = transformImageUrls(images, 'url', 'products');
     }
 
-    // Transform product image URLs to full URLs for response
+    // Transform product image URLs
     products = products.map((product) =>
       transformImageUrls(product, 'featured_image_url', 'products')
     );
 
-    // Build count query with same filters
-    let countQuery = 'SELECT COUNT(*) as total FROM products p WHERE p.is_active = TRUE';
-    const countParams = [];
-
-    if (organizationId) {
-      countQuery += ' AND p.organization_id = ?';
-      countParams.push(organizationId);
-    }
-
-    // Handle multiple categories in count query
-    if (category) {
-      const categories = category
-        .split(',')
-        .map((c) => c.trim())
-        .filter(Boolean);
-      if (categories.length > 0) {
-        const categoryPlaceholders = categories.map(() => '?').join(',');
-        const categoryResults = await query(
-          `SELECT id FROM categories WHERE slug IN (${categoryPlaceholders})`,
-          categories
-        );
-        const categoryIds = categoryResults.map((c) => c.id);
-
-        if (categoryIds.length > 0) {
-          const placeholders = categoryIds.map(() => '?').join(',');
-          countQuery += ` AND p.category_id IN (${placeholders})`;
-          countParams.push(...categoryIds);
-        }
-      }
-    }
-
-    if (search) {
-      countQuery += ' AND (p.name LIKE ? OR p.description LIKE ?)';
-      countParams.push(`%${search}%`, `%${search}%`);
-    }
-
-    // Price filtering in count query
-    if (minPrice !== undefined && minPrice !== null && minPrice !== '') {
-      countQuery += ' AND p.price >= ?';
-      countParams.push(Number.parseFloat(minPrice));
-    }
-    if (maxPrice !== undefined && maxPrice !== null && maxPrice !== '') {
-      countQuery += ' AND p.price <= ?';
-      countParams.push(Number.parseFloat(maxPrice));
-    }
-
-    // Custom fields filtering in count query
-    if (customFields) {
-      const fieldFilters = customFields
-        .split(',')
-        .map((f) => {
-          const [fieldId, value] = f.split(':');
-          return { fieldId: Number.parseInt(fieldId), value: value?.trim() };
-        })
-        .filter((f) => f.fieldId && f.value);
-
-      if (fieldFilters.length > 0) {
-        countQuery +=
-          ' AND p.id IN (SELECT DISTINCT pfv.product_id FROM product_field_values pfv WHERE ';
-        const fieldConditions = [];
-
-        for (const filter of fieldFilters) {
-          fieldConditions.push(
-            '(pfv.field_definition_id = ? AND (pfv.value_text LIKE ? OR pfv.value_longtext LIKE ?))'
-          );
-          countParams.push(filter.fieldId, `%${filter.value}%`, `%${filter.value}%`);
-        }
-
-        countQuery += fieldConditions.join(' OR ') + ')';
-      }
-    }
-
+    // Get total count using helper function
+    const { queryStr: countQuery, params: countParams } = await buildProductCountQuery(filters);
     const countResult = await query(countQuery, countParams);
 
-    // Format response to match frontend expectations
+    // Format response
     const responseData = {
       products,
       total: countResult[0].total,

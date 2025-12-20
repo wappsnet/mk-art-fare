@@ -26,22 +26,46 @@ module.exports = {
     },
   },
   rules: {
-    'max-depth': 'error',
-    complexity: 'error',
+    // Complexity rules
+    'max-depth': ['error', 4],
+    complexity: ['error', 15],
+    'max-lines-per-function': [
+      'warn',
+      {
+        max: 150,
+        skipBlankLines: true,
+        skipComments: true,
+      },
+    ],
     // React specific rules
-    'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+    'react-refresh/only-export-components': [
+      'warn',
+      {
+        allowConstantExport: true,
+      },
+    ],
     'react/prop-types': 'off', // We use TypeScript for prop validation
     'react/react-in-jsx-scope': 'off', // Not needed in React 18+
     'react/no-array-index-key': 'error',
     'react/no-unescaped-entities': 'off', // Allow natural text with apostrophes
     // TypeScript specific rules
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        argsIgnorePattern: '^_',
+      },
+    ],
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'error',
 
     // General rules
-    'no-console': ['error', { allow: ['warn', 'info', 'error'] }],
+    'no-console': [
+      'error',
+      {
+        allow: ['warn', 'info', 'error'],
+      },
+    ],
     'prefer-const': 'error',
     'no-var': 'error',
   },
