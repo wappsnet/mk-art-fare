@@ -1,4 +1,5 @@
 import { query } from '../config/database.js';
+import { generateSlug } from './helpers.js';
 
 /**
  * Build category filter conditions
@@ -160,4 +161,56 @@ export async function buildProductCountQuery(filters) {
   queryStr += buildCustomFieldsFilter(customFields, params);
 
   return { queryStr, params };
+}
+
+/**
+ * Build product update query from request body
+ * @param {Object} body - Request body with fields to update
+ * @returns {Object} Updates array and values array for SQL query
+ */
+export function buildProductUpdateQuery(body) {
+  const updates = [];
+  const values = [];
+  const { name, description, price, compareAtPrice, stockQuantity, sku, isActive } = body;
+
+  const fieldMapping = {
+    name: (val) => {
+      updates.push('name = ?, slug = ?');
+      values.push(val, generateSlug(val));
+    },
+    description: (val) => {
+      updates.push('description = ?');
+      values.push(val);
+    },
+    price: (val) => {
+      updates.push('price = ?');
+      values.push(val);
+    },
+    compareAtPrice: (val) => {
+      updates.push('compare_at_price = ?');
+      values.push(val);
+    },
+    stockQuantity: (val) => {
+      updates.push('stock_quantity = ?');
+      values.push(val);
+    },
+    sku: (val) => {
+      updates.push('sku = ?');
+      values.push(val);
+    },
+    isActive: (val) => {
+      updates.push('is_active = ?');
+      values.push(val);
+    },
+  };
+
+  const fields = { name, description, price, compareAtPrice, stockQuantity, sku, isActive };
+
+  for (const [key, value] of Object.entries(fields)) {
+    if (value !== undefined && fieldMapping[key]) {
+      fieldMapping[key](value);
+    }
+  }
+
+  return { updates, values };
 }

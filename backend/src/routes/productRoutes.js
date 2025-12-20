@@ -7,7 +7,11 @@ import { AppError, asyncHandler } from '../middleware/errorHandler.js';
 import { generateSlug, getPaginationParams, transformImageUrls } from '../utils/helpers.js';
 import { upload } from '../config/multer.js';
 import { subscriptionService } from '../services/subscriptionService.js';
-import { buildProductQuery, buildProductCountQuery } from '../utils/productQueryBuilder.js';
+import {
+  buildProductQuery,
+  buildProductCountQuery,
+  buildProductUpdateQuery,
+} from '../utils/productQueryBuilder.js';
 
 const router = Router();
 
@@ -214,38 +218,7 @@ router.patch(
       throw new AppError('Not authorized', 403);
     }
 
-    const updates = [];
-    const values = [];
-    const { name, description, price, compareAtPrice, stockQuantity, sku, isActive } = req.body;
-
-    if (name !== undefined) {
-      updates.push('name = ?, slug = ?');
-      values.push(name, generateSlug(name));
-    }
-    if (description !== undefined) {
-      updates.push('description = ?');
-      values.push(description);
-    }
-    if (price !== undefined) {
-      updates.push('price = ?');
-      values.push(price);
-    }
-    if (compareAtPrice !== undefined) {
-      updates.push('compare_at_price = ?');
-      values.push(compareAtPrice);
-    }
-    if (stockQuantity !== undefined) {
-      updates.push('stock_quantity = ?');
-      values.push(stockQuantity);
-    }
-    if (sku !== undefined) {
-      updates.push('sku = ?');
-      values.push(sku);
-    }
-    if (isActive !== undefined) {
-      updates.push('is_active = ?');
-      values.push(isActive);
-    }
+    const { updates, values } = buildProductUpdateQuery(req.body);
 
     if (updates.length > 0) {
       values.push(productId);
