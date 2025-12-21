@@ -25,7 +25,7 @@ import {
   FileTextOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { Layout } from '@/components/Layout';
+import AppLayout from '@/components/AppLayout';
 import {
   useGetUsersQuery,
   useUpdateUserMutation,
@@ -377,7 +377,7 @@ const AdminPage = () => {
   ];
 
   return (
-    <Layout>
+    <AppLayout>
       <ContainerStyled>
         <HeaderStyled>
           <Title level={2}>
@@ -429,7 +429,7 @@ const AdminPage = () => {
           </Form>
         </Modal>
       </ContainerStyled>
-    </Layout>
+    </AppLayout>
   );
 };
 

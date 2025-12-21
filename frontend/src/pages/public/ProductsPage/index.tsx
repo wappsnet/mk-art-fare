@@ -15,7 +15,7 @@ import {
 } from 'antd';
 import { SearchOutlined, ShoppingCartOutlined, FilterOutlined } from '@ant-design/icons';
 import { Link } from 'react-router';
-import { Layout } from '@/components/Layout';
+import AppLayout from '@/components/AppLayout';
 import {
   useGetProductsQuery,
   useGetGlobalCategoriesQuery,
@@ -203,7 +203,7 @@ const ProductsPage = () => {
   );
 
   return (
-    <Layout>
+    <AppLayout>
       <PageContainerStyled>
         <PageHeaderStyled>
           <Title level={2}>Discover Artworks</Title>
@@ -316,7 +316,7 @@ const ProductsPage = () => {
           </MainContentStyled>
         </ContainerStyled>
       </PageContainerStyled>
-    </Layout>
+    </AppLayout>
   );
 };
 

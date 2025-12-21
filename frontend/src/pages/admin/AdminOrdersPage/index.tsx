@@ -7,7 +7,7 @@ import {
   ClockCircleOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { Layout } from '@/components/Layout';
+import AppLayout from '@/components/AppLayout';
 import { useGetOrdersQuery } from '@/services/apiSlice';
 import { Order, OrderStatus } from '@/types/common';
 import { ContainerStyled, HeaderStyled, StatCardStyled } from './styles';
@@ -109,7 +109,7 @@ const AdminOrdersPage = () => {
   ];
 
   return (
-    <Layout>
+    <AppLayout>
       <ContainerStyled>
         <HeaderStyled>
           <div>
@@ -189,7 +189,7 @@ const AdminOrdersPage = () => {
           </Space>
         </Card>
       </ContainerStyled>
-    </Layout>
+    </AppLayout>
   );
 };
 

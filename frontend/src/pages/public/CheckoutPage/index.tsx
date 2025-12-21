@@ -15,7 +15,7 @@ import {
   Modal,
 } from 'antd';
 import { CreditCardOutlined, EnvironmentOutlined, ShoppingOutlined } from '@ant-design/icons';
-import { Layout } from '@/components/Layout';
+import AppLayout from '@/components/AppLayout';
 import { useAppSelector } from '@/hooks/useRedux';
 import {
   useGetCartQuery,
@@ -153,7 +153,7 @@ const CheckoutPage = () => {
   const orderTotal = subtotal + shipping + tax;
 
   return (
-    <Layout>
+    <AppLayout>
       <ContainerStyled>
         <PageTitleStyled level={2}>
           <ShoppingOutlined /> Checkout
@@ -389,7 +389,7 @@ const CheckoutPage = () => {
           </Row>
         </Form>
       </ContainerStyled>
-    </Layout>
+    </AppLayout>
   );
 };
 

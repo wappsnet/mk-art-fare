@@ -16,7 +16,7 @@ import {
 import { ShoppingCartOutlined, ShopOutlined, ZoomInOutlined } from '@ant-design/icons';
 import Zoom from 'react-medium-image-zoom';
 import 'react-medium-image-zoom/dist/styles.css';
-import { Layout } from '@/components/Layout';
+import AppLayout from '@/components/AppLayout';
 import {
   useGetProductQuery,
   useAddToCartMutation,
@@ -70,13 +70,13 @@ const ProductDetailPage = () => {
 
   if (loading) {
     return (
-      <Layout>
+      <AppLayout>
         <ContainerStyled>
           <LoadingContainerStyled>
             <Spin size="large" />
           </LoadingContainerStyled>
         </ContainerStyled>
-      </Layout>
+      </AppLayout>
     );
   }
 
@@ -85,147 +85,143 @@ const ProductDetailPage = () => {
     const currentImage = images[selectedImageIndex];
 
     return (
-    <Layout>
-      <ContainerStyled>
-        <Breadcrumb
-          items={[
-            { title: <Link to="/">Home</Link> },
-            { title: <Link to="/products">Products</Link> },
-            { title: product.name },
-          ]}
-          style={{ marginBottom: 24 }}
-        />
+      <AppLayout>
+        <ContainerStyled>
+          <Breadcrumb
+            items={[
+              { title: <Link to="/">Home</Link> },
+              { title: <Link to="/products">Products</Link> },
+              { title: product.name },
+            ]}
+            style={{ marginBottom: 24 }}
+          />
 
-        <Row gutter={[48, 48]}>
-          <Col xs={24} md={12}>
-            {images.length > 0 ? (
-              <ImageGalleryStyled>
-                <Zoom>
-                  <MainImageContainerStyled>
-                    <img src={currentImage?.url} alt={currentImage?.alt_text || product.name} />
-                    <ZoomHintStyled className="zoom-hint">
-                      <ZoomInOutlined /> Click to zoom
-                    </ZoomHintStyled>
-                  </MainImageContainerStyled>
-                </Zoom>
+          <Row gutter={[48, 48]}>
+            <Col xs={24} md={12}>
+              {images.length > 0 ? (
+                <ImageGalleryStyled>
+                  <Zoom>
+                    <MainImageContainerStyled>
+                      <img src={currentImage?.url} alt={currentImage?.alt_text || product.name} />
+                      <ZoomHintStyled className="zoom-hint">
+                        <ZoomInOutlined /> Click to zoom
+                      </ZoomHintStyled>
+                    </MainImageContainerStyled>
+                  </Zoom>
 
-                {images.length > 1 && (
-                  <ThumbnailsContainerStyled>
-                    {images.map((img, index) => (
-                      <ThumbnailStyled
-                        key={img.id}
-                        active={index === selectedImageIndex}
-                        onClick={() => setSelectedImageIndex(index)}
-                      >
-                        <img src={img.url} alt={img.alt_text || `${product.name} ${index + 1}`} />
-                      </ThumbnailStyled>
-                    ))}
-                  </ThumbnailsContainerStyled>
-                )}
-              </ImageGalleryStyled>
-            ) : (
-              <MainImageContainerStyled>
-                <Text type="secondary">No Image Available</Text>
-              </MainImageContainerStyled>
-            )}
-          </Col>
-
-          <Col xs={24} md={12}>
-            <Link to={`/shop/${product.organization_slug}`}>
-              <Button type="link" icon={<ShopOutlined />} style={{ padding: 0, marginBottom: 8 }}>
-                {product.organization_name || 'Unknown Artist'}
-              </Button>
-            </Link>
-
-            <Title level={2}>{product.name}</Title>
-
-            {product.sku && (
-              <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
-                SKU: {product.sku}
-              </Text>
-            )}
-
-            <PriceSectionStyled>
-              <PriceStyled>
-                ${product.price.toFixed(2)}
-                {product.compare_at_price &&
-                  product.compare_at_price >
-                    product.price && (
-                    <ComparePriceStyled>
-                      ${product.compare_at_price.toFixed(2)}
-                    </ComparePriceStyled>
+                  {images.length > 1 && (
+                    <ThumbnailsContainerStyled>
+                      {images.map((img, index) => (
+                        <ThumbnailStyled
+                          key={img.id}
+                          active={index === selectedImageIndex}
+                          onClick={() => setSelectedImageIndex(index)}
+                        >
+                          <img src={img.url} alt={img.alt_text || `${product.name} ${index + 1}`} />
+                        </ThumbnailStyled>
+                      ))}
+                    </ThumbnailsContainerStyled>
                   )}
-              </PriceStyled>
-              {product.stock_quantity > 0 ? (
-                <Tag color="success" style={{ marginTop: 12 }}>
-                  {product.stock_quantity} in stock
-                </Tag>
+                </ImageGalleryStyled>
               ) : (
-                <Tag color="error" style={{ marginTop: 12 }}>
-                  Out of stock
-                </Tag>
+                <MainImageContainerStyled>
+                  <Text type="secondary">No Image Available</Text>
+                </MainImageContainerStyled>
               )}
-            </PriceSectionStyled>
+            </Col>
 
-            <Divider />
+            <Col xs={24} md={12}>
+              <Link to={`/shop/${product.organization_slug}`}>
+                <Button type="link" icon={<ShopOutlined />} style={{ padding: 0, marginBottom: 8 }}>
+                  {product.organization_name || 'Unknown Artist'}
+                </Button>
+              </Link>
 
-            {product.description && (
-              <>
-                <Title level={5}>Description</Title>
-                <Paragraph>{product.description}</Paragraph>
-                <Divider />
-              </>
-            )}
+              <Title level={2}>{product.name}</Title>
 
-            {fieldValues.length > 0 && (
-              <>
-                <Title level={5}>Product Details</Title>
-                <Descriptions column={1} bordered size="small">
-                  {fieldValues.map((field) => (
-                    <Descriptions.Item key={field.id} label={field.label || field.name}>
-                      <FieldValueDisplay field={field} />
-                    </Descriptions.Item>
-                  ))}
-                </Descriptions>
-                <Divider />
-              </>
-            )}
+              {product.sku && (
+                <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
+                  SKU: {product.sku}
+                </Text>
+              )}
 
-            <QuantityContainerStyled>
-              <Text strong>Quantity:</Text>
-              <InputNumber
-                min={1}
-                max={product.stock_quantity}
-                value={quantity}
-                onChange={(value) => setQuantity(value || 1)}
-                style={{ marginLeft: 16 }}
-              />
-            </QuantityContainerStyled>
+              <PriceSectionStyled>
+                <PriceStyled>
+                  ${product.price.toFixed(2)}
+                  {product.compare_at_price && product.compare_at_price > product.price && (
+                    <ComparePriceStyled>${product.compare_at_price.toFixed(2)}</ComparePriceStyled>
+                  )}
+                </PriceStyled>
+                {product.stock_quantity > 0 ? (
+                  <Tag color="success" style={{ marginTop: 12 }}>
+                    {product.stock_quantity} in stock
+                  </Tag>
+                ) : (
+                  <Tag color="error" style={{ marginTop: 12 }}>
+                    Out of stock
+                  </Tag>
+                )}
+              </PriceSectionStyled>
 
-            <Button
-              type="primary"
-              size="large"
-              icon={<ShoppingCartOutlined />}
-              onClick={handleAddToCart}
-              disabled={product.stock_quantity === 0}
-              loading={adding}
-              block
-            >
-              {product.stock_quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
-            </Button>
-          </Col>
-        </Row>
-      </ContainerStyled>
-    </Layout>
+              <Divider />
+
+              {product.description && (
+                <>
+                  <Title level={5}>Description</Title>
+                  <Paragraph>{product.description}</Paragraph>
+                  <Divider />
+                </>
+              )}
+
+              {fieldValues.length > 0 && (
+                <>
+                  <Title level={5}>Product Details</Title>
+                  <Descriptions column={1} bordered size="small">
+                    {fieldValues.map((field) => (
+                      <Descriptions.Item key={field.id} label={field.label || field.name}>
+                        <FieldValueDisplay field={field} />
+                      </Descriptions.Item>
+                    ))}
+                  </Descriptions>
+                  <Divider />
+                </>
+              )}
+
+              <QuantityContainerStyled>
+                <Text strong>Quantity:</Text>
+                <InputNumber
+                  min={1}
+                  max={product.stock_quantity}
+                  value={quantity}
+                  onChange={(value) => setQuantity(value || 1)}
+                  style={{ marginLeft: 16 }}
+                />
+              </QuantityContainerStyled>
+
+              <Button
+                type="primary"
+                size="large"
+                icon={<ShoppingCartOutlined />}
+                onClick={handleAddToCart}
+                disabled={product.stock_quantity === 0}
+                loading={adding}
+                block
+              >
+                {product.stock_quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+              </Button>
+            </Col>
+          </Row>
+        </ContainerStyled>
+      </AppLayout>
     );
   }
 
   return (
-    <Layout>
+    <AppLayout>
       <ContainerStyled>
         <Title level={3}>Product not found</Title>
       </ContainerStyled>
-    </Layout>
+    </AppLayout>
   );
 };
 

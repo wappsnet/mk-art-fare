@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Row, Col, Card, Typography, Button, Modal, Form, Input, message } from 'antd';
 import { ShopOutlined, PlusOutlined } from '@ant-design/icons';
-import { Layout } from '@/components/Layout';
+import AppLayout from '@/components/AppLayout';
 import { useAppSelector } from '@/hooks/useRedux';
 import { useGetMyOrganizationsQuery, useCreateOrganizationMutation } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
@@ -48,7 +48,7 @@ const DashboardPage = () => {
   };
 
   return (
-    <Layout>
+    <AppLayout>
       <ContainerStyled>
         <WelcomeSectionStyled>
           <Title level={2}>Welcome back, {user?.first_name || user?.email}!</Title>
@@ -116,12 +116,7 @@ const DashboardPage = () => {
           >
             Cancel
           </Button>,
-          <Button
-            key="submit"
-            type="primary"
-            loading={isCreating}
-            onClick={() => form.submit()}
-          >
+          <Button key="submit" type="primary" loading={isCreating} onClick={() => form.submit()}>
             Create Shop
           </Button>,
         ]}
@@ -151,7 +146,7 @@ const DashboardPage = () => {
           </Form.Item>
         </Form>
       </Modal>
-    </Layout>
+    </AppLayout>
   );
 };
 

@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router';
 import { Col, Typography, InputNumber, List, Empty, Divider, Space, message, Button } from 'antd';
 import { DeleteOutlined, ShoppingOutlined } from '@ant-design/icons';
-import { Layout } from '@/components/Layout';
+import AppLayout from '@/components/AppLayout';
 import { useAppSelector } from '@/hooks/useRedux';
 import {
   useGetCartQuery,
@@ -79,13 +79,13 @@ const CartPage = () => {
 
   if (loading) {
     return (
-      <Layout>
+      <AppLayout>
         <ContainerStyled>
           <LoadingContainerStyled>
             <Empty description="Loading cart..." />
           </LoadingContainerStyled>
         </ContainerStyled>
-      </Layout>
+      </AppLayout>
     );
   }
 
@@ -95,7 +95,7 @@ const CartPage = () => {
     // Cart has products, continue to render below
   } else {
     return (
-      <Layout>
+      <AppLayout>
         <ContainerStyled>
           <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Your cart is empty">
             <Link to="/products">
@@ -105,7 +105,7 @@ const CartPage = () => {
             </Link>
           </Empty>
         </ContainerStyled>
-      </Layout>
+      </AppLayout>
     );
   }
 
@@ -117,7 +117,7 @@ const CartPage = () => {
   const totalItems = cart.items.length;
 
   return (
-    <Layout>
+    <AppLayout>
       <ContainerStyled>
         <Title level={2}>Shopping Cart</Title>
         <Text type="secondary">{totalItems} items in your cart</Text>
@@ -209,7 +209,7 @@ const CartPage = () => {
           </Col>
         </ContentRowStyled>
       </ContainerStyled>
-    </Layout>
+    </AppLayout>
   );
 };
 

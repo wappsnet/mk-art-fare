@@ -21,7 +21,7 @@ import {
   SafetyCertificateOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { Layout } from '@/components/Layout';
+import AppLayout from '@/components/AppLayout';
 import { useGetProductsQuery, useModerateProductMutation } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
 import { Product } from '@/types/common';
@@ -113,8 +113,7 @@ const AdminProductModerationPage = () => {
       dataIndex: 'price',
       key: 'price',
       render: (price: number) => `$${price?.toFixed(2) || '0.00'}`,
-      sorter: (a: Product, b: Product) =>
-        (a.price || 0) - (b.price || 0),
+      sorter: (a: Product, b: Product) => (a.price || 0) - (b.price || 0),
     },
     {
       title: 'Stock',
@@ -182,7 +181,7 @@ const AdminProductModerationPage = () => {
   ];
 
   return (
-    <Layout>
+    <AppLayout>
       <ContainerStyled>
         <HeaderStyled>
           <div>
@@ -271,7 +270,7 @@ const AdminProductModerationPage = () => {
           )}
         </Modal>
       </ContainerStyled>
-    </Layout>
+    </AppLayout>
   );
 };
 

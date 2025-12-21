@@ -1,5 +1,5 @@
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
+import AppHeader from '@/components/AppHeader';
+import AppFooter from '@/components/AppFooter';
 import { ContentStyled, LayoutStyled } from './style.ts';
 import { ReactNode } from 'react';
 
@@ -7,12 +7,14 @@ interface LayoutProps {
   children: ReactNode;
 }
 
-export const Layout = ({ children }: LayoutProps) => {
+export const AppLayout = ({ children }: LayoutProps) => {
   return (
     <LayoutStyled theme="light">
-      <Header />
+      <AppHeader />
       <ContentStyled>{children}</ContentStyled>
-      <Footer />
+      <AppFooter />
     </LayoutStyled>
   );
 };
+
+export default AppLayout;

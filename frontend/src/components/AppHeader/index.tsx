@@ -13,15 +13,18 @@ import { useGetCartQuery, useLogoutMutation } from '@/services/apiSlice';
 import ArtFareLogo from '@/assets/base/logo.svg';
 import { HeaderStyled, LogoStyled, NavMenuStyled } from './style.ts';
 
-export const Header = () => {
+const AppHeader = () => {
   const navigate = useNavigate();
   const { user } = useAppSelector((state) => state.auth);
   const { data: cartData } = useGetCartQuery();
   const [logout] = useLogoutMutation();
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/');
+  const handleLogout = () => {
+    logout()
+      .unwrap()
+      .then(() => {
+        navigate('/');
+      });
   };
 
   // Build user menu items based on role and permissions
@@ -124,3 +127,5 @@ export const Header = () => {
     </HeaderStyled>
   );
 };
+
+export default AppHeader;

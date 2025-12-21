@@ -1,20 +1,5 @@
 import styled from '@emotion/styled';
-import { Card, Form, Button, Space } from 'antd';
-
-export const ContainerStyled = styled.div`
-  min-height: calc(100vh - 64px - 200px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 50px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-`;
-
-export const CardStyled = styled(Card)`
-  width: 100%;
-  max-width: 450px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-`;
+import { Form, Button, Space } from 'antd';
 
 export const FullWidthSpaceStyled = styled(Space)`
   width: 100%;

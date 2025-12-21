@@ -1,7 +1,7 @@
 import { Button, Row, Col, Typography, Space } from 'antd';
 import { ShoppingOutlined, BankOutlined, ReadOutlined } from '@ant-design/icons';
 import { Link } from 'react-router';
-import { Layout } from '@/components/Layout';
+import AppLayout from '@/components/AppLayout';
 import { withKeys } from '@/utils/arrayHelpers';
 import {
   HeroSectionStyled,
@@ -52,7 +52,7 @@ const HomePage = () => {
   ];
 
   return (
-    <Layout>
+    <AppLayout>
       <HeroSectionStyled>
         <HeroTitleStyled>Welcome to Art Fare</HeroTitleStyled>
         <HeroTextStyled>
@@ -122,7 +122,7 @@ const HomePage = () => {
           </Space>
         </CTASectionStyled>
       </SectionStyled>
-    </Layout>
+    </AppLayout>
   );
 };
 

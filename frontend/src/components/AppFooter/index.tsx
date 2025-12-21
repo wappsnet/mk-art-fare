@@ -5,9 +5,15 @@ import {
   InstagramOutlined,
   LinkedinOutlined,
 } from '@ant-design/icons';
-import { CopyrightStyled, FooterLinkStyled, FooterSectionStyled, SocialIconStyled, FooterStyled } from './style.ts';
+import {
+  CopyrightStyled,
+  FooterLinkStyled,
+  FooterSectionStyled,
+  SocialIconStyled,
+  FooterStyled,
+} from './style.ts';
 
-export const Footer = () => {
+const AppFooter = () => {
   return (
     <FooterStyled>
       <Row gutter={[32, 32]}>
@@ -44,16 +50,32 @@ export const Footer = () => {
           <FooterSectionStyled>
             <h3>Connect With Us</h3>
             <Space size="large">
-              <SocialIconStyled href="https://facebook.com" target="_blank" rel="noopener noreferrer">
+              <SocialIconStyled
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <FacebookOutlined />
               </SocialIconStyled>
-              <SocialIconStyled href="https://twitter.com" target="_blank" rel="noopener noreferrer">
+              <SocialIconStyled
+                href="https://twitter.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <TwitterOutlined />
               </SocialIconStyled>
-              <SocialIconStyled href="https://instagram.com" target="_blank" rel="noopener noreferrer">
+              <SocialIconStyled
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <InstagramOutlined />
               </SocialIconStyled>
-              <SocialIconStyled href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
+              <SocialIconStyled
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <LinkedinOutlined />
               </SocialIconStyled>
             </Space>
@@ -65,3 +87,5 @@ export const Footer = () => {
     </FooterStyled>
   );
 };
+
+export default AppFooter;

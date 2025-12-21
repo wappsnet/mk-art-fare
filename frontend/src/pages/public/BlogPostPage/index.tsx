@@ -4,7 +4,7 @@ import { withKeys } from '@/utils/arrayHelpers';
 import { Typography, Avatar, Divider, Button, Input, List, Form, message, Spin } from 'antd';
 import { Comment as AntComment } from '@ant-design/compatible';
 import { UserOutlined, CalendarOutlined, EyeOutlined } from '@ant-design/icons';
-import { Layout } from '@/components/Layout';
+import AppLayout from '@/components/AppLayout';
 import { useGetBlogPostQuery } from '@/services/apiSlice';
 import { useAppSelector } from '@/hooks/useRedux';
 import {
@@ -79,28 +79,28 @@ const BlogPostPage = () => {
 
   if (loading) {
     return (
-      <Layout>
+      <AppLayout>
         <ContainerStyled>
           <LoadingContainerStyled>
             <Spin size="large" />
           </LoadingContainerStyled>
         </ContainerStyled>
-      </Layout>
+      </AppLayout>
     );
   }
 
   if (post === null || post === undefined) {
     return (
-      <Layout>
+      <AppLayout>
         <ContainerStyled>
           <Title level={3}>Blog post not found</Title>
         </ContainerStyled>
-      </Layout>
+      </AppLayout>
     );
   }
 
   return (
-    <Layout>
+    <AppLayout>
       <ContainerStyled>
         <BreadcrumbStyled
           items={[
@@ -196,7 +196,7 @@ const BlogPostPage = () => {
           )}
         </CommentSectionStyled>
       </ContainerStyled>
-    </Layout>
+    </AppLayout>
   );
 };
 

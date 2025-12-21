@@ -9,7 +9,7 @@ import {
   SafetyCertificateOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { Layout } from '@/components/Layout';
+import AppLayout from '@/components/AppLayout';
 import { useGetOrganizationsQuery, useModerateOrganizationMutation } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
 import { Organization } from '@/types/common';
@@ -149,7 +149,7 @@ const AdminOrganizationModerationPage = () => {
   ];
 
   return (
-    <Layout>
+    <AppLayout>
       <ContainerStyled>
         <HeaderStyled>
           <div>
@@ -225,7 +225,7 @@ const AdminOrganizationModerationPage = () => {
           )}
         </Modal>
       </ContainerStyled>
-    </Layout>
+    </AppLayout>
   );
 };
 

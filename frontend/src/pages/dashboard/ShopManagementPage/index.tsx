@@ -1,7 +1,7 @@
 import { useParams, useNavigate, Outlet, useLocation } from 'react-router';
 import { Card, Typography, Button, Tabs, Spin } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
-import { Layout } from '@/components/Layout';
+import AppLayout from '@/components/AppLayout';
 import { useGetOrganizationByIdQuery } from '@/services/apiSlice';
 import { ContainerStyled, HeaderStyled, OutletWrapperStyled } from './styles';
 import { useMemo } from 'react';
@@ -53,26 +53,26 @@ const ShopManagementPage = () => {
 
   if (isLoading) {
     return (
-      <Layout>
+      <AppLayout>
         <ContainerStyled>
           <Spin size="large" />
         </ContainerStyled>
-      </Layout>
+      </AppLayout>
     );
   }
 
   if (organization === null || organization === undefined) {
     return (
-      <Layout>
+      <AppLayout>
         <ContainerStyled>
           <Title level={3}>Organization not found</Title>
         </ContainerStyled>
-      </Layout>
+      </AppLayout>
     );
   }
 
   return (
-    <Layout>
+    <AppLayout>
       <ContainerStyled>
         <HeaderStyled>
           <div>
@@ -102,7 +102,7 @@ const ShopManagementPage = () => {
           </OutletWrapperStyled>
         </Card>
       </ContainerStyled>
-    </Layout>
+    </AppLayout>
   );
 };
 

@@ -1,13 +1,13 @@
 import { Result, Button } from 'antd';
 import { useNavigate } from 'react-router';
-import { Layout } from '@/components/Layout';
+import AppLayout from '@/components/AppLayout';
 import { ErrorPageContainer } from './styles';
 
 const NotFoundPage = () => {
   const navigate = useNavigate();
 
   return (
-    <Layout>
+    <AppLayout>
       <ErrorPageContainer>
         <Result
           status="404"
@@ -20,7 +20,7 @@ const NotFoundPage = () => {
           }
         />
       </ErrorPageContainer>
-    </Layout>
+    </AppLayout>
   );
 };
 

@@ -1,13 +1,13 @@
 import { Result, Button } from 'antd';
 import { useNavigate } from 'react-router';
-import { Layout } from '@/components/Layout';
+import AppLayout from '@/components/AppLayout';
 import { ErrorPageContainer } from './styles';
 
 const ForbiddenPage = () => {
   const navigate = useNavigate();
 
   return (
-    <Layout>
+    <AppLayout>
       <ErrorPageContainer>
         <Result
           status="403"
@@ -20,7 +20,7 @@ const ForbiddenPage = () => {
           }
         />
       </ErrorPageContainer>
-    </Layout>
+    </AppLayout>
   );
 };
 

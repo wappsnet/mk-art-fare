@@ -2,7 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { Row, Col, Typography, Avatar, Spin, Empty, Pagination, Input } from 'antd';
 import { UserOutlined, EyeOutlined, CalendarOutlined, SearchOutlined } from '@ant-design/icons';
-import { Layout } from '@/components/Layout';
+import AppLayout from '@/components/AppLayout';
 import { useGetBlogPostsQuery } from '@/services/apiSlice';
 import {
   ContainerStyled,
@@ -67,7 +67,9 @@ const BlogPage = () => {
                   cover={
                     post.featured_image_url ? (
                       <CoverWrapperStyled>
-                        {index === 0 && <FeaturedBadgeStyled color="gold">Featured</FeaturedBadgeStyled>}
+                        {index === 0 && (
+                          <FeaturedBadgeStyled color="gold">Featured</FeaturedBadgeStyled>
+                        )}
                         <img alt={post.title} src={post.featured_image_url} />
                       </CoverWrapperStyled>
                     ) : (
@@ -119,7 +121,7 @@ const BlogPage = () => {
   }
 
   return (
-    <Layout>
+    <AppLayout>
       <ContainerStyled>
         <HeroSectionStyled>
           <Title level={1} style={{ color: 'white', marginBottom: 16 }}>
@@ -150,7 +152,7 @@ const BlogPage = () => {
 
         {content}
       </ContainerStyled>
-    </Layout>
+    </AppLayout>
   );
 };
 

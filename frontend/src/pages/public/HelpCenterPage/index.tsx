@@ -1,6 +1,6 @@
 import { Typography, Collapse, Space, Flex } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
-import { Layout } from '@/components/Layout';
+import AppLayout from '@/components/AppLayout';
 import { ContainerStyled, HeaderStyled } from './styles';
 import { faqData } from './faqData';
 import { ContactCards } from './ContactCards';
@@ -10,7 +10,7 @@ const { Title, Paragraph } = Typography;
 
 const HelpCenterPage = () => {
   return (
-    <Layout>
+    <AppLayout>
       <ContainerStyled>
         <HeaderStyled>
           <Space direction="vertical" size={16}>
@@ -51,7 +51,7 @@ const HelpCenterPage = () => {
           <ContactForm />
         </Flex>
       </ContainerStyled>
-    </Layout>
+    </AppLayout>
   );
 };
 

@@ -4,9 +4,9 @@ import { MailOutlined, LockOutlined, UserOutlined, GoogleOutlined } from '@ant-d
 import { Link, useNavigate } from 'react-router';
 import { useAppSelector } from '@/hooks/useRedux';
 import { useRegisterMutation } from '@/services/apiSlice';
-import { Layout } from '@/components/Layout';
 import { getErrorMessage } from '@/types/errors';
-import { ContainerStyled, CardStyled, GoogleButtonStyled, CenterTextStyled } from './styles';
+import { GoogleButtonStyled, CenterTextStyled } from './styles';
+import AppAuthLayout from '@/components/AppAuthLayout';
 
 const { Title, Text } = Typography;
 
@@ -52,97 +52,97 @@ const RegisterPage = () => {
   };
 
   return (
-    <Layout>
-      <ContainerStyled>
-        <CardStyled>
-          <Space direction="vertical" size="large" style={{ width: '100%' }} /* width needed for Space */>
-            <CenterTextStyled>
-              <Title level={2}>Create Account</Title>
-              <Text type="secondary">Join Art Fare and start your journey</Text>
-            </CenterTextStyled>
+    <AppAuthLayout>
+      <Space
+        direction="vertical"
+        size="large"
+        style={{ width: '100%' }} /* width needed for Space */
+      >
+        <CenterTextStyled>
+          <Title level={2}>Create Account</Title>
+          <Text type="secondary">Join Art Fare and start your journey</Text>
+        </CenterTextStyled>
 
-            <GoogleButtonStyled icon={<GoogleOutlined />} size="large" onClick={handleGoogleLogin}>
-              Continue with Google
-            </GoogleButtonStyled>
+        <GoogleButtonStyled icon={<GoogleOutlined />} size="large" onClick={handleGoogleLogin}>
+          Continue with Google
+        </GoogleButtonStyled>
 
-            <Divider>Or register with email</Divider>
+        <Divider>Or register with email</Divider>
 
-            <Form<RegisterFormValues>
-              form={registerForm}
-              name="register"
-              layout="vertical"
-              onFinish={onFinish}
-              autoComplete="off"
-            >
-              <Form.Item
-                name="email"
-                label="Email"
-                rules={[
-                  { required: true, message: 'Please input your email!' },
-                  { type: 'email', message: 'Please enter a valid email!' },
-                ]}
-              >
-                <Input prefix={<MailOutlined />} placeholder="your@email.com" size="large" />
-              </Form.Item>
+        <Form<RegisterFormValues>
+          form={registerForm}
+          name="register"
+          layout="vertical"
+          onFinish={onFinish}
+          autoComplete="off"
+        >
+          <Form.Item
+            name="email"
+            label="Email"
+            rules={[
+              { required: true, message: 'Please input your email!' },
+              { type: 'email', message: 'Please enter a valid email!' },
+            ]}
+          >
+            <Input prefix={<MailOutlined />} placeholder="your@email.com" size="large" />
+          </Form.Item>
 
-              <Form.Item name="first_name" label="First Name">
-                <Input prefix={<UserOutlined />} placeholder="John" size="large" />
-              </Form.Item>
+          <Form.Item name="first_name" label="First Name">
+            <Input prefix={<UserOutlined />} placeholder="John" size="large" />
+          </Form.Item>
 
-              <Form.Item name="last_name" label="Last Name">
-                <Input prefix={<UserOutlined />} placeholder="Doe" size="large" />
-              </Form.Item>
+          <Form.Item name="last_name" label="Last Name">
+            <Input prefix={<UserOutlined />} placeholder="Doe" size="large" />
+          </Form.Item>
 
-              <Form.Item
-                name="password"
-                label="Password"
-                rules={[
-                  { required: true, message: 'Please input your password!' },
-                  { min: 8, message: 'Password must be at least 8 characters!' },
-                  {
-                    pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-                    message: 'Password must contain uppercase, lowercase, and number!',
-                  },
-                ]}
-              >
-                <Input.Password prefix={<LockOutlined />} placeholder="••••••••" size="large" />
-              </Form.Item>
+          <Form.Item
+            name="password"
+            label="Password"
+            rules={[
+              { required: true, message: 'Please input your password!' },
+              { min: 8, message: 'Password must be at least 8 characters!' },
+              {
+                pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+                message: 'Password must contain uppercase, lowercase, and number!',
+              },
+            ]}
+          >
+            <Input.Password prefix={<LockOutlined />} placeholder="••••••••" size="large" />
+          </Form.Item>
 
-              <Form.Item
-                name="confirmPassword"
-                label="Confirm Password"
-                dependencies={['password']}
-                rules={[
-                  { required: true, message: 'Please confirm your password!' },
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      if (value && getFieldValue('password') !== value) {
-                        return Promise.reject(new Error('Passwords do not match!'));
-                      }
-                      return Promise.resolve();
-                    },
-                  }),
-                ]}
-              >
-                <Input.Password prefix={<LockOutlined />} placeholder="••••••••" size="large" />
-              </Form.Item>
+          <Form.Item
+            name="confirmPassword"
+            label="Confirm Password"
+            dependencies={['password']}
+            rules={[
+              { required: true, message: 'Please confirm your password!' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (value && getFieldValue('password') !== value) {
+                    return Promise.reject(new Error('Passwords do not match!'));
+                  }
+                  return Promise.resolve();
+                },
+              }),
+            ]}
+          >
+            <Input.Password prefix={<LockOutlined />} placeholder="••••••••" size="large" />
+          </Form.Item>
 
-              <Form.Item>
-                <Button type="primary" htmlType="submit" size="large" block loading={isLoading}>
-                  Create Account
-                </Button>
-              </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" size="large" block loading={isLoading}>
+              Create Account
+            </Button>
+          </Form.Item>
 
-              <CenterTextStyled>
-                <Text type="secondary">
-                  Already have an account? <Link to="/login">Sign in</Link>
-                </Text>
-              </CenterTextStyled>
-            </Form>
-          </Space>
-        </CardStyled>
-      </ContainerStyled>
-    </Layout>
+          <CenterTextStyled>
+            <Text type="secondary">
+              Already have an account? <Link to="/login">Sign in</Link>
+            </Text>
+          </CenterTextStyled>
+        </Form>
+      </Space>
+    </AppAuthLayout>
   );
 };
 

@@ -1,7 +1,7 @@
 import { useNavigate, Outlet, useLocation } from 'react-router';
 import { Card, Typography, Tabs } from 'antd';
 import { UserOutlined, LockOutlined, ShoppingOutlined, CrownOutlined } from '@ant-design/icons';
-import { Layout } from '@/components/Layout';
+import AppLayout from '@/components/AppLayout';
 import { ContainerStyled, HeaderStyled, OutletContainer } from './styles';
 
 const { Title } = Typography;
@@ -38,7 +38,7 @@ const AccountPage = () => {
   ];
 
   return (
-    <Layout>
+    <AppLayout>
       <ContainerStyled>
         <HeaderStyled>
           <Title level={2}>Account Settings</Title>
@@ -56,7 +56,7 @@ const AccountPage = () => {
           </OutletContainer>
         </Card>
       </ContainerStyled>
-    </Layout>
+    </AppLayout>
   );
 };
 

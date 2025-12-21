@@ -1,6 +1,6 @@
 import { Typography, Button, Space, Row, Col, Tag, Flex } from 'antd';
 import { CheckOutlined, CrownOutlined, StarOutlined } from '@ant-design/icons';
-import { Layout } from '@/components/Layout';
+import AppLayout from '@/components/AppLayout';
 import { useNavigate } from 'react-router';
 import { useAppSelector } from '@/hooks/useRedux';
 import {
@@ -72,7 +72,7 @@ const PricingPage = () => {
   ];
 
   return (
-    <Layout>
+    <AppLayout>
       <ContainerStyled>
         <HeaderStyled>
           <Space direction="vertical" size={16}>
@@ -147,7 +147,7 @@ const PricingPage = () => {
           </Flex>
         </Flex>
       </ContainerStyled>
-    </Layout>
+    </AppLayout>
   );
 };
 
