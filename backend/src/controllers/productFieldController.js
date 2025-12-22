@@ -1,4 +1,4 @@
-import customFieldService from '../services/customFieldService.js';
+import customFieldService from '../services/customFields/index.js';
 import fieldValidationService from '../services/fieldValidationService.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { sendSuccess } from '../utils/response.js';

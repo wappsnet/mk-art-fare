@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Form } from 'antd';
 import { FieldDefinition, FieldType } from '@/types/customFields';
 import { TextField } from './Addons/components/TextField';
@@ -28,7 +28,7 @@ const DynamicFieldRenderer: React.FC<DynamicFieldRendererProps> = ({
 }) => {
   const { field_type, label, placeholder, help_text, options, validation_rules } = field;
 
-  const renderField = () => {
+  const FieldContent = useMemo(() => {
     switch (field_type) {
       case FieldType.TEXT:
         return (
@@ -67,57 +67,25 @@ const DynamicFieldRenderer: React.FC<DynamicFieldRendererProps> = ({
 
       case FieldType.RADIO:
         return (
-          <RadioField
-            value={value}
-            onChange={onChange}
-            disabled={disabled}
-            options={options}
-          />
+          <RadioField value={value} onChange={onChange} disabled={disabled} options={options} />
         );
 
       case FieldType.CHECKBOX:
         return (
-          <CheckboxField
-            value={value}
-            onChange={onChange}
-            disabled={disabled}
-            options={options}
-          />
+          <CheckboxField value={value} onChange={onChange} disabled={disabled} options={options} />
         );
 
       case FieldType.TOGGLE:
-        return (
-          <ToggleField
-            value={value}
-            onChange={onChange}
-            disabled={disabled}
-          />
-        );
+        return <ToggleField value={value} onChange={onChange} disabled={disabled} />;
 
       case FieldType.DATE:
-        return (
-          <DateField
-            onChange={onChange}
-            disabled={disabled}
-          />
-        );
+        return <DateField onChange={onChange} disabled={disabled} />;
 
       case FieldType.TIME:
-        return (
-          <TimeField
-            onChange={onChange}
-            disabled={disabled}
-          />
-        );
+        return <TimeField onChange={onChange} disabled={disabled} />;
 
       case FieldType.COLOR:
-        return (
-          <ColorField
-            value={value}
-            onChange={onChange}
-            disabled={disabled}
-          />
-        );
+        return <ColorField value={value} onChange={onChange} disabled={disabled} />;
 
       case FieldType.RICHTEXT:
         return (
@@ -130,22 +98,10 @@ const DynamicFieldRenderer: React.FC<DynamicFieldRendererProps> = ({
         );
 
       case FieldType.IMAGE:
-        return (
-          <FileField
-            onChange={onChange}
-            disabled={disabled}
-            isImage={true}
-          />
-        );
+        return <FileField onChange={onChange} disabled={disabled} isImage={true} />;
 
       case FieldType.FILE:
-        return (
-          <FileField
-            onChange={onChange}
-            disabled={disabled}
-            isImage={false}
-          />
-        );
+        return <FileField onChange={onChange} disabled={disabled} isImage={false} />;
 
       default:
         return (
@@ -157,7 +113,18 @@ const DynamicFieldRenderer: React.FC<DynamicFieldRendererProps> = ({
           />
         );
     }
-  };
+  }, [
+    field_type,
+    placeholder,
+    value,
+    onChange,
+    disabled,
+    validation_rules?.maxLength,
+    validation_rules?.min,
+    validation_rules?.max,
+    validation_rules?.step,
+    options,
+  ]);
 
   return (
     <Form.Item
@@ -171,7 +138,7 @@ const DynamicFieldRenderer: React.FC<DynamicFieldRendererProps> = ({
       ]}
       style={{ marginBottom: 16 }}
     >
-      {renderField()}
+      {FieldContent}
     </Form.Item>
   );
 };

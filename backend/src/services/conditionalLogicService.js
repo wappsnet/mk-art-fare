@@ -1,4 +1,4 @@
-import customFieldService from './customFieldService.js';
+import customFieldService from './customFields/index.js';
 
 /**
  * Conditional Logic Service
@@ -73,11 +73,11 @@ class ConditionalLogicService {
 
     // Get current value for the referenced field
     let fieldValue;
-    if (currentValues[field_id] !== undefined) {
-      fieldValue = currentValues[field_id];
-    } else {
+    if (currentValues[field_id]) {
       const valueObj = await customFieldService.getProductFieldValue(productId, field_id);
       fieldValue = valueObj?.value;
+    } else {
+      fieldValue = currentValues[field_id];
     }
 
     // Apply operator
@@ -160,7 +160,7 @@ class ConditionalLogicService {
     }
 
     // Loose equality for flexibility
-    return fieldValue == compareValue;
+    return fieldValue === compareValue;
   }
 
   /**
@@ -259,8 +259,7 @@ class ConditionalLogicService {
     const visibilityMap = {};
 
     for (const fieldDef of fieldDefinitions) {
-      const isVisible = await this.evaluateCondition(fieldDef, productId, currentValues);
-      visibilityMap[fieldDef.id] = isVisible;
+      visibilityMap[fieldDef.id] = await this.evaluateCondition(fieldDef, productId, currentValues);
     }
 
     return visibilityMap;

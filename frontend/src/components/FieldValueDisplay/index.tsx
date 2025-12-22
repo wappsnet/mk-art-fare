@@ -6,14 +6,9 @@ import { withKeys } from '@/utils/arrayHelpers.ts';
 
 interface FieldValueDisplayProps {
   field: FieldValue;
-  mode?: 'full' | 'compact';
 }
 
-export const FieldValueDisplay: React.FC<FieldValueDisplayProps> = ({ field, mode = 'full' }) => {
-  if (field.value === null || field.value === undefined) {
-    return mode === 'compact' ? null : <span>-</span>;
-  }
-
+export const FieldValueDisplay: React.FC<FieldValueDisplayProps> = ({ field }) => {
   switch (field.field_type) {
     case 'toggle':
       return <Tag color={field.value ? 'success' : 'default'}>{field.value ? 'Yes' : 'No'}</Tag>;
@@ -31,43 +26,40 @@ export const FieldValueDisplay: React.FC<FieldValueDisplayProps> = ({ field, mod
       return <span>{String(field.value)}</span>;
 
     case 'date':
-      return <span>{new Date(field.value as string).toLocaleDateString()}</span>;
+      return <span>{new Date(field.value).toLocaleDateString()}</span>;
 
     case 'time':
-      return <span>{field.value as string}</span>;
+      return <span>{field.value}</span>;
 
     case 'color':
       return (
         <Space>
-          <ColorSwatch $color={field.value as string} />
-          <span>{field.value as string}</span>
+          <ColorSwatch $color={field.value} />
+          <span>{field.value}</span>
         </Space>
       );
 
     case 'image':
     case 'file':
-      if (Array.isArray(field.value)) {
-        return (
-          <Space direction="vertical" size="small">
-            {field.value.map((file: { url: string; name?: string }) => (
-              <a key={file.url} href={file.url} target="_blank" rel="noopener noreferrer">
-                {file.name || 'View file'}
-              </a>
-            ))}
-          </Space>
-        );
-      }
-      return <span>-</span>;
+      return (
+        <Space direction="vertical" size="small">
+          {field.value.map((file: { url: string; name?: string }) => (
+            <a key={file.url} href={file.url} target="_blank" rel="noopener noreferrer">
+              {file.name || 'View file'}
+            </a>
+          ))}
+        </Space>
+      );
 
     case 'richtext':
-      return <div dangerouslySetInnerHTML={{ __html: field.value as string }} />;
+      return <div dangerouslySetInnerHTML={{ __html: field.value }} />;
 
     case 'number':
       return <span>{Number(field.value).toLocaleString()}</span>;
 
     case 'select':
     case 'radio':
-      return <Tag>{field.value as string}</Tag>;
+      return <Tag>{field.value}</Tag>;
 
     default:
       return <span>{String(field.value)}</span>;

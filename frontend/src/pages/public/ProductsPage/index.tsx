@@ -1,19 +1,6 @@
-import { useState, useEffect } from 'react';
-import {
-  Row,
-  Col,
-  Input,
-  Slider,
-  Button,
-  Typography,
-  Spin,
-  Empty,
-  Pagination,
-  Drawer,
-  Select,
-  Space,
-} from 'antd';
-import { SearchOutlined, ShoppingCartOutlined, FilterOutlined } from '@ant-design/icons';
+import { useState, useEffect, useMemo } from 'react';
+import { Row, Col, Button, Typography, Spin, Empty, Pagination, Drawer } from 'antd';
+import { ShoppingCartOutlined, FilterOutlined } from '@ant-design/icons';
 import { Link } from 'react-router';
 import AppLayout from '@/components/AppLayout';
 import {
@@ -21,17 +8,12 @@ import {
   useGetGlobalCategoriesQuery,
   useGetProductFilterFieldsQuery,
 } from '@/services/apiSlice';
-import { CustomFieldFilter } from '@/components/CustomFieldFilter';
 import {
   PageContainerStyled,
   PageHeaderStyled,
   ContainerStyled,
   SidebarStyled,
   MainContentStyled,
-  FilterSectionStyled,
-  SearchCompactStyled,
-  PriceRangeText,
-  PriceSliderWrapperStyled,
   MobileFilterButtonStyled,
   ProductCardStyled,
   PlaceholderImageStyled,
@@ -40,6 +22,7 @@ import {
   LoadingContainerStyled,
   PaginationContainerStyled,
 } from './styles';
+import FilterPanel from './Addons/components/FilterPanel';
 
 const { Title, Text } = Typography;
 
@@ -54,10 +37,10 @@ const ProductsPage = () => {
   const limit = 12;
 
   const { data: categoriesData } = useGetGlobalCategoriesQuery();
-  const categories = categoriesData?.data || [];
+  const categories = useMemo(() => categoriesData?.data || [], [categoriesData?.data]);
 
   const { data: filterFieldsData } = useGetProductFilterFieldsQuery();
-  const filterFields = filterFieldsData?.data || [];
+  const filterFields = useMemo(() => filterFieldsData?.data || [], [filterFieldsData?.data]);
 
   // Debounce search input
   useEffect(() => {
@@ -113,94 +96,32 @@ const ProductsPage = () => {
     setPage(1);
   };
 
-  const FilterPanel = () => (
-    <>
-      <FilterSectionStyled>
-        <Title level={5}>Search</Title>
-        <SearchCompactStyled>
-          <Input
-            placeholder="Search artworks..."
-            allowClear
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onPressEnter={() => handleSearch(searchInput)}
-          />
-          <Button
-            type="primary"
-            icon={<SearchOutlined />}
-            onClick={() => handleSearch(searchInput)}
-          />
-        </SearchCompactStyled>
-      </FilterSectionStyled>
+  const handleChangeCustomFilter = ({ id, value }: { id: number; value: string }) => {
+    setCustomFieldFilters((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+    setPage(1);
+  };
 
-      <FilterSectionStyled>
-        <Title level={5}>Categories</Title>
-        <Select
-          mode="multiple"
-          placeholder="Select categories"
-          allowClear
-          value={selectedCategories}
-          onChange={handleCategoryChange}
-          maxTagCount="responsive"
-          style={{ width: '100%' }}
-        >
-          {categories.map((cat) => (
-            <Select.Option key={cat.id} value={cat.slug}>
-              {cat.name}
-            </Select.Option>
-          ))}
-        </Select>
-      </FilterSectionStyled>
-
-      <FilterSectionStyled>
-        <Title level={5}>Price Range</Title>
-        <PriceRangeText type="secondary" style={{ fontSize: 12 }}>
-          ${priceRange[0]} - ${priceRange[1]}
-        </PriceRangeText>
-        <PriceSliderWrapperStyled>
-          <Slider
-            range
-            min={0}
-            max={10000}
-            step={100}
-            value={priceRange}
-            onChange={handlePriceChange}
-            tooltip={{ formatter: (value) => `$${value}` }}
-          />
-        </PriceSliderWrapperStyled>
-      </FilterSectionStyled>
-
-      {filterFields.length > 0 && (
-        <FilterSectionStyled>
-          <Title level={5}>Custom Filters</Title>
-          <Space direction="vertical" style={{ width: '100%' }} size="middle">
-            {filterFields.map((field) => (
-              <div key={field.id}>
-                <Text strong style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
-                  {field.label || field.name}
-                </Text>
-                <CustomFieldFilter
-                  field={field}
-                  value={customFieldFilters[field.id] || ''}
-                  onChange={(value) => {
-                    setCustomFieldFilters((prev) => ({
-                      ...prev,
-                      [field.id]: value,
-                    }));
-                    setPage(1);
-                  }}
-                />
-              </div>
-            ))}
-          </Space>
-        </FilterSectionStyled>
-      )}
-
-      <Button block onClick={handleClearFilters}>
-        Clear All Filters
-      </Button>
-    </>
-  );
+  const Filters = useMemo(() => {
+    return (
+      <FilterPanel
+        filterFields={filterFields}
+        categories={categories}
+        searchInput={searchInput}
+        setSearchInput={setSearchInput}
+        handleSearch={handleSearch}
+        customFieldFilters={customFieldFilters}
+        handleChangeCustomFilter={handleChangeCustomFilter}
+        handleClearFilters={handleClearFilters}
+        selectedCategories={selectedCategories}
+        handleCategoryChange={handleCategoryChange}
+        priceRange={priceRange}
+        handlePriceChange={handlePriceChange}
+      />
+    );
+  }, [categories, customFieldFilters, filterFields, priceRange, searchInput, selectedCategories]);
 
   return (
     <AppLayout>
@@ -222,9 +143,7 @@ const ProductsPage = () => {
 
         <ContainerStyled>
           {/* Desktop Sidebar */}
-          <SidebarStyled>
-            <FilterPanel />
-          </SidebarStyled>
+          <SidebarStyled>{Filters}</SidebarStyled>
 
           {/* Mobile Drawer */}
           <Drawer
@@ -234,7 +153,7 @@ const ProductsPage = () => {
             open={drawerOpen}
             width={300}
           >
-            <FilterPanel />
+            {Filters}
           </Drawer>
 
           {/* Main Content */}

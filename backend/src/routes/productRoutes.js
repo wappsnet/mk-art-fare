@@ -1,17 +1,10 @@
 import { Router } from 'express';
-import { query } from '../config/database.js';
 import { authenticate, authorize } from '../middleware/auth.js';
 import { sendSuccess } from '../utils/response.js';
 import { UserRole } from '../types/index.js';
-import { AppError, asyncHandler } from '../middleware/errorHandler.js';
-import { generateSlug, getPaginationParams, transformImageUrls } from '../utils/helpers.js';
+import { asyncHandler } from '../middleware/errorHandler.js';
 import { upload } from '../config/multer.js';
-import { subscriptionService } from '../services/subscriptionService.js';
-import {
-  buildProductQuery,
-  buildProductCountQuery,
-  buildProductUpdateQuery,
-} from '../utils/productQueryBuilder.js';
+import productService from '../services/productService.js';
 
 const router = Router();
 
@@ -19,48 +12,8 @@ const router = Router();
 router.get(
   '/filter-fields',
   asyncHandler(async (req, res) => {
-    // Get field definitions that are commonly used across products
-    // Limit to filterable field types (text, select, radio, number, toggle, color)
-    const filterableTypes = ['text', 'select', 'radio', 'number', 'toggle', 'color', 'date'];
-
-    const fields = await query(
-      `SELECT DISTINCT fd.id, fd.name, fd.label, fd.field_type, fd.options, fd.field_group_id,
-              fg.name as group_name
-       FROM field_definitions fd
-       INNER JOIN field_groups fg ON fd.field_group_id = fg.id
-       INNER JOIN product_field_group_assignments pfga ON fg.id = pfga.field_group_id
-       WHERE fd.field_type IN (${filterableTypes.map(() => '?').join(',')})
-         AND fg.is_active = TRUE
-       GROUP BY fd.id
-       HAVING COUNT(DISTINCT pfga.product_id) >= 1
-       ORDER BY COUNT(DISTINCT pfga.product_id) DESC, fg.name, fd.sort_order
-       LIMIT 20`,
-      filterableTypes
-    );
-
-    // Parse JSON options for select/radio fields
-    const fieldsWithOptions = fields.map((field) => {
-      let parsedOptions = null;
-      if (field.options) {
-        try {
-          parsedOptions = JSON.parse(field.options);
-        } catch (error) {
-          console.error('Failed to parse field options:', {
-            fieldId: field.id,
-            fieldName: field.name,
-            rawOptions: field.options,
-            error: error.message,
-          });
-          parsedOptions = null;
-        }
-      }
-      return {
-        ...field,
-        options: parsedOptions,
-      };
-    });
-
-    sendSuccess(res, fieldsWithOptions);
+    const fields = await productService.getFilterFields();
+    sendSuccess(res, fields);
   })
 );
 
@@ -68,46 +21,11 @@ router.get(
 router.get(
   '/',
   asyncHandler(async (req, res) => {
-    const { page, limit, offset } = getPaginationParams(req.query.page, req.query.limit);
     const { organizationId, category, search, minPrice, maxPrice, customFields } = req.query;
-
-    // Ensure limit and offset are valid integers
-    const validLimit = Math.floor(Number(limit)) || 10;
-    const validOffset = Math.floor(Number(offset)) || 0;
-
-    // Build product query using helper functions
     const filters = { organizationId, category, search, minPrice, maxPrice, customFields };
-    const { queryStr, params } = await buildProductQuery(filters);
+    const pagination = { page: req.query.page, limit: req.query.limit };
 
-    // Execute main query with pagination
-    const finalQuery = `${queryStr} ORDER BY p.created_at DESC LIMIT ${validLimit} OFFSET ${validOffset}`;
-    let products = await query(finalQuery, params);
-
-    // Fetch and transform images for each product
-    for (const product of products) {
-      const images = await query(
-        'SELECT * FROM product_images WHERE product_id = ? ORDER BY sort_order',
-        [product.id]
-      );
-      product.images = transformImageUrls(images, 'url', 'products');
-    }
-
-    // Transform product image URLs
-    products = products.map((product) =>
-      transformImageUrls(product, 'featured_image_url', 'products')
-    );
-
-    // Get total count using helper function
-    const { queryStr: countQuery, params: countParams } = await buildProductCountQuery(filters);
-    const countResult = await query(countQuery, countParams);
-
-    // Format response
-    const responseData = {
-      products,
-      total: countResult[0].total,
-      page,
-      limit,
-    };
+    const responseData = await productService.getProducts(filters, pagination);
 
     sendSuccess(res, responseData);
   })
@@ -117,28 +35,8 @@ router.get(
 router.get(
   '/:slug',
   asyncHandler(async (req, res) => {
-    const results = await query(
-      `SELECT p.*, o.name as organization_name, o.slug as organization_slug
-     FROM products p
-     LEFT JOIN organizations o ON p.organization_id = o.id
-     WHERE p.slug = ? AND p.is_active = TRUE`,
-      [req.params.slug]
-    );
-
-    if (results.length === 0) {
-      throw new AppError('Product not found', 404);
-    }
-
-    let images = await query(
-      'SELECT * FROM product_images WHERE product_id = ? ORDER BY sort_order',
-      [results[0].id]
-    );
-
-    // Transform image URLs to full URLs
-    images = transformImageUrls(images, 'url', 'products');
-    const product = transformImageUrls(results[0], 'featured_image_url', 'products');
-
-    sendSuccess(res, { ...product, images });
+    const product = await productService.getProductBySlug(req.params.slug);
+    sendSuccess(res, product);
   })
 );
 
@@ -148,53 +46,11 @@ router.post(
   authenticate,
   authorize(UserRole.ARTIST, UserRole.ADMIN),
   asyncHandler(async (req, res) => {
-    const {
-      organizationId,
-      categoryId,
-      name,
-      description,
-      price,
-      compareAtPrice,
-      stockQuantity,
-      sku,
-    } = req.body;
-
-    const org = await query('SELECT * FROM organizations WHERE id = ? AND owner_id = ?', [
-      organizationId,
+    const product = await productService.createProduct(
+      req.body.organizationId,
       req.user.userId,
-    ]);
-    if (org.length === 0) {
-      throw new AppError('Organization not found or not authorized', 403);
-    }
-
-    // Check subscription limits
-    const canCreate = await subscriptionService.canCreateProduct(
-      req.user.userId,
-      organizationId
+      req.body
     );
-    if (!canCreate.allowed) {
-      throw new AppError(canCreate.reason, 403);
-    }
-
-    const slug = generateSlug(name);
-    const result = await query(
-      `INSERT INTO products (organization_id, category_id, name, slug, description, price, compare_at_price, stock_quantity, sku)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        organizationId,
-        categoryId || null,
-        name,
-        slug,
-        description || null,
-        price,
-        compareAtPrice || null,
-        stockQuantity || 0,
-        sku || null,
-      ]
-    );
-
-    let product = await query('SELECT * FROM products WHERE id = ?', [result.insertId]);
-    product = transformImageUrls(product[0], 'featured_image_url', 'products');
     sendSuccess(res, product, 'Product created successfully', 201);
   })
 );
@@ -206,27 +62,7 @@ router.patch(
   authorize(UserRole.ARTIST, UserRole.ADMIN),
   asyncHandler(async (req, res) => {
     const productId = Number.parseInt(req.params.id);
-    const product = await query(
-      'SELECT p.*, o.owner_id FROM products p LEFT JOIN organizations o ON p.organization_id = o.id WHERE p.id = ?',
-      [productId]
-    );
-
-    if (product.length === 0) {
-      throw new AppError('Product not found', 404);
-    }
-    if (product[0].owner_id !== req.user.userId) {
-      throw new AppError('Not authorized', 403);
-    }
-
-    const { updates, values } = buildProductUpdateQuery(req.body);
-
-    if (updates.length > 0) {
-      values.push(productId);
-      await query(`UPDATE products SET ${updates.join(', ')} WHERE id = ?`, values);
-    }
-
-    let updated = await query('SELECT * FROM products WHERE id = ?', [productId]);
-    updated = transformImageUrls(updated[0], 'featured_image_url', 'products');
+    const updated = await productService.updateProduct(productId, req.user.userId, req.body);
     sendSuccess(res, updated, 'Product updated successfully');
   })
 );
@@ -238,19 +74,7 @@ router.delete(
   authorize(UserRole.ARTIST, UserRole.ADMIN),
   asyncHandler(async (req, res) => {
     const productId = Number.parseInt(req.params.id);
-    const product = await query(
-      'SELECT p.*, o.owner_id FROM products p LEFT JOIN organizations o ON p.organization_id = o.id WHERE p.id = ?',
-      [productId]
-    );
-
-    if (product.length === 0) {
-      throw new AppError('Product not found', 404);
-    }
-    if (product[0].owner_id !== req.user.userId) {
-      throw new AppError('Not authorized', 403);
-    }
-
-    await query('DELETE FROM products WHERE id = ?', [productId]);
+    await productService.deleteProduct(productId, req.user.userId);
     sendSuccess(res, null, 'Product deleted successfully');
   })
 );
@@ -262,41 +86,7 @@ router.post(
   authorize(UserRole.ARTIST, UserRole.ADMIN),
   asyncHandler(async (req, res) => {
     const productId = Number.parseInt(req.params.id);
-    const { url, alt_text, is_thumbnail } = req.body;
-
-    const product = await query(
-      'SELECT p.*, o.owner_id FROM products p LEFT JOIN organizations o ON p.organization_id = o.id WHERE p.id = ?',
-      [productId]
-    );
-
-    if (product.length === 0) {
-      throw new AppError('Product not found', 404);
-    }
-    if (product[0].owner_id !== req.user.userId) {
-      throw new AppError('Not authorized', 403);
-    }
-
-    // Get the highest sort_order
-    const maxOrder = await query(
-      'SELECT MAX(sort_order) as max_order FROM product_images WHERE product_id = ?',
-      [productId]
-    );
-    const sortOrder = (maxOrder[0].max_order || -1) + 1;
-
-    // If this is set as thumbnail, unset all other thumbnails
-    if (is_thumbnail) {
-      await query('UPDATE product_images SET is_thumbnail = FALSE WHERE product_id = ?', [
-        productId,
-      ]);
-    }
-
-    const result = await query(
-      'INSERT INTO product_images (product_id, url, alt_text, sort_order, is_thumbnail) VALUES (?, ?, ?, ?, ?)',
-      [productId, url, alt_text || null, sortOrder, is_thumbnail || false]
-    );
-
-    let image = await query('SELECT * FROM product_images WHERE id = ?', [result.insertId]);
-    image = transformImageUrls(image[0], 'url', 'products');
+    const image = await productService.addProductImage(productId, req.user.userId, req.body);
     sendSuccess(res, image, 'Image added successfully', 201);
   })
 );
@@ -309,63 +99,7 @@ router.patch(
   asyncHandler(async (req, res) => {
     const productId = Number.parseInt(req.params.productId);
     const imageId = Number.parseInt(req.params.imageId);
-    const { url, alt_text, sort_order, is_thumbnail } = req.body;
-
-    const product = await query(
-      'SELECT p.*, o.owner_id FROM products p LEFT JOIN organizations o ON p.organization_id = o.id WHERE p.id = ?',
-      [productId]
-    );
-
-    if (product.length === 0) {
-      throw new AppError('Product not found', 404);
-    }
-    if (product[0].owner_id !== req.user.userId) {
-      throw new AppError('Not authorized', 403);
-    }
-
-    const image = await query('SELECT * FROM product_images WHERE id = ? AND product_id = ?', [
-      imageId,
-      productId,
-    ]);
-    if (image.length === 0) {
-      throw new AppError('Image not found', 404);
-    }
-
-    // If setting as thumbnail, unset all other thumbnails
-    if (is_thumbnail) {
-      await query(
-        'UPDATE product_images SET is_thumbnail = FALSE WHERE product_id = ? AND id != ?',
-        [productId, imageId]
-      );
-    }
-
-    const updates = [];
-    const values = [];
-
-    if (url !== undefined) {
-      updates.push('url = ?');
-      values.push(url);
-    }
-    if (alt_text !== undefined) {
-      updates.push('alt_text = ?');
-      values.push(alt_text);
-    }
-    if (sort_order !== undefined) {
-      updates.push('sort_order = ?');
-      values.push(sort_order);
-    }
-    if (is_thumbnail !== undefined) {
-      updates.push('is_thumbnail = ?');
-      values.push(is_thumbnail);
-    }
-
-    if (updates.length > 0) {
-      values.push(imageId);
-      await query(`UPDATE product_images SET ${updates.join(', ')} WHERE id = ?`, values);
-    }
-
-    let updated = await query('SELECT * FROM product_images WHERE id = ?', [imageId]);
-    updated = transformImageUrls(updated[0], 'url', 'products');
+    const updated = await productService.updateProductImage(productId, imageId, req.user.userId, req.body);
     sendSuccess(res, updated, 'Image updated successfully');
   })
 );
@@ -378,20 +112,7 @@ router.delete(
   asyncHandler(async (req, res) => {
     const productId = Number.parseInt(req.params.productId);
     const imageId = Number.parseInt(req.params.imageId);
-
-    const product = await query(
-      'SELECT p.*, o.owner_id FROM products p LEFT JOIN organizations o ON p.organization_id = o.id WHERE p.id = ?',
-      [productId]
-    );
-
-    if (product.length === 0) {
-      throw new AppError('Product not found', 404);
-    }
-    if (product[0].owner_id !== req.user.userId) {
-      throw new AppError('Not authorized', 403);
-    }
-
-    await query('DELETE FROM product_images WHERE id = ? AND product_id = ?', [imageId, productId]);
+    await productService.deleteProductImage(productId, imageId, req.user.userId);
     sendSuccess(res, null, 'Image deleted successfully');
   })
 );
@@ -403,34 +124,7 @@ router.put(
   authorize(UserRole.ARTIST, UserRole.ADMIN),
   asyncHandler(async (req, res) => {
     const productId = Number.parseInt(req.params.id);
-    const { imageOrders } = req.body; // Array of {id, sort_order}
-
-    const product = await query(
-      'SELECT p.*, o.owner_id FROM products p LEFT JOIN organizations o ON p.organization_id = o.id WHERE p.id = ?',
-      [productId]
-    );
-
-    if (product.length === 0) {
-      throw new AppError('Product not found', 404);
-    }
-    if (product[0].owner_id !== req.user.userId) {
-      throw new AppError('Not authorized', 403);
-    }
-
-    // Update sort orders for each image
-    for (const { id, sort_order } of imageOrders) {
-      await query('UPDATE product_images SET sort_order = ? WHERE id = ? AND product_id = ?', [
-        sort_order,
-        id,
-        productId,
-      ]);
-    }
-
-    let images = await query(
-      'SELECT * FROM product_images WHERE product_id = ? ORDER BY sort_order',
-      [productId]
-    );
-    images = transformImageUrls(images, 'url', 'products');
+    const images = await productService.reorderProductImages(productId, req.user.userId, req.body.imageOrders);
     sendSuccess(res, images, 'Images reordered successfully');
   })
 );
@@ -446,74 +140,19 @@ router.post(
   ]),
   asyncHandler(async (req, res) => {
     const productId = Number.parseInt(req.params.id);
-    const { is_thumbnail } = req.body;
-    const altPayload = req.body.alt_text; // string or string[]
-
-    const product = await query(
-      'SELECT p.*, o.owner_id FROM products p LEFT JOIN organizations o ON p.organization_id = o.id WHERE p.id = ?',
-      [productId]
-    );
-    if (product.length === 0) {
-      throw new AppError('Product not found', 404);
-    }
-    if (product[0].owner_id !== req.user.userId) {
-      throw new AppError('Not authorized', 403);
-    }
 
     const files = [
       ...(req.files && req.files.image ? req.files.image : []),
       ...(req.files && req.files.images ? req.files.images : []),
     ];
 
-    if (!files || files.length === 0) {
-      throw new AppError('No file uploaded', 400);
-    }
+    const options = {
+      is_thumbnail: req.body.is_thumbnail,
+      alt_text: req.body.alt_text,
+    };
 
-    // Get current max sort order once
-    const maxOrder = await query(
-      'SELECT MAX(sort_order) as max_order FROM product_images WHERE product_id = ?',
-      [productId]
-    );
-    let nextOrder = (maxOrder[0].max_order || -1) + 1;
-
-    // If request sets thumbnail, make the first uploaded image the thumbnail
-    const firstIsThumbnail = is_thumbnail === 'true' || is_thumbnail === true;
-    if (firstIsThumbnail) {
-      await query('UPDATE product_images SET is_thumbnail = FALSE WHERE product_id = ?', [
-        productId,
-      ]);
-    }
-
-    const created = [];
-    for (let i = 0; i < files.length; i++) {
-      const f = files[i];
-      // Store only the filename without path or host
-      const filename = f.filename;
-      const isThumb = firstIsThumbnail && i === 0;
-      let altForThis = null;
-      if (Array.isArray(altPayload)) {
-        altForThis = altPayload[i] ?? null;
-      } else if (typeof altPayload === 'string') {
-        altForThis = altPayload || null;
-      }
-
-      const result = await query(
-        'INSERT INTO product_images (product_id, url, alt_text, sort_order, is_thumbnail) VALUES (?, ?, ?, ?, ?)',
-        [productId, filename, altForThis, nextOrder++, isThumb]
-      );
-
-      const rows = await query('SELECT * FROM product_images WHERE id = ?', [result.insertId]);
-      created.push(rows[0]);
-    }
-
-    // Transform image URLs to full URLs for response
-    const transformedImages = transformImageUrls(created, 'url', 'products');
-    sendSuccess(
-      res,
-      transformedImages.length === 1 ? transformedImages[0] : transformedImages,
-      'Image(s) uploaded successfully',
-      201
-    );
+    const result = await productService.uploadProductImages(productId, req.user.userId, files, options);
+    sendSuccess(res, result, 'Image(s) uploaded successfully', 201);
   })
 );
 

@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Card, Button, Typography, Space } from 'antd';
+import { Card, Button, Typography } from 'antd';
 
 const { Text: AntText } = Typography;
 
@@ -42,24 +42,8 @@ export const MainContentStyled = styled.div`
   min-width: 0;
 `;
 
-export const FilterSectionStyled = styled.div`
-  background: #fafafa;
-  padding: 24px;
-  border-radius: 8px;
-  margin-bottom: 24px;
-`;
-
-export const SearchCompactStyled = styled(Space.Compact)`
-  width: 100%;
-`;
-
 // Use AntD Text directly - apply styles via props
-export const PriceRangeText = AntText;
 export const ProductShop = AntText;
-
-export const PriceSliderWrapperStyled = styled.div`
-  margin-top: 16px;
-`;
 
 export const MobileFilterButtonStyled = styled(Button)`
   display: none;

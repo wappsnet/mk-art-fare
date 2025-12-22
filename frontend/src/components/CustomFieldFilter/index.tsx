@@ -1,7 +1,7 @@
-import React from 'react';
-import { Input, Select, Switch, Space } from 'antd';
+import React, { useMemo } from 'react';
+import { Input, Select, Switch, Space, DatePicker } from 'antd';
 import type { FieldDefinition } from '@/types/customFields';
-import { FullWidthSelect, FullWidthInputNumber, FullWidthDatePicker, ColorInput } from './styles';
+import { FullWidthSelect, FullWidthInputNumber, ColorInput } from './styles';
 
 interface CustomFieldFilterProps {
   field: FieldDefinition;
@@ -10,14 +10,15 @@ interface CustomFieldFilterProps {
 }
 
 export const CustomFieldFilter: React.FC<CustomFieldFilterProps> = ({ field, value, onChange }) => {
-  const renderFilterInput = () => {
+  const filter = useMemo(() => {
+    const placeholder = field.label || field.name;
     switch (field.field_type) {
       case 'select':
       case 'radio':
-        if (field.options && Array.isArray(field.options)) {
+        if (field.options) {
           return (
             <FullWidthSelect
-              placeholder={`Select ${field.label || field.name}`}
+              placeholder={`Select ${placeholder}`}
               allowClear
               value={value}
               onChange={(val) => onChange(typeof val === 'string' ? val : '')}
@@ -32,7 +33,7 @@ export const CustomFieldFilter: React.FC<CustomFieldFilterProps> = ({ field, val
         }
         return (
           <Input
-            placeholder={`Enter ${field.label || field.name}`}
+            placeholder={`Enter ${placeholder}`}
             value={value}
             onChange={(e) => onChange(e.target.value)}
             allowClear
@@ -42,7 +43,7 @@ export const CustomFieldFilter: React.FC<CustomFieldFilterProps> = ({ field, val
       case 'number':
         return (
           <FullWidthInputNumber
-            placeholder={`Enter ${field.label || field.name}`}
+            placeholder={`Enter ${placeholder}`}
             value={value ? Number(value) : undefined}
             onChange={(val) => onChange(val?.toString() || '')}
           />
@@ -52,8 +53,8 @@ export const CustomFieldFilter: React.FC<CustomFieldFilterProps> = ({ field, val
         return (
           <Space>
             <Switch
-              checked={value === 'true'}
-              onChange={(checked) => onChange(checked ? 'true' : '')}
+              checked={JSON.parse(value)}
+              onChange={(checked) => onChange(JSON.stringify(checked))}
             />
             <span>{value === 'true' ? 'Yes' : 'Any'}</span>
           </Space>
@@ -61,33 +62,18 @@ export const CustomFieldFilter: React.FC<CustomFieldFilterProps> = ({ field, val
 
       case 'date':
         return (
-          <FullWidthDatePicker
-            placeholder={`Select ${field.label || field.name}`}
+          <DatePicker
+            placeholder={`Select ${placeholder}`}
             value={value}
             onChange={(date) => {
-              if (
-                date &&
-                typeof date === 'object' &&
-                'format' in date &&
-                typeof date.format === 'function'
-              ) {
-                onChange(String(date.format('YYYY-MM-DD')));
-              } else {
-                onChange('');
-              }
+              onChange(date);
             }}
             allowClear
           />
         );
 
       case 'color':
-        return (
-          <ColorInput
-            type="color"
-            value={value || '#000000'}
-            onChange={(e) => onChange(e.target.value)}
-          />
-        );
+        return <ColorInput type="color" value={value} onChange={(e) => onChange(e.target.value)} />;
 
       case 'text':
       default:
@@ -100,7 +86,7 @@ export const CustomFieldFilter: React.FC<CustomFieldFilterProps> = ({ field, val
           />
         );
     }
-  };
+  }, [field.field_type, field.label, field.name, field.options, onChange, value]);
 
-  return <div>{renderFilterInput()}</div>;
+  return <div>{filter}</div>;
 };
