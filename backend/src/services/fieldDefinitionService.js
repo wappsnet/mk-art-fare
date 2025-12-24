@@ -3,10 +3,8 @@ import { AppError } from '../middleware/errorHandler.js';
 
 export const fieldDefinitionService = {
   async create(fieldGroupId, data) {
-    const options = typeof data.options === 'string'
-      ? data.options
-      : JSON.stringify(data.options || []);
-
+    // MySQL JSON columns automatically handle serialization
+    // No need to manually stringify - just pass the objects directly
     const result = await query(
       `INSERT INTO field_definitions (
         field_group_id, name, label, type, placeholder, help_text,
@@ -20,9 +18,9 @@ export const fieldDefinitionService = {
         data.field_type,
         data.placeholder,
         data.help_text,
-        data.default_value,
-        options,
-        JSON.stringify(data.validation_rules || {}),
+        data.default_value, // MySQL JSON column handles this
+        data.options || null, // Pass array directly
+        data.validation_rules || null, // Pass object directly
         data.required || false,
         data.is_searchable || false,
         data.is_filterable || false,
@@ -75,16 +73,13 @@ export const fieldDefinitionService = {
       updates.push('default_value = ?');
       values.push(data.default_value);
     }
-    if (data.options) {
-      const options = typeof data.options === 'string'
-        ? data.options
-        : JSON.stringify(data.options);
+    if (data.options !== undefined) {
       updates.push('options = ?');
-      values.push(options);
+      values.push(data.options); // Pass array directly to JSON column
     }
-    if (data.validation_rules) {
+    if (data.validation_rules !== undefined) {
       updates.push('validation_rules = ?');
-      values.push(JSON.stringify(data.validation_rules));
+      values.push(data.validation_rules); // Pass object directly to JSON column
     }
     if (data.required !== undefined) {
       updates.push('required = ?');

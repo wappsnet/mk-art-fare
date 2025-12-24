@@ -4,19 +4,26 @@ import { ToggleFieldDefinition, ToggleFieldValue } from '@/types/fields';
 
 interface ToggleFieldProps {
   field: ToggleFieldDefinition;
+  fieldValue?: ToggleFieldValue;
   onChange: (value: ToggleFieldValue) => void;
   disabled?: boolean;
 }
 
-export const ToggleField: FC<ToggleFieldProps> = ({ field, onChange, disabled }) => {
+export const ToggleField: FC<ToggleFieldProps> = ({ field, fieldValue, onChange, disabled }) => {
   return (
     <Switch
       defaultChecked={field.defaultValue}
-      checked={field.value}
-      onChange={() => {
+      checked={field.fieldValue?.value}
+      onChange={(value) => {
         onChange({
+          id: fieldValue?.id || 0,
+          field_definition_id: field.id,
+          name: field.name,
+          label: field.label,
+          created_at: fieldValue?.created_at,
+          updated_at: fieldValue?.updated_at,
           type: field.type,
-          value: !field.value,
+          value,
         });
       }}
       disabled={disabled}

@@ -106,9 +106,13 @@ const AppHeader = () => {
 
         {user ? (
           <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-            <UserMenuTrigger>
-              <Avatar src={user.avatar_url} icon={<UserOutlined />} />
-              <span>{user.first_name || user.email}</span>
+            <UserMenuTrigger align="center">
+              <Flex align="center">
+                <Avatar src={user.avatar_url} icon={<UserOutlined />} />
+              </Flex>
+              <Flex align="center">
+                <span>{user.first_name || user.email}</span>
+              </Flex>
             </UserMenuTrigger>
           </Dropdown>
         ) : (

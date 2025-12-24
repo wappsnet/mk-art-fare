@@ -1,0 +1,171 @@
+# Clean Code Rules for mk-art-fare Frontend
+
+## Component Structure
+
+### Use Addons Pattern for Complex Components
+
+All complex components with subcomponents MUST follow the Addons pattern:
+
+```
+ComponentName/
+├── Addons/
+│   ├── components/      # All subcomponents
+│   └── types/          # Shared types
+├── index.tsx           # Main component (default export)
+└── styles.ts           # Component styles
+```
+
+### Nested Components
+
+When a component has its own subcomponents, nest using the same Addons pattern:
+
+```
+ParentComponent/
+├── Addons/
+│   └── components/
+│       └── ChildComponent/
+│           ├── Addons/
+│           │   └── components/
+│           │       └── GrandchildComponent/
+│           ├── index.tsx
+│           └── styles.ts
+```
+
+### File Naming and Exports
+
+- ✅ Component files: `index.tsx` with **default export**
+- ✅ Style files: `styles.ts` in same directory as component
+- ✅ Type files: `Addons/types/index.ts`
+- ❌ No named exports for components
+- ❌ No styles in parent when child needs them
+
+## TypeScript Standards
+
+### No Type Casting
+
+❌ **Never**:
+```typescript
+const value = data as SomeType;
+const value: any = data;
+```
+
+✅ **Always**:
+```typescript
+// Use discriminated unions
+type FieldValue = TextFieldValue | NumberFieldValue | SelectFieldValue;
+
+// Let TypeScript narrow types
+switch (field.type) {
+  case FieldType.TEXT:
+    // TypeScript knows this is TextFieldValue
+    return field.value.toUpperCase();
+}
+```
+
+### No Defensive Type Checking
+
+❌ **Never**:
+```typescript
+const value = typeof data === 'string' ? data : JSON.stringify(data);
+```
+
+✅ **Always**:
+```typescript
+// Define proper types, trust them
+const value = data; // Database handles JSON automatically
+```
+
+## React Patterns
+
+### Use useMemo for Conditional Rendering
+
+❌ **Never**:
+```typescript
+{fieldType && (() => {
+  switch (fieldType) {
+    case 'text': return <Input />;
+    case 'number': return <InputNumber />;
+  }
+})()}
+```
+
+✅ **Always**:
+```typescript
+const inputField = useMemo(() => {
+  switch (fieldType) {
+    case 'text': return <Input />;
+    case 'number': return <InputNumber />;
+  }
+}, [fieldType]);
+
+return <>{inputField}</>;
+```
+
+## Styling
+
+### Minimize Ant Design Customization
+
+❌ **Avoid**:
+```typescript
+const CustomButton = styled(Button)`
+  background: blue;
+  border-radius: 8px;
+`;
+```
+
+✅ **Prefer**:
+```typescript
+<Button type="primary" shape="round">
+```
+
+### Component-Specific Styles
+
+- Each component should have its own `styles.ts` if it needs custom styling
+- Don't mix styles from different components in a shared file
+- Keep styles co-located with components
+
+## Database
+
+### JSON Columns
+
+- Use native JSON columns in database
+- No manual `JSON.stringify()` or `JSON.parse()` in services
+- Trust MySQL to handle JSON serialization
+
+## File Organization
+
+```
+src/
+├── components/           # Shared/reusable components
+├── pages/
+│   └── dashboard/
+│       └── PageName/
+│           ├── Addons/
+│           │   ├── components/
+│           │   └── types/
+│           ├── index.tsx
+│           └── styles.ts
+├── services/            # API/RTK Query
+└── types/              # Global types
+```
+
+## Import Order
+
+```typescript
+// 1. React and third-party
+import { FC, useMemo } from 'react';
+import { Form, Input } from 'antd';
+
+// 2. Global types and services
+import { FieldType } from '@/types/fields';
+import { useGetDataQuery } from '@/services/apiSlice';
+
+// 3. Local imports (styles, types, components)
+import { ComponentStyled } from './styles';
+import { LocalType } from './Addons/types';
+import SubComponent from './Addons/components/SubComponent';
+```
+
+## Examples
+
+See `AI_Instructions.md` for detailed examples of the Addons pattern.

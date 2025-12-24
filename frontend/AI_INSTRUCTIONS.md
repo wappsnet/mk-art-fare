@@ -1,886 +1,108 @@
-# AI Development Instructions
+# AI Instructions for mk-art-fare Frontend
 
-## Critical Rules
+## Component Structure Pattern
 
-### ⛔ NEVER DO (Without Explicit Permission)
+### Addons Folder Structure
 
-1. **Documentation & Comments**
-   - DO NOT generate README files, documentation, or markdown files
-   - DO NOT add code comments or JSDoc unless explicitly requested
-   - DO NOT create TODO comments or implementation notes
-   - DO NOT add "helpful" explanatory comments to code
+When creating complex components with subcomponents, follow the **Addons pattern**:
 
-2. **Over-Engineering**
-   - DO NOT add features beyond what was requested
-   - DO NOT create abstractions for single-use code
-   - DO NOT add error handling for impossible scenarios
-   - DO NOT add future-proofing or "what if" code
-   - DO NOT refactor surrounding code when fixing bugs
-
-3. **Unnecessary Changes**
-   - DO NOT add type annotations to code you didn't modify
-   - DO NOT clean up existing code unless asked
-   - DO NOT add docstrings to existing functions
-   - DO NOT reorganize imports unless necessary
-
-4. **Styling Violations**
-   - DO NOT use inline styles (style={}) - use styled-components or Space/Flex
-   - DO NOT use HTML tags (h1-h6, p) - use Typography components (Title, Text, Paragraph)
-   - DO NOT add margins/padding inline - use Space component with size prop
-
-5. **Code Pattern Violations**
-   - DO NOT use negated conditions (if (!condition)) - use positive conditions instead
-   - DO NOT use Modals for forms - use Drawer with footer buttons instead
-   - DO NOT put buttons inside Form when using Drawer/Modal - use footer prop
-   - DO NOT use Form.Item for action buttons - they belong in Drawer/Modal footer
-
-6. **TypeScript Type Safety Violations**
-   - DO NOT use `any` type - use `unknown` or define proper types/interfaces
-   - DO NOT use type assertions/coercion (as, <Type>) - use type guards and runtime checks instead
-   - DO NOT use array index as key in React lists - use `withKeys` helper from `@/utils/arrayHelpers`
-   - DO NOT wrap styled components around generic Ant Design components (Form, etc.) - it breaks type inference
-
-7. **Component Complexity Violations**
-   - DO NOT create components with high complexity (ESLint max complexity: 20)
-   - DO NOT put all rendering logic in large switch/if-else statements
-   - DO NOT leave complex components unreduced when complexity errors appear
-
-### ✅ ALWAYS DO
-
-1. **Code Quality**
-   - Write clean, readable, self-documenting code
-   - Use meaningful variable and function names
-   - Follow existing code patterns in the project
-   - Maintain TypeScript strict type safety
-
-2. **TypeScript Best Practices**
-   - Define proper types and interfaces for all data structures
-   - Use type guards (`typeof`, `instanceof`, `in` operator) instead of type assertions
-   - Use `unknown` instead of `any` for truly dynamic values, then narrow with type guards
-   - Specify generic types for Forms, hooks, and components: `Form.useForm<FormValues>()`
-   - Remove unused imports and variables to keep code clean
-
-3. **File Organization**
-   - Follow the project structure patterns
-   - Place files in appropriate directories
-   - Use index.tsx pattern for components and pages
-   - When components exceed complexity limits, create subcomponents in `Addons/components/` folder
-   - Extract each case/variant into its own component file to reduce complexity
-
-4. **Confirmation**
-   - Ask before creating new files or major refactoring
-   - Clarify ambiguous requirements
-   - Present options when multiple approaches exist
-
----
-
-## Project Architecture
-
-### Frontend Stack
-
-**Core Technologies:**
-- React 18.2 + TypeScript 5.3
-- Vite 5.0 (build tool)
-- Ant Design 5.12 (UI library)
-- Redux Toolkit 2.0 + RTK Query (state management)
-- React Router 7.10 (routing)
-- Emotion (CSS-in-JS)
-
-**Key Libraries:**
-- `dayjs` - Date manipulation
-- `axios` - HTTP client
-- `@ant-design/icons` - Icons
-- `react-redux` - Redux bindings
-
-### Directory Structure
-
-```
-src/
-├── components/       # Reusable UI components
-├── pages/           # Page components
-│   ├── public/      # Public-facing pages
-│   ├── admin/       # Admin pages
-│   ├── dashboard/   # Shop owner dashboard
-│   └── account/     # User account pages
-├── routes/          # Route configuration
-├── services/        # API services (RTK Query)
-├── store/           # Redux store
-├── hooks/           # Custom React hooks
-├── guards/          # Route guards
-├── types/           # TypeScript types
-├── config/          # Configuration files
-├── utils/           # Utility functions
-└── styles/          # Global styles
-```
-
-### Code Patterns
-
-#### Export Patterns
-
-**Pages: Use default exports**
-```typescript
-// pages/ProductsPage/index.tsx
-const ProductsPage = () => {
-  return <div>Products</div>;
-};
-
-export default ProductsPage;
-```
-
-**Components: Use named exports**
-```tsx
-// components/ProductCard/index.tsx
-export const ProductCard = ({ product }: ProductCardProps) => {
-  return <Card>{product.name}</Card>;
-};
-```
-
-**Route imports: Use default imports for pages**
-```typescript
-// routes/publicRoutes.tsx
-import ProductsPage from '@/pages/public/ProductsPage';
-import ProductDetailPage from '@/pages/public/ProductDetailPage';
-```
-
-#### Component Structure
-
-Every component/page follows this pattern:
-
-```tsx
-// ComponentName/index.tsx
-import { useState } from 'react';
-import { Button, Typography } from 'antd';
-import { Container, Wrapper } from './styles';
-
-const { Title, Text } = Typography;
-
-export const ComponentName = () => {
-  const [state, setState] = useState();
-
-  return (
-    <Container>
-      <Title level={2}>Title</Title>
-      <Text>Content</Text>
-    </Container>
-  );
-};
-```
-
-```tsx
-// ComponentName/styles.ts (only if needed)
-import styled from '@emotion/styled';
-
-export const Container = styled.div`
-  /* Structural/layout styles only */
-  max-width: 1200px;
-  margin: 0 auto;
-`;
-```
-
-#### Component Complexity Reduction
-
-When a component exceeds ESLint complexity limits (max: 20), extract logic into subcomponents:
-
-**Folder Structure:**
 ```
 ComponentName/
-├── index.tsx                    # Main component (orchestration)
-├── styles.ts                    # Styled components
-└── Addons/
-    └── components/              # Subcomponents for complexity reduction
-        ├── VariantA.tsx
-        ├── VariantB.tsx
-        └── VariantC.tsx
+├── Addons/
+│   ├── components/
+│   │   ├── SubComponent1/
+│   │   │   ├── index.tsx (default export)
+│   │   │   └── styles.ts (if needed)
+│   │   └── SubComponent2/
+│   │       ├── Addons/              # Nested Addons for sub-subcomponents
+│   │       │   └── components/
+│   │       │       └── NestedComponent/
+│   │       │           ├── index.tsx (default export)
+│   │       │           └── styles.ts (if needed)
+│   │       ├── index.tsx (default export)
+│   │       └── styles.ts (if needed)
+│   └── types/
+│       └── index.ts (shared types/interfaces)
+├── index.tsx (main component, default export)
+└── styles.ts (main component styles)
 ```
 
-**Example - DynamicFieldRenderer:**
+### Key Principles
 
-Before (High Complexity):
-```tsx
-// DynamicFieldRenderer/index.tsx
-const renderField = () => {
-  switch (field_type) {
-    case FieldType.TEXT:
-      return (
-        <Input
-          placeholder={placeholder}
-          value={typeof value === 'string' ? value : ''}
-          onChange={(e) => onChange?.(e.target.value)}
-          disabled={disabled}
-        />
-      );
-    case FieldType.NUMBER:
-      return (
-        <InputNumber
-          value={typeof value === 'number' ? value : undefined}
-          onChange={(val) => onChange?.(val)}
-          disabled={disabled}
-        />
-      );
-    // ... 10 more cases
-  }
-};
+1. **Addons at Every Level**: Use the `Addons/` pattern consistently at every component level
+2. **Default Exports**: All components must use default exports, not named exports
+3. **Component-Specific Styles**: Each component should have its own `styles.ts` file if it needs custom styling
+4. **Shared Types**: Place shared types/interfaces in `Addons/types/index.ts`
+5. **Nested Components**: If a subcomponent is only used by its parent, nest it using the same Addons pattern
+
+### Examples
+
+#### Example 1: ShopCustomFieldsPage
+
+```
+ShopCustomFieldsPage/
+├── Addons/
+│   ├── components/
+│   │   ├── FieldGroupCard/
+│   │   │   ├── Addons/
+│   │   │   │   └── components/
+│   │   │   │       └── FieldDefinitionList/
+│   │   │   │           ├── index.tsx
+│   │   │   │           └── styles.ts
+│   │   │   ├── index.tsx
+│   │   │   └── styles.ts
+│   │   ├── FieldGroupForm/
+│   │   │   └── index.tsx
+│   │   └── FieldDefinitionForm/
+│   │       └── index.tsx
+│   └── types/
+│       └── index.ts
+├── index.tsx
+└── styles.ts
 ```
 
-After (Reduced Complexity):
-```tsx
-// DynamicFieldRenderer/index.tsx
-import { TextField } from './Addons/components/TextField';
-import { NumberField } from './Addons/components/NumberField';
+#### Example 2: DynamicFieldRenderer
 
-const renderField = () => {
-  switch (field_type) {
-    case FieldType.TEXT:
-      return <TextField placeholder={placeholder} value={value} onChange={onChange} disabled={disabled} />;
-    case FieldType.NUMBER:
-      return <NumberField value={value} onChange={onChange} disabled={disabled} />;
-    // ... simplified cases
-  }
-};
-
-// DynamicFieldRenderer/Addons/components/TextField.tsx
-interface TextFieldProps {
-  placeholder?: string;
-  value: unknown;
-  onChange?: (value: unknown) => void;
-  disabled?: boolean;
-}
-
-export const TextField = ({ placeholder, value, onChange, disabled }: TextFieldProps) => {
-  return (
-    <Input
-      placeholder={placeholder}
-      value={typeof value === 'string' ? value : ''}
-      onChange={(e) => onChange?.(e.target.value)}
-      disabled={disabled}
-    />
-  );
-};
+```
+DynamicFieldRenderer/
+├── Addons/
+│   ├── components/
+│   │   ├── TextField/
+│   │   │   ├── index.tsx
+│   │   │   └── styles.ts
+│   │   ├── NumberField/
+│   │   │   ├── index.tsx
+│   │   │   └── styles.ts
+│   │   └── ...other field types
+│   └── types/
+│       └── index.ts
+├── index.tsx
+└── styles.ts
 ```
 
-**Benefits:**
-- Reduces cyclomatic complexity to pass ESLint rules
-- Improves code organization and readability
-- Makes components easier to test individually
-- Follows single responsibility principle
-
-#### Styling Guidelines
-
-**CRITICAL: NO INLINE STYLES**
-
-Never use inline styles with the `style={}` prop. Instead:
-
-1. **For spacing (margins, padding, gaps):** Use Ant Design's Space component
-2. **For layout (flexbox, grid):** Create styled components
-3. **For component widths:** Create styled components that extend Ant Design components
-4. **For typography:** Use Ant Design Typography components (Title, Text, Paragraph) - NEVER use h1-h6 or p tags
-
-**Priority Order:**
-1. Use AntD components with built-in props
-2. Use AntD Space/Flex components for spacing and layout
-3. Use styled-components for structural layout
-4. Use theme configuration for global changes
-
-**Examples:**
-
-✅ **CORRECT:**
-```tsx
-// Use Space for spacing instead of margins
-<Space direction="vertical" size={24}>
-  <Title level={2}>Welcome</Title>
-  <Text>Description here</Text>
-</Space>
-
-// Use styled components for layout
-const Container = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 70vh;
-  padding: 20px;
-`;
-
-// Use styled components for width constraints
-const FormCard = styled(Card)`
-  max-width: 450px;
-  width: 100%;
-`;
-
-// Use Typography components, not HTML tags
-<Title level={2}>Heading</Title>
-<Text>Regular text</Text>
-<Paragraph>Long form content</Paragraph>
-```
-
-❌ **INCORRECT:**
-```tsx
-// Don't use inline styles
-<div style={{ padding: '100px 20px', textAlign: 'center' }}>
-  <h2>Heading</h2>
-  <p>Text content</p>
-</div>
-
-// Don't use margin/padding inline
-<div style={{ marginBottom: 24 }}>Content</div>
-
-// Don't use HTML tags for text
-<h1>Title</h1>
-<h2>Subtitle</h2>
-<p>Paragraph</p>
-
-// Don't override AntD component styles
-const CustomButton = styled(Button)`
-  background: red;
-  &:hover { background: blue; }
-`;
-```
-
-**Space Component Usage:**
-```tsx
-// ❌ INCORRECT: Inline styles
-<Space direction="vertical" size={24} style={{ width: '100%' }}>
-  {/* children */}
-</Space>
-
-// ✅ CORRECT: Use a styled Space
-const FullWidthSpace = styled(Space)`
-  width: 100%;
-`;
-```
-
-**Migrating from Deprecated Ant Design Patterns:**
-
-When migrating from deprecated Ant Design components, always use styled components instead of inline styles:
-
-```tsx
-// ❌ INCORRECT: Using deprecated Input.Search with enterButton
-<Input.Search enterButton={<SearchOutlined />} />
-
-// ❌ INCORRECT: Using Space.Compact with inline styles
-<Space.Compact style={{ width: '100%' }}>
-  <Input />
-  <Button />
-</Space.Compact>
-
-// ✅ CORRECT: Use styled Space.Compact
-const SearchCompactStyled = styled(Space.Compact)`
-  width: 100%;
-`;
-
-<SearchCompactStyled>
-  <Input placeholder="Search..." />
-  <Button type="primary" icon={<SearchOutlined />} />
-</SearchCompactStyled>
-```
-
-**Common Deprecations to Migrate:**
-- `Input.Search` with `enterButton` → Use `Space.Compact` with `Input` + `Button`
-- `Input` with `addonBefore`/`addonAfter` → Use `Space.Compact` with multiple components
-- Always create styled components instead of using inline `style` prop
-
-#### Drawer Patterns
-
-**ALWAYS use Drawer (not Modal) for forms with footer buttons:**
-
-✅ **CORRECT:**
-```tsx
-<Drawer
-  title="Create Item"
-  open={isOpen}
-  onClose={() => setIsOpen(false)}
-  width={500}
-  footer={
-    <Space>
-      <Button onClick={() => setIsOpen(false)}>Cancel</Button>
-      <Button type="primary" onClick={() => form.submit()} loading={isLoading}>
-        Submit
-      </Button>
-    </Space>
-  }
->
-  <Form form={form} layout="vertical" onFinish={handleSubmit}>
-    <Form.Item name="name" label="Name" rules={[{ required: true }]}>
-      <Input />
-    </Form.Item>
-    <Form.Item name="description" label="Description">
-      <Input.TextArea rows={3} />
-    </Form.Item>
-  </Form>
-</Drawer>
-```
-
-**Key Drawer Features:**
-- Use `width` prop for drawer size (e.g., 500, 700, 900)
-- Buttons always in `footer` prop wrapped in `Space`
-- Cancel button first, action button last
-- Use `onClose` instead of `onCancel`
-- Content scrolls automatically when height exceeds viewport
-
-❌ **INCORRECT:**
-```tsx
-<Modal title="Create Item" open={isOpen} onCancel={() => setIsOpen(false)} footer={null}>
-  <Form form={form} onFinish={handleSubmit}>
-    <Form.Item name="name" label="Name">
-      <Input />
-    </Form.Item>
-    {/* Don't put buttons inside Form */}
-    <Form.Item>
-      <Button type="primary" htmlType="submit">Submit</Button>
-      <Button onClick={() => setIsOpen(false)}>Cancel</Button>
-    </Form.Item>
-  </Form>
-</Modal>
-```
-
-**When to use Modal vs Drawer:**
-- Use **Drawer** for: Forms, editing, creating, managing data (most common)
-- Use **Modal.confirm()** for: Confirmations, destructive actions
-- Use **Modal.success/error/info()** for: Notifications with actions
-
-#### Conditional Logic Patterns
-
-**Avoid negated conditions - use positive conditions:**
-
-✅ **CORRECT:**
-```tsx
-// Use positive condition
-if (user) {
-  return <Dashboard user={user} />;
-}
-return <Login />;
-
-// Or use early return for error/empty states
-if (isLoading) return <Spinner />;
-if (error) return <Error />;
-return <Content data={data} />;
-```
-
-❌ **INCORRECT:**
-```tsx
-// Avoid negated conditions
-if (!user) {
-  return <Login />;
-}
-return <Dashboard user={user} />;
-
-// Avoid double negation
-if (!isLoading && !error) {
-  return <Content />;
-}
-```
-
-#### Navigation Patterns
-
-**Use React Router for navigation in components:**
-
-✅ **CORRECT:**
-```tsx
-import { useNavigate, Link } from 'react-router';
-
-// Programmatic navigation
-const navigate = useNavigate();
-navigate('/login');
-
-// Link component for anchors
-<Link to="/products">View Products</Link>
-```
-
-❌ **INCORRECT:**
-```tsx
-// Don't use window.location in components
-window.location.href = '/login';
-
-// Don't use <a> tags for internal links
-<a href="/products">View Products</a>
-```
-
-**Exception:** `window.location.href` is acceptable in non-React contexts:
-- API interceptors (e.g., `src/services/api.ts`)
-- Service classes outside React component tree
-- Utility functions that need full page reload
-
-#### State Management
-
-**Local State (useState):**
-```typescript
-// For component-specific state
-const [isOpen, setIsOpen] = useState(false);
-const [formData, setFormData] = useState({ name: '' });
-```
-
-**RTK Query (API calls):**
-```typescript
-// For server data
-const { data, isLoading, error } = useGetProductsQuery({ page: 1 });
-const [createProduct] = useCreateProductMutation();
-```
-
-**Redux Store (Global state):**
-```typescript
-// Only for truly global state (auth, theme, etc.)
-const { isAuthenticated, user } = useAppSelector((state) => state.auth);
-```
-
-#### API Services
-
-All API calls use RTK Query in `services/apiSlice.ts`:
+### Import Examples
 
 ```typescript
-// Query (GET)
+// Main component imports subcomponent
+import FieldGroupCard from './Addons/components/FieldGroupCard';
+import { FieldFormValues } from './Addons/types';
 
-getProducts = builder.query<ApiResponse<Product[]>, void>({
-  query: () => '/products',
-  providesTags: ['Product'],
-}),
+// Nested component imports its child
+import FieldDefinitionList from './Addons/components/FieldDefinitionList';
 
-// Mutation (POST/PUT/DELETE)
-createProduct = builder.mutation<ApiResponse<Product>, Partial<Product>>({
-  query: (data) => ({
-    url: '/products',
-    method: 'POST',
-    body: data,
-  }),
-  invalidatesTags: ['Product'],
-});
+// Component exports
+export default ComponentName; // Always use default export
 ```
 
-#### Type Safety
+## Styling Guidelines
 
-Always define proper types and avoid `any`:
+- **Avoid over-customizing Ant Design components** - Use Ant Design's built-in props and design system when possible
+- Keep styled components minimal and only for essential customization
+- Prefer className-based styling over emotion/styled-components when appropriate
 
-```tsx
-// ✅ CORRECT: Define proper interfaces
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-}
+## Code Quality
 
-// ✅ CORRECT: Use in components with proper types
-const ProductCard = ({ product }: { product: Product }) => {
-  // ...
-};
-
-// ✅ CORRECT: Use with hooks
-const [products, setProducts] = useState<Product[]>([]);
-
-// ✅ CORRECT: Use unknown for truly dynamic values, then narrow
-function handleValue(value: unknown) {
-  if (typeof value === 'string') {
-    return value.toUpperCase();
-  }
-  if (typeof value === 'number') {
-    return value.toFixed(2);
-  }
-  return '';
-}
-
-// ❌ INCORRECT: Using any type
-const data: any = fetchData(); // Don't do this
-
-// ❌ INCORRECT: Using type assertions
-const value = data as string; // Don't do this
-
-// ✅ CORRECT: Use type guards
-if (typeof data === 'string') {
-  const value = data; // TypeScript knows it's a string
-}
-```
-
-**Using withKeys Helper for React Lists:**
-
-When rendering lists without stable IDs, use the `withKeys` helper instead of array index:
-
-```tsx
-import { withKeys } from '@/utils/arrayHelpers';
-
-// ❌ INCORRECT: Using array index as key
-items.map((item, index) => <div key={index}>{item}</div>)
-
-// ✅ CORRECT: Using withKeys helper
-withKeys(items).map((item) => <div key={item._key}>{item.value}</div>)
-
-// ✅ CORRECT: For objects, withKeys adds _key property
-interface Item {
-  name: string;
-}
-const items: Item[] = [{ name: 'A' }, { name: 'B' }];
-withKeys(items).map((item) => <div key={item._key}>{item.name}</div>)
-
-// ✅ BEST: Use stable IDs when available
-items.map((item) => <div key={item.id}>{item.name}</div>)
-```
-
-#### Error Handling
-
-```typescript
-// API error handling
-try {
-  await createProduct(data).unwrap();
-  message.success('Product created');
-} catch (error) {
-  message.error(getErrorMessage(error) || 'Failed to create product');
-}
-```
-
-### Routing Patterns
-
-**Route Definition:**
-```tsx
-// routes/publicRoutes.tsx
-export const publicRoutes: AppRouteObject[] = [
-  {
-    path: '/products',
-    element: <ProductsPage />,
-    meta: { title: 'Products - Art Fare' },
-  },
-];
-```
-
-**With Guards:**
-```tsx
-const Routes ={
-  path: '/admin', 
-  element: (
-      <RequireRole allowedRoles={[UserRole.ADMIN]}>
-        <AdminPage />
-      </RequireRole>
-  ),
-  meta: {
-    requiresAuth: true,
-    allowedRoles: [UserRole.ADMIN],
-    title: 'Admin - Art Fare',
-  }
-}
-```
-
-### Import Patterns
-
-Use path aliases:
-
-```tsx
-// ✅ CORRECT
-import { Layout } from '@/components/Layout';
-import { useGetProductsQuery } from '@/services/apiSlice';
-import { Product } from '@/types/common';
-
-// ❌ INCORRECT
-import { Layout } from '../../../components/Layout';
-```
-
-### Naming Conventions
-
-```typescript
-// Components: PascalCase
-export const ProductCard = () => {};
-
-// Functions/variables: camelCase
-const calculateTotal = () => {};
-const userProfile = {};
-
-// Constants: UPPER_SNAKE_CASE
-const API_BASE_URL = '';
-const MAX_ITEMS = 10;
-
-// Types/Interfaces: PascalCase
-interface UserProfile {}
-type ProductStatus = 'active' | 'inactive';
-
-// Files:
-// - Components: PascalCase (ProductCard/index.tsx)
-// - Utilities: camelCase (formatPrice.ts)
-// - Types: camelCase (common.ts)
-```
-
----
-
-## Common Tasks
-
-### Adding a New Page
-
-1. Create folder: `src/pages/{category}/{PageName}/`
-2. Create `index.tsx` with component
-3. Create `styles.ts` if needed (layout only)
-4. Add route to appropriate route file
-5. Use default export for pages
-
-```tsx
-// 1. Create index.tsx
-const ProductsPage = () => {
-  return <div>Products</div>;
-};
-
-export default ProductsPage;
-
-// 2. Add to routes
-import ProductsPage from '@/pages/public/ProductsPage';
-
-export const publicRoutes: AppRouteObject[] = [
-  {
-    path: '/products',
-    element: <ProductsPage />,
-    meta: { title: 'Products' },
-  },
-];
-```
-
-### Adding a New Component
-
-1. Create folder: `src/components/{ComponentName}/`
-2. Create `index.tsx` with component
-3. Create `styles.ts` if needed
-4. Export from component
-
-```tsx
-// components/ProductCard/index.tsx
-export const ProductCard = ({ product }: ProductCardProps) => {
-  return <Card>{product.name}</Card>;
-};
-```
-
-### Adding an API Endpoint
-
-Add to `services/apiSlice.ts`:
-
-```typescript
-// In endpoints builder
-getProducts: builder.query<ApiResponse<Product[]>, QueryParams>({
-  query: (params) => ({
-    url: '/products',
-    params,
-  }),
-  providesTags: ['Product'],
-});
-```
-
-### Adding a Type
-
-Add to `types/common.ts`:
-
-```typescript
-export interface Product {
-  id: number;
-  name: string;
-  price: number;
-  // ... other fields
-}
-```
-
----
-
-## Performance Guidelines
-
-1. **Lazy Loading**: Use for routes
-```typescript
-const ProductsPage = lazy(() => import('@/pages/public/ProductsPage'));
-```
-
-2. **Memoization**: Only when proven necessary
-```typescript
-const expensiveValue = useMemo(() => calculate(data), [data]);
-const handleClick = useCallback(() => action(), [dep]);
-```
-
-3. **List Rendering**: Always use keys
-```tsx
-{products.map(product => (
-  <ProductCard key={product.id} product={product} />
-))}
-```
-
----
-
-## Security Guidelines
-
-1. **Input Validation**: Always validate user input
-2. **XSS Prevention**: Sanitize HTML content
-3. **Auth Tokens**: Store in memory or httpOnly cookies
-4. **Role Checks**: Use route guards
-5. **Sensitive Data**: Never log or expose
-
----
-
-## Testing Guidelines
-
-1. **Write tests for**:
-   - Utility functions
-   - Complex business logic
-   - Critical user flows
-
-2. **Don't test**:
-   - Third-party libraries
-   - Simple mappings
-   - Styling
-
----
-
-## Git Workflow
-
-1. **Commit Messages**: Clear and concise
-   ```
-   feat: Add product search functionality
-   fix: Resolve cart total calculation
-   refactor: Simplify auth flow
-   ```
-
-2. **Branch Naming**:
-   ```
-   feature/product-search
-   fix/cart-calculation
-   refactor/auth-flow
-   ```
-
----
-
-## When Working with AI
-
-### Before Starting
-
-1. Understand the full requirement
-2. Ask clarifying questions if needed
-3. Identify impacted files
-4. Check existing patterns
-
-### During Development
-
-1. Follow existing code patterns
-2. Make minimal necessary changes
-3. Test changes thoroughly
-4. Keep changes focused
-
-### After Completion
-
-1. Verify all changes work
-2. Check for unintended side effects
-3. Ensure type safety
-4. Remove debug code
-
----
-
-## Remember
-
-- **Simplicity over cleverness**
-- **Explicit over implicit**
-- **Types over any**
-- **Ask before assuming**
-- **No documentation without permission**
-- **Code should explain itself**
-- **Follow existing patterns**
-- **Make minimal changes**
-- **Pages use default exports, components use named exports**
-- **NO inline styles - use styled-components or Space/Flex components**
-- **NO h1-h6 or p tags - use Typography components (Title, Text, Paragraph)**
-- **NO negated conditions (if (!x)) - use positive conditions instead**
-- **Modal buttons belong in footer prop, not inside Form**
-
----
-
-## Questions to Ask
-
-- "Should I create documentation for this?"
-- "Do you want comments explaining this logic?"
-- "Should I refactor the surrounding code?"
-- "Would you like error handling for this edge case?"
-- "Should I add type annotations to existing code?"
-
-**Default answer to all: NO, unless explicitly requested.**
+- **No type casting or `any` types** - Use proper TypeScript discriminated unions
+- **Use `useMemo`** instead of self-calling functions for conditional rendering
+- **Proper JSON handling** - Database JSON columns eliminate need for manual stringify/parse
+- **Clean code** - No defensive type checking when proper types are defined

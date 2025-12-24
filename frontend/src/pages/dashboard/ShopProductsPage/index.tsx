@@ -101,7 +101,7 @@ const ShopProductsPage = () => {
       const typedValues: Record<number, FieldValue> = {};
 
       productFieldValues.forEach((fv) => {
-        typedValues[fv.id] = fv;
+        typedValues[fv.field_definition_id] = fv;
       });
 
       setFieldValues(typedValues);
@@ -125,7 +125,7 @@ const ShopProductsPage = () => {
   const updateFieldValue = (updatedFieldValue: FieldValue) => {
     setFieldValues((prev) => ({
       ...prev,
-      [updatedFieldValue.id]: updatedFieldValue,
+      [updatedFieldValue.field_definition_id]: updatedFieldValue,
     }));
   };
 

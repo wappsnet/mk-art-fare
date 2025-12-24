@@ -14,37 +14,37 @@ export const generateFieldDefinition = ({
   switch (field.type) {
     case FieldType.TEXT:
       if (fieldValue.type === FieldType.TEXT) {
-        return { ...field, value: fieldValue.value };
+        return { ...field, value: fieldValue.value, fieldValue };
       }
       return field;
 
     case FieldType.NUMBER:
       if (fieldValue.type === FieldType.NUMBER) {
-        return { ...field, value: fieldValue.value };
+        return { ...field, value: fieldValue.value, fieldValue };
       }
       return field;
 
     case FieldType.SELECT:
       if (fieldValue.type === FieldType.SELECT) {
-        return { ...field, value: fieldValue.value };
+        return { ...field, value: fieldValue.value, fieldValue };
       }
       return field;
 
     case FieldType.RADIO:
       if (fieldValue.type === FieldType.RADIO) {
-        return { ...field, value: fieldValue.value };
+        return { ...field, value: fieldValue.value, fieldValue };
       }
       return field;
 
     case FieldType.CHECKBOX:
       if (fieldValue.type === FieldType.CHECKBOX) {
-        return { ...field, value: fieldValue.value };
+        return { ...field, value: fieldValue.value, fieldValue };
       }
       return field;
 
     case FieldType.TOGGLE:
       if (fieldValue.type === FieldType.TOGGLE) {
-        return { ...field, value: fieldValue.value };
+        return { ...field, value: fieldValue.value, fieldValue };
       }
       return field;
 

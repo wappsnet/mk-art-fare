@@ -55,13 +55,13 @@ export const productFieldService = {
   },
 
   async updateFieldValue(productId, fieldDefinitionId, value) {
-    const jsonValue = JSON.stringify(value);
-
+    // MySQL JSON column automatically handles serialization
+    // Pass the value directly without stringifying
     await query(
       `INSERT INTO product_field_values (product_id, field_definition_id, value)
        VALUES (?, ?, ?)
        ON DUPLICATE KEY UPDATE value = ?`,
-      [productId, fieldDefinitionId, jsonValue, jsonValue]
+      [productId, fieldDefinitionId, value, value]
     );
   },
 
