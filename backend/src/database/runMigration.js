@@ -1,13 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import pool from '../config/database.js';
-import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const runSpecificMigration = async (migrationFile) => {
   try {
-    console.log(`🔄 Running migration: ${migrationFile}`);
+    console.info(`🔄 Running migration: ${migrationFile}`);
 
     const migrationPath = path.join(__dirname, '../../..', 'database', 'migrations', migrationFile);
 
@@ -28,7 +28,7 @@ const runSpecificMigration = async (migrationFile) => {
     for (const statement of statements) {
       try {
         await connection.query(statement);
-        console.log('✅ Executed:', statement.substring(0, 80) + '...');
+        console.info('✅ Executed:', statement.substring(0, 80) + '...');
       } catch (error) {
         console.error('❌ Error executing statement:', statement.substring(0, 100));
         console.error('Error:', error.message);
@@ -38,7 +38,7 @@ const runSpecificMigration = async (migrationFile) => {
 
     connection.release();
 
-    console.log('✅ Migration completed successfully');
+    console.info('✅ Migration completed successfully');
     process.exit(0);
   } catch (error) {
     console.error('❌ Migration failed:', error);

@@ -1,4 +1,4 @@
-import { Layout as AntLayout, Menu } from 'antd';
+import { Layout as AntLayout, Menu, Space } from 'antd';
 import styled from '@emotion/styled';
 import { Link } from 'react-router';
 
@@ -26,4 +26,8 @@ export const NavMenuStyled = styled(Menu)`
   flex: 1;
   display: flex;
   align-items: center;
+`;
+
+export const UserMenuTrigger = styled(Space)`
+  cursor: pointer;
 `;

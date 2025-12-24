@@ -23,6 +23,10 @@ import {
   ImageCardActionsStyled,
   ImageCardContentStyled,
   ThumbnailBadgeStyled,
+  FullWidthSpace,
+  FullWidthVerticalSpace,
+  ImageGridContainer,
+  AltTextDisplay,
 } from './style.ts';
 
 interface ProductImageManagerProps {
@@ -217,7 +221,7 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
 
   return (
     <div>
-      <Space direction="vertical" style={{ width: '100%' }} size="large">
+      <FullWidthSpace direction="vertical" size="large">
         <div>
           <h4>Add New Image</h4>
           <Tabs
@@ -230,7 +234,7 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
                   </span>
                 ),
                 children: (
-                  <Space direction="vertical" style={{ width: '100%' }}>
+                  <FullWidthVerticalSpace direction="vertical">
                     <Upload
                       multiple
                       fileList={fileList}
@@ -263,7 +267,7 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
                     >
                       Upload Image{fileList.length > 1 ? 's' : ''}
                     </Button>
-                  </Space>
+                  </FullWidthVerticalSpace>
                 ),
               },
               {
@@ -274,7 +278,7 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
                   </span>
                 ),
                 children: (
-                  <Space direction="vertical" style={{ width: '100%' }}>
+                  <FullWidthVerticalSpace direction="vertical">
                     <Input
                       placeholder="Image URL (e.g., https://example.com/image.jpg)"
                       value={imageUrl}
@@ -297,23 +301,16 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
                     >
                       Add Image
                     </Button>
-                  </Space>
+                  </FullWidthVerticalSpace>
                 ),
               },
             ]}
           />
         </div>
 
-        {localImages.length > 0 && (
-          <div>
-            <h4>Current Images ({localImages.length})</h4>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                gap: '16px',
-              }}
-            >
+        <div>
+          <h4>Current Images ({localImages.length})</h4>
+          <ImageGridContainer>
               {localImages.map((img) => (
                 <ImageCardStyled key={img.id}>
                   <ImageCardContentStyled>
@@ -329,7 +326,7 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
                           onChange={(e) => setEditingAltText(e.target.value)}
                           onPressEnter={() => handleUpdateAltText(img.id)}
                           autoFocus
-                          style={{ marginBottom: 8 }}
+                          css={{ marginBottom: 8 }}
                         />
                         <Space>
                           <Button
@@ -353,16 +350,9 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
                       </div>
                     ) : (
                       <>
-                        <div
-                          style={{
-                            fontSize: 13,
-                            color: img.alt_text ? '#333' : '#999',
-                            minHeight: 40,
-                            fontStyle: img.alt_text ? 'normal' : 'italic',
-                          }}
-                        >
+                        <AltTextDisplay hasAltText={!!img.alt_text}>
                           {img.alt_text || 'No alt text'}
-                        </div>
+                        </AltTextDisplay>
                         <Button
                           size="small"
                           block
@@ -382,7 +372,7 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
                         loading={updating && editingAltId !== img.id}
                         type={img.is_thumbnail ? 'primary' : 'default'}
                         size="small"
-                        style={{ flex: 1 }}
+                        css={{ flex: 1 }}
                       >
                         {img.is_thumbnail ? 'Thumbnail' : 'Set as Thumbnail'}
                       </Button>
@@ -398,10 +388,9 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
                   </ImageCardFooterStyled>
                 </ImageCardStyled>
               ))}
-            </div>
+            </ImageGridContainer>
           </div>
-        )}
-      </Space>
+      </FullWidthSpace>
     </div>
   );
 };

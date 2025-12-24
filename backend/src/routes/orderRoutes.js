@@ -23,7 +23,7 @@ router.get(
   authenticate,
   asyncHandler(async (req, res) => {
     const { orders, total, page, limit } = await orderService.getUserOrders(req.user.userId, req.query);
-    sendPaginated(res, orders, page, limit, total);
+    sendPaginated(res, orders, { page, limit, total });
   })
 );
 
@@ -50,7 +50,7 @@ router.get(
       req.user.userId,
       req.query
     );
-    sendPaginated(res, orders, page, limit, total);
+    sendPaginated(res, orders, { page, limit, total });
   })
 );
 

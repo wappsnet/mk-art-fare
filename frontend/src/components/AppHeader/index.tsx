@@ -11,7 +11,7 @@ import { Link, useNavigate } from 'react-router';
 import { useAppSelector } from '@/hooks/useRedux';
 import { useGetCartQuery, useLogoutMutation } from '@/services/apiSlice';
 import ArtFareLogo from '@/assets/base/logo.svg';
-import { HeaderStyled, LogoStyled, NavMenuStyled } from './style.ts';
+import { HeaderStyled, LogoStyled, NavMenuStyled, UserMenuTrigger } from './style.ts';
 
 const AppHeader = () => {
   const navigate = useNavigate();
@@ -106,10 +106,10 @@ const AppHeader = () => {
 
         {user ? (
           <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-            <Space style={{ cursor: 'pointer' }}>
+            <UserMenuTrigger>
               <Avatar src={user.avatar_url} icon={<UserOutlined />} />
               <span>{user.first_name || user.email}</span>
-            </Space>
+            </UserMenuTrigger>
           </Dropdown>
         ) : (
           <Space>

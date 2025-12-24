@@ -59,7 +59,7 @@ router.get(
     );
 
     // Get images for each product
-    for (let product of products) {
+    for (const product of products) {
       const images = await query('SELECT * FROM product_images WHERE product_id = ? ORDER BY sort_order', [
         product.id,
       ]);

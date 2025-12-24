@@ -77,7 +77,7 @@ export class OrganizationController {
       search
     );
 
-    sendPaginated(res, organizations, page, limit, total);
+    sendPaginated(res, organizations, { page, limit, total });
   }
 
   async getOrganizationProducts(req, res) {

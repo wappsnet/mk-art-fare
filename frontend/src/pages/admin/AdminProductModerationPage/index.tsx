@@ -82,7 +82,7 @@ const AdminProductModerationPage = () => {
           alt="Product"
           width={60}
           height={60}
-          style={{ objectFit: 'cover', borderRadius: 4 }}
+          css={{ objectFit: 'cover', borderRadius: 4 }}
         />
       ),
     },
@@ -96,13 +96,13 @@ const AdminProductModerationPage = () => {
             <Text strong>{name}</Text>
             {record.moderation_status === 'approved' && (
               <Badge
-                count={<SafetyCertificateOutlined style={{ color: '#52c41a' }} />}
+                count={<SafetyCertificateOutlined css={{ color: '#52c41a' }} />}
                 title="Moderated"
               />
             )}
           </Space>
           <br />
-          <Text type="secondary" style={{ fontSize: 12 }}>
+          <Text type="secondary" css={{ fontSize: 12 }}>
             {record.sku}
           </Text>
         </div>
@@ -214,7 +214,7 @@ const AdminProductModerationPage = () => {
           width={600}
         >
           {selectedProduct && (
-            <Space direction="vertical" size="large" style={{ width: '100%' }}>
+            <Space direction="vertical" size="large" css={{ width: '100%' }}>
               <div>
                 {selectedProduct.primary_image_url && (
                   <Image
@@ -222,7 +222,7 @@ const AdminProductModerationPage = () => {
                     alt={selectedProduct.name}
                     width="100%"
                     height={200}
-                    style={{ objectFit: 'cover', borderRadius: 8, marginBottom: 16 }}
+                    css={{ objectFit: 'cover', borderRadius: 8, marginBottom: 16 }}
                   />
                 )}
                 <Title level={4}>{selectedProduct.name}</Title>
@@ -248,7 +248,7 @@ const AdminProductModerationPage = () => {
                 />
               </div>
 
-              <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
+              <Space css={{ width: '100%', justifyContent: 'flex-end' }}>
                 <Button
                   danger
                   icon={<CloseOutlined />}

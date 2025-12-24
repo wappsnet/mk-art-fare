@@ -14,18 +14,16 @@ import {
   RegisterFormData,
   OrganizationTheme,
   ProductImage,
-  SubscriptionPlan,
-  SubscriptionResponse,
-  SubscriptionHistory,
 } from '@/types/common';
+import { SubscriptionPlan, SubscriptionResponse, SubscriptionHistory } from '@/types/subscription';
 import {
   FieldGroup,
   FieldGroupFormData,
   FieldDefinition,
   FieldDefinitionFormData,
-  FieldValue,
   ProductFieldValues,
-} from '@/types/customFields';
+  FieldValue,
+} from '@/types/fields';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_URL,
@@ -108,6 +106,7 @@ export const api = createApi({
     'FieldGroup',
     'Subscription',
   ],
+  // eslint-disable-next-line max-lines-per-function
   endpoints: (builder) => ({
     // Auth endpoints
     login: builder.mutation<
@@ -161,9 +160,6 @@ export const api = createApi({
     }),
 
     // Product endpoints
-    getProductFilterFields: builder.query<ApiResponse<FieldDefinition[]>, void>({
-      query: () => '/products/filter-fields',
-    }),
     getProducts: builder.query<
       ApiResponse<{ products: Product[]; total: number; page: number; limit: number }>,
       {
@@ -171,7 +167,6 @@ export const api = createApi({
         minPrice?: number;
         maxPrice?: number;
         category?: string;
-        customFields?: string;
         page?: number;
         limit?: number;
       }
@@ -181,7 +176,6 @@ export const api = createApi({
         if (params.search) queryParams.append('search', params.search);
         if (params.minPrice) queryParams.append('minPrice', params.minPrice.toString());
         if (params.maxPrice) queryParams.append('maxPrice', params.maxPrice.toString());
-        if (params.customFields) queryParams.append('customFields', params.customFields);
         if (params.category) queryParams.append('category', params.category);
         if (params.page) queryParams.append('page', params.page.toString());
         if (params.limit) queryParams.append('limit', params.limit.toString());
@@ -592,7 +586,6 @@ export const api = createApi({
       invalidatesTags: ['Product'],
     }),
 
-    // Field Group endpoints
     getFieldGroups: builder.query<
       ApiResponse<FieldGroup[]>,
       { organizationId: number; includeFields?: boolean }
@@ -633,8 +626,6 @@ export const api = createApi({
       }),
       invalidatesTags: ['FieldGroup'],
     }),
-
-    // Field Definition endpoints
     createFieldDefinition: builder.mutation<
       ApiResponse<FieldDefinition>,
       { fieldGroupId: number; data: FieldDefinitionFormData }
@@ -678,8 +669,6 @@ export const api = createApi({
       }),
       invalidatesTags: ['FieldGroup'],
     }),
-
-    // Product Field Group Assignment endpoints
     assignFieldGroupToProduct: builder.mutation<
       ApiResponse<void>,
       { productId: number; fieldGroupId: number }
@@ -712,14 +701,12 @@ export const api = createApi({
       query: (productId) => `/products/${productId}/field-groups`,
       providesTags: (_result, _error, productId) => [{ type: 'ProductFieldGroups', id: productId }],
     }),
-
-    // Product Field Values endpoints
     getProductFieldValues: builder.query<ApiResponse<FieldValue[]>, number>({
       query: (productId) => `/products/${productId}/fields`,
       providesTags: (_result, _error, productId) => [{ type: 'ProductFieldValues', id: productId }],
     }),
     batchUpdateProductFieldValues: builder.mutation<
-      ApiResponse<FieldValue[]>,
+      ApiResponse<void>,
       { productId: number; fields: ProductFieldValues }
     >({
       query: ({ productId, fields }) => ({
@@ -733,7 +720,7 @@ export const api = createApi({
       ],
     }),
     updateProductFieldValue: builder.mutation<
-      ApiResponse<FieldValue>,
+      ApiResponse<void>,
       { productId: number; fieldId: number; value: unknown }
     >({
       query: ({ productId, fieldId, value }) => ({
@@ -794,7 +781,6 @@ export const {
   useRegisterMutation,
   useLogoutMutation,
   useGetProfileQuery,
-  useGetProductFilterFieldsQuery,
   useGetProductsQuery,
   useGetProductQuery,
   useCreateProductMutation,

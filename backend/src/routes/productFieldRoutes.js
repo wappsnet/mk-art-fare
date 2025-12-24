@@ -6,7 +6,6 @@ import { UserRole } from '../types/index.js';
 
 const router = Router();
 
-// Field group assignments (require authentication for write operations)
 router.post(
   '/:id/field-groups',
   authenticate,
@@ -23,7 +22,6 @@ router.delete(
 
 router.get('/:id/field-groups', asyncHandler(productFieldController.getProductFieldGroups));
 
-// Field values
 router.get('/:id/fields', asyncHandler(productFieldController.getProductFieldValues));
 
 router.post(

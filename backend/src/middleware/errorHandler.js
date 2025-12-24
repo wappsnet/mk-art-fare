@@ -1,8 +1,6 @@
 import { sendError } from '../utils/response.js';
 
 export class AppError extends Error {
-  statusCode;
-
   constructor(message, statusCode = 400) {
     super(message);
     this.statusCode = statusCode;
@@ -10,7 +8,7 @@ export class AppError extends Error {
   }
 }
 
-export const errorHandler = (err, req, res, next) => {
+export const errorHandler = (err, _req, res, _next) => {
   if (err instanceof AppError) {
     sendError(res, err.message, err.statusCode);
     return;
@@ -25,7 +23,7 @@ export const errorHandler = (err, req, res, next) => {
   }
 };
 
-export const notFoundHandler = (req, res, next) => {
+export const notFoundHandler = (req, res, _next) => {
   sendError(res, `Route ${req.originalUrl} not found`, 404);
 };
 

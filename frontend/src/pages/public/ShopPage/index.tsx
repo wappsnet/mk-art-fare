@@ -83,7 +83,7 @@ const ShopPage = () => {
                           type="primary"
                           icon={<ShoppingCartOutlined />}
                           block
-                          style={{ marginTop: 12 }}
+                          css={{ marginTop: 12 }}
                           disabled={product.stock_quantity === 0}
                         >
                           Add to Cart
@@ -129,12 +129,12 @@ const ShopPage = () => {
           {shop.banner_url && <BannerImageStyled url={shop.banner_url} />}
           <ShopContentStyled>
             {shop.logo_url && <ShopLogoStyled src={shop.logo_url} alt={shop.name} />}
-            <Title level={1} style={{ color: 'inherit', marginBottom: 16 }}>
+            <Title level={1} css={{ color: 'inherit', marginBottom: 16 }}>
               {shop.name}
             </Title>
             {shop.description && (
               <Paragraph
-                style={{ color: 'inherit', fontSize: 16, maxWidth: 600, margin: '0 auto' }}
+                css={{ color: 'inherit', fontSize: 16, maxWidth: 600, margin: '0 auto' }}
               >
                 {shop.description}
               </Paragraph>

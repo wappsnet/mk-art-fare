@@ -11,7 +11,7 @@ router.get(
   '/',
   asyncHandler(async (req, res) => {
     const { posts, total, page, limit } = await blogService.getPublishedPosts(req.query);
-    sendPaginated(res, posts, page, limit, total);
+    sendPaginated(res, posts, { page, limit, total });
   })
 );
 

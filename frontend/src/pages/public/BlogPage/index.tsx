@@ -89,7 +89,7 @@ const BlogPage = () => {
                   <PostMetaStyled>
                     <span>
                       <Avatar size="small" src={post.avatar_url} icon={<UserOutlined />} />
-                      <Text style={{ marginLeft: 8 }}>
+                      <Text css={{ marginLeft: 8 }}>
                         {post.first_name} {post.last_name}
                       </Text>
                     </span>
@@ -124,11 +124,11 @@ const BlogPage = () => {
     <AppLayout>
       <ContainerStyled>
         <HeroSectionStyled>
-          <Title level={1} style={{ color: 'white', marginBottom: 16 }}>
+          <Title level={1} css={{ color: 'white', marginBottom: 16 }}>
             Art Blog
           </Title>
           <Paragraph
-            style={{
+            css={{
               color: 'rgba(255,255,255,0.9)',
               fontSize: 18,
               maxWidth: 600,

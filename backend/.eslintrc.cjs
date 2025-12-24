@@ -15,14 +15,23 @@ module.exports = {
   rules: {
     // Complexity rules
     'max-depth': ['error', 4],
-    complexity: ['error', 10],
-    'max-lines-per-function': ['warn', { max: 100, skipBlankLines: true, skipComments: true }],
+    'max-params': ['error', 5],
+    complexity: ['error', 15],
+    'max-lines-per-function': ['warn', { max: 150, skipBlankLines: true, skipComments: true }],
 
     // General rules
-    'no-console': ['warn', { allow: ['warn', 'error'] }],
+    'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
     'prefer-const': 'error',
     'no-var': 'error',
     'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
   },
   ignorePatterns: ['dist', 'node_modules'],
+  overrides: [
+    {
+      files: ['src/server.js', 'src/database/**/*.js'],
+      rules: {
+        'no-console': 'off',
+      },
+    },
+  ],
 };

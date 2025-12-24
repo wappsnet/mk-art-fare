@@ -3,7 +3,7 @@ import pool from '../config/database.js';
 
 const seedDatabase = async () => {
   try {
-    console.log('🌱 Starting database seeding...');
+    console.info('🌱 Starting database seeding...');
 
     const connection = await pool.getConnection();
 
@@ -15,7 +15,7 @@ const seedDatabase = async () => {
        ON DUPLICATE KEY UPDATE email = email`,
       ['admin@artfare.com', adminPassword, 'Admin', 'User', 'admin', true, true]
     );
-    console.log('✅ Admin user created');
+    console.info('✅ Admin user created');
 
     // Create sample categories
     const categories = [
@@ -34,11 +34,11 @@ const seedDatabase = async () => {
         [name, slug, description]
       );
     }
-    console.log('✅ Sample categories created');
+    console.info('✅ Sample categories created');
 
     connection.release();
 
-    console.log('✅ Database seeding completed successfully');
+    console.info('✅ Database seeding completed successfully');
     process.exit(0);
   } catch (error) {
     console.error('❌ Seeding failed:', error);

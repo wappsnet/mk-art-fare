@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router';
 import {
   Row,
@@ -31,10 +31,10 @@ import {
   useBatchUpdateProductFieldValuesMutation,
 } from '@/services/apiSlice';
 import { ProductImageManager } from '@/components/ProductImageManager';
-import DynamicFieldRenderer from '@/components/DynamicFieldRenderer';
+import { DynamicFieldRenderer } from '@/components/DynamicFieldRenderer';
 import { Product, ProductFormData } from '@/types/common';
-import { ProductFieldValues } from '@/types/customFields';
 import { getErrorMessage } from '@/types/errors';
+import { FieldValue } from '@/types/fields';
 import {
   TopSpaceStyled,
   ProductImageStyled,
@@ -42,48 +42,10 @@ import {
   ProductActionsStyled,
   FullWidthInputStyled,
 } from './styles';
+import { generateFieldDefinition } from '@/utils/fieldHelpers.ts';
 
 const { Text } = Typography;
 const { Option } = Select;
-
-// Helper function to process field value for backend storage
-const processFieldValue = (value: unknown): unknown => {
-  // eslint-disable-next-line no-console
-  console.log('📦 processFieldValue called with:', value, 'type:', typeof value, 'isArray:', Array.isArray(value));
-
-  // Handle null/undefined
-  if (value === null || value === undefined) {
-    return value;
-  }
-
-  // Handle arrays (checkbox, multi-select) - send as-is, backend will stringify
-  if (Array.isArray(value)) {
-    // eslint-disable-next-line no-console
-    console.log('📦 Array kept as-is for backend validation:', value);
-    return value;
-  }
-
-  // Handle date/time objects (dayjs objects from DatePicker/TimePicker)
-  if (typeof value === 'object') {
-    // Check if it's a dayjs/moment object with format method
-    if ('format' in value && typeof value.format === 'function') {
-      const formatted = String(value.format('YYYY-MM-DD HH:mm:ss'));
-      // eslint-disable-next-line no-console
-      console.log('📦 Date formatted to:', formatted);
-      return formatted;
-    }
-
-    // For file/image objects, keep as-is (backend expects objects)
-    // eslint-disable-next-line no-console
-    console.log('📦 Object kept as-is:', value);
-    return value;
-  }
-
-  // Handle primitive values (string, number, boolean)
-  // eslint-disable-next-line no-console
-  console.log('📦 Primitive value, keeping as is:', value);
-  return value;
-};
 
 const ShopProductsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -93,8 +55,8 @@ const ShopProductsPage = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isImageManagerOpen, setIsImageManagerOpen] = useState(false);
   const [managingImagesProduct, setManagingImagesProduct] = useState<Product | null>(null);
-  const [selectedFieldGroups, setSelectedFieldGroups] = useState<number[]>([]);
-  const [customFieldValues, setCustomFieldValues] = useState<ProductFieldValues>({});
+  const [selectedFieldGroupIds, setSelectedFieldGroupIds] = useState<number[]>([]);
+  const [fieldValues, setFieldValues] = useState<Record<number, FieldValue>>({});
   const [productForm] = Form.useForm();
 
   const { data: productsData } = useGetOrganizationProductsByIdQuery(orgId);
@@ -103,11 +65,11 @@ const ShopProductsPage = () => {
     organizationId: orgId,
     includeFields: true,
   });
-  const { data: productFieldGroups } = useGetProductFieldGroupsQuery(editingProduct?.id || 0, {
-    skip: !editingProduct?.id,
+  const { data: productFieldGroupsData } = useGetProductFieldGroupsQuery(editingProduct?.id || 0, {
+    skip: !editingProduct,
   });
-  const { data: productFieldValues } = useGetProductFieldValuesQuery(editingProduct?.id || 0, {
-    skip: !editingProduct?.id,
+  const { data: productFieldValuesData } = useGetProductFieldValuesQuery(editingProduct?.id || 0, {
+    skip: !editingProduct,
   });
 
   const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
@@ -117,50 +79,58 @@ const ShopProductsPage = () => {
   const [unassignFieldGroup] = useUnassignFieldGroupFromProductMutation();
   const [batchUpdateFieldValues] = useBatchUpdateProductFieldValuesMutation();
 
-  const products = Array.isArray(productsData?.data) ? productsData.data : [];
-  const allCategories = Array.isArray(categoriesData?.data) ? categoriesData.data : [];
+  const products = useMemo(() => productsData?.data ?? [], [productsData?.data]);
+  const allCategories = useMemo(() => categoriesData?.data ?? [], [categoriesData?.data]);
+  const fieldGroups = useMemo(() => fieldGroupsData?.data ?? [], [fieldGroupsData?.data]);
+  const productFieldGroups = useMemo(() => {
+    return productFieldGroupsData?.data ?? [];
+  }, [productFieldGroupsData?.data]);
 
-  // Load field groups and values when editing a product
+  const productFieldValues = useMemo(() => {
+    return productFieldValuesData?.data ?? [];
+  }, [productFieldValuesData?.data]);
+
   useEffect(() => {
-    if (productFieldGroups?.data) {
-      setSelectedFieldGroups(productFieldGroups.data.map((g) => g.id));
+    if (editingProduct && productFieldGroups.length > 0) {
+      setSelectedFieldGroupIds(productFieldGroups.map((fg) => fg.id));
     }
-  }, [productFieldGroups, editingProduct?.id]);
+  }, [editingProduct, productFieldGroups]);
 
   useEffect(() => {
-    if (productFieldValues?.data) {
-      const fieldValuesMap: ProductFieldValues = {};
-      productFieldValues.data.forEach((fv) => {
-        let parsedValue = fv.value;
+    if (editingProduct && productFieldValues.length > 0) {
+      const typedValues: Record<number, FieldValue> = {};
 
-        // Try to parse JSON strings back to arrays/objects
-        if (
-          typeof fv.value === 'string' &&
-          (fv.value.startsWith('[') || fv.value.startsWith('{'))
-        ) {
-          try {
-            parsedValue = JSON.parse(fv.value);
-          } catch {
-            // If parsing fails, keep the original string value
-          }
-        }
-
-        fieldValuesMap[fv.field_definition_id] = parsedValue;
+      productFieldValues.forEach((fv) => {
+        typedValues[fv.id] = fv;
       });
-      setCustomFieldValues(fieldValuesMap);
-    }
-  }, [productFieldValues, editingProduct?.id]);
 
-  // Get all fields from selected field groups
-  const allCustomFields =
-    fieldGroupsData?.data
-      ?.filter((group) => selectedFieldGroups.includes(group.id))
-      ?.flatMap((group) => group.fields || []) || [];
+      setFieldValues(typedValues);
+    }
+  }, [editingProduct, productFieldValues]);
+
+  const selectedFieldDefinitions = useMemo(
+    () =>
+      fieldGroups
+        .filter((fg) => selectedFieldGroupIds.includes(fg.id))
+        .flatMap((fg) => fg.fields || [])
+        .map((field) =>
+          generateFieldDefinition({
+            field,
+            fieldValue: fieldValues[field.id],
+          })
+        ),
+    [fieldGroups, fieldValues, selectedFieldGroupIds]
+  );
+
+  const updateFieldValue = (updatedFieldValue: FieldValue) => {
+    setFieldValues((prev) => ({
+      ...prev,
+      [updatedFieldValue.id]: updatedFieldValue,
+    }));
+  };
 
   const openProductModal = (product?: Product) => {
     setEditingProduct(product || null);
-    setSelectedFieldGroups([]);
-    setCustomFieldValues({});
 
     if (product) {
       productForm.setFieldsValue({
@@ -171,90 +141,76 @@ const ShopProductsPage = () => {
         sku: product.sku,
         category_id: product.category_id,
       });
-      // Custom field groups and values will be loaded by useEffect hooks
     } else {
       productForm.resetFields();
+      setSelectedFieldGroupIds([]);
+      setFieldValues({});
     }
     setIsProductModalOpen(true);
   };
 
+  const saveProduct = async (values: ProductFormData): Promise<number> => {
+    if (editingProduct) {
+      await updateProduct({
+        id: editingProduct.id,
+        data: values,
+      }).unwrap();
+      return editingProduct.id;
+    }
+
+    const result = await createProduct({ organization_id: orgId, ...values }).unwrap();
+    if (!result.data) {
+      throw new Error('Failed to create product');
+    }
+    return result.data.id;
+  };
+
+  const syncFieldGroups = async (productId: number) => {
+    const previousFieldGroupIds = editingProduct ? productFieldGroups.map((fg) => fg.id) : [];
+    const groupsToAdd = selectedFieldGroupIds.filter((id) => !previousFieldGroupIds.includes(id));
+    const groupsToRemove = previousFieldGroupIds.filter(
+      (id) => !selectedFieldGroupIds.includes(id)
+    );
+
+    await Promise.all([
+      ...groupsToAdd.map((groupId) =>
+        assignFieldGroup({ productId, fieldGroupId: groupId }).unwrap()
+      ),
+      ...groupsToRemove.map((groupId) =>
+        unassignFieldGroup({ productId, fieldGroupId: groupId }).unwrap()
+      ),
+    ]);
+  };
+
+  const saveFieldValues = async (productId: number) => {
+    const fieldValueUpdates: Record<number, FieldValue['value']> = {};
+    selectedFieldDefinitions.forEach((field) => {
+      if (field.value !== undefined) {
+        fieldValueUpdates[field.id] = field.value;
+      }
+    });
+
+    if (Object.keys(fieldValueUpdates).length > 0) {
+      await batchUpdateFieldValues({ productId, fields: fieldValueUpdates }).unwrap();
+    }
+  };
+
+  const resetProductForm = () => {
+    setIsProductModalOpen(false);
+    setEditingProduct(null);
+    productForm.resetFields();
+    setSelectedFieldGroupIds([]);
+    setFieldValues({});
+  };
+
   const handleProductSubmit = async (values: ProductFormData) => {
     try {
-      const productData = {
-        ...values,
-      };
+      const productId = await saveProduct(values);
+      await syncFieldGroups(productId);
+      await saveFieldValues(productId);
 
-      let productId: number;
-
-      if (editingProduct) {
-        await updateProduct({ id: editingProduct.id, data: productData }).unwrap();
-        productId = editingProduct.id;
-        message.success('Product updated successfully!');
-      } else {
-        const result = await createProduct({ organization_id: orgId, ...productData }).unwrap();
-        productId = result.data!.id;
-        message.success('Product created successfully!');
-      }
-
-      // Handle field group assignments
-      if (editingProduct) {
-        const currentGroups = productFieldGroups?.data?.map((g) => g.id) || [];
-        const added = selectedFieldGroups.filter((id) => !currentGroups.includes(id));
-        const removed = currentGroups.filter((id) => !selectedFieldGroups.includes(id));
-
-        // Assign new groups
-        for (const groupId of added) {
-          await assignFieldGroup({ productId, fieldGroupId: groupId }).unwrap();
-        }
-
-        // Unassign removed groups
-        for (const groupId of removed) {
-          await unassignFieldGroup({ productId, fieldGroupId: groupId }).unwrap();
-        }
-      } else {
-        // For new products, assign all selected field groups
-        for (const groupId of selectedFieldGroups) {
-          await assignFieldGroup({ productId, fieldGroupId: groupId }).unwrap();
-        }
-      }
-
-      // Save custom field values
-      if (Object.keys(customFieldValues).length > 0) {
-        // Convert arrays and objects to JSON strings for backend storage
-        const processedFields: ProductFieldValues = {};
-
-        // eslint-disable-next-line no-console
-        console.log('🔍 Raw customFieldValues:', customFieldValues);
-
-        for (const [fieldIdStr, value] of Object.entries(customFieldValues)) {
-          const fieldId = Number.parseInt(fieldIdStr, 10);
-          const processedValue = processFieldValue(value);
-          processedFields[fieldId] = processedValue;
-
-          // eslint-disable-next-line no-console
-          console.log(`🔍 Field ${fieldId}:`, {
-            original: value,
-            processed: processedValue,
-            isArray: Array.isArray(value),
-            type: typeof processedValue,
-          });
-        }
-
-        // eslint-disable-next-line no-console
-        console.log('🔍 Sending to API:', { productId, fields: processedFields });
-
-        await batchUpdateFieldValues({
-          productId,
-          fields: processedFields,
-        }).unwrap();
-        message.success('Custom fields saved successfully!');
-      }
-
-      setIsProductModalOpen(false);
-      setEditingProduct(null);
-      setSelectedFieldGroups([]);
-      setCustomFieldValues({});
-      productForm.resetFields();
+      message.success(`Product ${editingProduct ? 'updated' : 'created'} successfully!`);
+      resetProductForm();
     } catch (error) {
       message.error(
         getErrorMessage(error) || `Failed to ${editingProduct ? 'update' : 'create'} product`
@@ -351,8 +307,6 @@ const ShopProductsPage = () => {
         onClose={() => {
           setIsProductModalOpen(false);
           setEditingProduct(null);
-          setSelectedFieldGroups([]);
-          setCustomFieldValues({});
           productForm.resetFields();
         }}
         width={700}
@@ -362,8 +316,6 @@ const ShopProductsPage = () => {
               onClick={() => {
                 setIsProductModalOpen(false);
                 setEditingProduct(null);
-                setSelectedFieldGroups([]);
-                setCustomFieldValues({});
                 productForm.resetFields();
               }}
             >
@@ -409,35 +361,26 @@ const ShopProductsPage = () => {
             </Select>
           </Form.Item>
 
-          <Divider>Custom Fields</Divider>
-
-          <Form.Item label="Field Groups">
-            <Select
-              mode="multiple"
-              placeholder="Select field groups to add custom fields"
-              value={selectedFieldGroups}
-              onChange={setSelectedFieldGroups}
-              options={fieldGroupsData?.data?.map((group) => ({
-                label: group.name,
-                value: group.id,
-              }))}
-            />
-          </Form.Item>
-
-          {allCustomFields.length > 0 && (
+          {fieldGroups.length > 0 && (
             <>
-              {allCustomFields.map((field) => (
-                <DynamicFieldRenderer
-                  key={field.id}
-                  field={field}
-                  value={customFieldValues[field.id]}
-                  onChange={(value) =>
-                    setCustomFieldValues((prev) => ({
-                      ...prev,
-                      [field.id]: value,
-                    }))
-                  }
-                />
+              <Divider>Custom Fields</Divider>
+              <Form.Item label="Field Groups">
+                <Select
+                  mode="multiple"
+                  placeholder="Select field groups"
+                  value={selectedFieldGroupIds}
+                  onChange={setSelectedFieldGroupIds}
+                >
+                  {fieldGroups.map((fg) => (
+                    <Option key={fg.id} value={fg.id}>
+                      {fg.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+
+              {selectedFieldDefinitions.map((field) => (
+                <DynamicFieldRenderer key={field.id} field={field} onChange={updateFieldValue} />
               ))}
             </>
           )}

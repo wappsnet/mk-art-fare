@@ -100,7 +100,7 @@ const SubscriptionPage = () => {
   if (isLoading) {
     return (
       <ContainerStyled>
-        <Space direction="vertical" size={32} style={{ width: '100%', alignItems: 'center' }}>
+        <Space direction="vertical" size={32} css={{ width: '100%', alignItems: 'center' }}>
           <Spin size="large" />
           <Text>Loading subscription information...</Text>
         </Space>

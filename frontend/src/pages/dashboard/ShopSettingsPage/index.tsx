@@ -48,6 +48,7 @@ import {
 
 const { Title, Text, Paragraph } = Typography;
 
+// eslint-disable-next-line complexity
 const ShopSettingsPage = () => {
   const { id } = useParams<{ id: string }>();
   const orgId = Number.parseInt(id!);

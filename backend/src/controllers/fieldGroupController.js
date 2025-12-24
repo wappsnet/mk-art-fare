@@ -1,280 +1,61 @@
-import customFieldService from '../services/customFields/index.js';
-import conditionalLogicService from '../services/conditionalLogicService.js';
-import { AppError } from '../middleware/errorHandler.js';
+import { fieldGroupService } from '../services/fieldGroupService.js';
+import { fieldDefinitionService } from '../services/fieldDefinitionService.js';
 import { sendSuccess } from '../utils/response.js';
 
-/**
- * Field Group Controller
- * Handles HTTP requests for field groups and field definitions
- */
-
 export const fieldGroupController = {
-  // ==================== FIELD GROUPS ====================
-
-  /**
-   * Create a new field group
-   * POST /api/field-groups
-   */
   async createFieldGroup(req, res) {
-    const { name, description, organizationId } = req.body;
-
-    if (!name || !organizationId) {
-      throw new AppError('Name and organizationId are required', 400);
-    }
-
-    // Verify user owns the organization
-    const org = await req.app.locals.query(
-      'SELECT id FROM organizations WHERE id = ? AND owner_id = ?',
-      [organizationId, req.user.userId]
-    );
-
-    if (org.length === 0) {
-      throw new AppError('Organization not found or access denied', 404);
-    }
-
-    const fieldGroup = await customFieldService.createFieldGroup(organizationId, {
-      name,
-      description,
-    });
-
-    sendSuccess(res, fieldGroup, 'Field group created successfully', 201);
+    const group = await fieldGroupService.create(req.body.organizationId, req.body);
+    sendSuccess(res, group, 201);
   },
 
-  /**
-   * Get all field groups for an organization
-   * GET /api/field-groups?organizationId=123&includeFields=true
-   */
   async getFieldGroups(req, res) {
     const { organizationId, includeFields } = req.query;
-
-    if (!organizationId) {
-      throw new AppError('organizationId is required', 400);
-    }
-
-    // Verify access
-    const org = await req.app.locals.query(
-      'SELECT id FROM organizations WHERE id = ? AND owner_id = ?',
-      [organizationId, req.user.userId]
-    );
-
-    if (org.length === 0) {
-      throw new AppError('Organization not found or access denied', 404);
-    }
-
-    const groups = await customFieldService.getFieldGroupsByOrganization(
-      Number(organizationId),
+    const groups = await fieldGroupService.getByOrganization(
+      Number.parseInt(organizationId),
       includeFields === 'true'
     );
-
     sendSuccess(res, groups);
   },
 
-  /**
-   * Get a single field group by ID
-   * GET /api/field-groups/:id
-   */
   async getFieldGroupById(req, res) {
-    const { id } = req.params;
-
-    const fieldGroup = await customFieldService.getFieldGroupById(Number(id));
-
-    // Verify ownership
-    const org = await req.app.locals.query(
-      'SELECT id FROM organizations WHERE id = ? AND owner_id = ?',
-      [fieldGroup.organization_id, req.user.userId]
-    );
-
-    if (org.length === 0) {
-      throw new AppError('Access denied', 403);
-    }
-
-    sendSuccess(res, fieldGroup);
+    const group = await fieldGroupService.getById(Number.parseInt(req.params.id));
+    const fields = await fieldDefinitionService.getByFieldGroup(group.id);
+    sendSuccess(res, { ...group, fields });
   },
 
-  /**
-   * Update a field group
-   * PATCH /api/field-groups/:id
-   */
   async updateFieldGroup(req, res) {
-    const { id } = req.params;
-    const updates = req.body;
-
-    // Get field group to verify ownership
-    const fieldGroup = await customFieldService.getFieldGroupById(Number(id));
-
-    // Verify ownership
-    const org = await req.app.locals.query(
-      'SELECT id FROM organizations WHERE id = ? AND owner_id = ?',
-      [fieldGroup.organization_id, req.user.userId]
-    );
-
-    if (org.length === 0) {
-      throw new AppError('Access denied', 403);
-    }
-
-    const updated = await customFieldService.updateFieldGroup(
-      Number(id),
-      fieldGroup.organization_id,
-      updates
-    );
-
-    sendSuccess(res, updated, 'Field group updated successfully');
+    const group = await fieldGroupService.update(Number.parseInt(req.params.id), req.body);
+    sendSuccess(res, group);
   },
 
-  /**
-   * Delete a field group
-   * DELETE /api/field-groups/:id
-   */
   async deleteFieldGroup(req, res) {
-    const { id } = req.params;
-
-    // Get field group to verify ownership
-    const fieldGroup = await customFieldService.getFieldGroupById(Number(id));
-
-    // Verify ownership
-    const org = await req.app.locals.query(
-      'SELECT id FROM organizations WHERE id = ? AND owner_id = ?',
-      [fieldGroup.organization_id, req.user.userId]
-    );
-
-    if (org.length === 0) {
-      throw new AppError('Access denied', 403);
-    }
-
-    await customFieldService.deleteFieldGroup(Number(id), fieldGroup.organization_id);
-
-    sendSuccess(res, null, 'Field group deleted successfully');
+    await fieldGroupService.delete(Number.parseInt(req.params.id));
+    sendSuccess(res, { message: 'Field group deleted successfully' });
   },
 
-  // ==================== FIELD DEFINITIONS ====================
-
-  /**
-   * Add a field definition to a field group
-   * POST /api/field-groups/:id/fields
-   */
   async createFieldDefinition(req, res) {
-    const { id } = req.params;
-    const fieldData = req.body;
-
-    // Get field group to verify ownership
-    const fieldGroup = await customFieldService.getFieldGroupById(Number(id));
-
-    // Verify ownership
-    const org = await req.app.locals.query(
-      'SELECT id FROM organizations WHERE id = ? AND owner_id = ?',
-      [fieldGroup.organization_id, req.user.userId]
-    );
-
-    if (org.length === 0) {
-      throw new AppError('Access denied', 403);
-    }
-
-    // Validate conditional logic if provided
-    if (fieldData.conditional_logic) {
-      const errors = conditionalLogicService.validateConditionalLogic(
-        fieldData.conditional_logic
-      );
-      if (errors.length > 0) {
-        throw new AppError(`Conditional logic validation failed: ${errors.join(', ')}`, 400);
-      }
-    }
-
-    const fieldDefinition = await customFieldService.createFieldDefinition(
-      Number(id),
-      fieldData
-    );
-
-    sendSuccess(res, fieldDefinition, 'Field definition created successfully', 201);
+    const field = await fieldDefinitionService.create(Number.parseInt(req.params.id), req.body);
+    sendSuccess(res, field, 201);
   },
 
-  /**
-   * Update a field definition
-   * PATCH /api/field-groups/:groupId/fields/:fieldId
-   */
   async updateFieldDefinition(req, res) {
-    const { groupId, fieldId } = req.params;
-    const updates = req.body;
-
-    // Get field group to verify ownership
-    const fieldGroup = await customFieldService.getFieldGroupById(Number(groupId));
-
-    // Verify ownership
-    const org = await req.app.locals.query(
-      'SELECT id FROM organizations WHERE id = ? AND owner_id = ?',
-      [fieldGroup.organization_id, req.user.userId]
+    const field = await fieldDefinitionService.update(
+      Number.parseInt(req.params.fieldId),
+      req.body
     );
-
-    if (org.length === 0) {
-      throw new AppError('Access denied', 403);
-    }
-
-    // Validate conditional logic if provided
-    if (updates.conditional_logic) {
-      const errors = conditionalLogicService.validateConditionalLogic(
-        updates.conditional_logic
-      );
-      if (errors.length > 0) {
-        throw new AppError(`Conditional logic validation failed: ${errors.join(', ')}`, 400);
-      }
-    }
-
-    const updated = await customFieldService.updateFieldDefinition(Number(fieldId), updates);
-
-    sendSuccess(res, updated, 'Field definition updated successfully');
+    sendSuccess(res, field);
   },
 
-  /**
-   * Delete a field definition
-   * DELETE /api/field-groups/:groupId/fields/:fieldId
-   */
   async deleteFieldDefinition(req, res) {
-    const { groupId, fieldId } = req.params;
-
-    // Get field group to verify ownership
-    const fieldGroup = await customFieldService.getFieldGroupById(Number(groupId));
-
-    // Verify ownership
-    const org = await req.app.locals.query(
-      'SELECT id FROM organizations WHERE id = ? AND owner_id = ?',
-      [fieldGroup.organization_id, req.user.userId]
-    );
-
-    if (org.length === 0) {
-      throw new AppError('Access denied', 403);
-    }
-
-    await customFieldService.deleteFieldDefinition(Number(fieldId));
-
-    sendSuccess(res, null, 'Field definition deleted successfully');
+    await fieldDefinitionService.delete(Number.parseInt(req.params.fieldId));
+    sendSuccess(res, { message: 'Field definition deleted successfully' });
   },
 
-  /**
-   * Reorder field definitions in a group
-   * PUT /api/field-groups/:id/fields/reorder
-   */
   async reorderFields(req, res) {
-    const { id } = req.params;
-    const { fieldIds } = req.body;
-
-    if (!Array.isArray(fieldIds)) {
-      throw new AppError('fieldIds must be an array', 400);
-    }
-
-    // Get field group to verify ownership
-    const fieldGroup = await customFieldService.getFieldGroupById(Number(id));
-
-    // Verify ownership
-    const org = await req.app.locals.query(
-      'SELECT id FROM organizations WHERE id = ? AND owner_id = ?',
-      [fieldGroup.organization_id, req.user.userId]
+    await fieldDefinitionService.reorder(
+      Number.parseInt(req.params.id),
+      req.body.fieldIds
     );
-
-    if (org.length === 0) {
-      throw new AppError('Access denied', 403);
-    }
-
-    const reordered = await customFieldService.reorderFields(Number(id), fieldIds);
-
-    sendSuccess(res, reordered, 'Fields reordered successfully');
+    sendSuccess(res, { message: 'Fields reordered successfully' });
   },
 };

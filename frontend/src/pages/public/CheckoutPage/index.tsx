@@ -178,7 +178,7 @@ const CheckoutPage = () => {
                         onChange={(e) => setSelectedAddress(e.target.value)}
                       >
                         <FullWidthSpaceStyled>
-                          <Space direction="vertical" style={{ width: '100%' }}>
+                          <Space direction="vertical" css={{ width: '100%' }}>
                             {addresses.map((address) => (
                               <Radio key={address.id} value={address.id}>
                                 <div>
@@ -198,7 +198,7 @@ const CheckoutPage = () => {
                     <Button
                       type="link"
                       onClick={() => setUseNewAddress(true)}
-                      style={{ marginTop: 16, padding: 0 }}
+                      css={{ marginTop: 16, padding: 0 }}
                     >
                       + Add New Address
                     </Button>
@@ -211,7 +211,7 @@ const CheckoutPage = () => {
                       <Button
                         type="link"
                         onClick={() => setUseNewAddress(false)}
-                        style={{ marginBottom: 16, padding: 0 }}
+                        css={{ marginBottom: 16, padding: 0 }}
                       >
                         ← Use Saved Address
                       </Button>
@@ -287,7 +287,7 @@ const CheckoutPage = () => {
                     onChange={(e) => setPaymentMethod(e.target.value)}
                   >
                     <FullWidthSpaceStyled>
-                      <Space direction="vertical" style={{ width: '100%' }}>
+                      <Space direction="vertical" css={{ width: '100%' }}>
                         <Radio value="credit_card">
                           <Space>
                             <CreditCardOutlined />
@@ -348,7 +348,7 @@ const CheckoutPage = () => {
 
                 <Divider />
 
-                <Space direction="vertical" style={{ width: '100%' }}>
+                <Space direction="vertical" css={{ width: '100%' }}>
                   <PriceRowStyled>
                     <Text>Subtotal:</Text>
                     <Text>${subtotal.toFixed(2)}</Text>

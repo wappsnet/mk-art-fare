@@ -54,7 +54,7 @@ export class UserController {
       return u;
     });
 
-    sendPaginated(res, usersResponse, page, limit, total);
+    sendPaginated(res, usersResponse, { page, limit, total });
   }
 
   async updateUserRole(req, res) {

@@ -62,7 +62,7 @@ const AdminOrdersPage = () => {
       dataIndex: 'total_amount',
       key: 'total_amount',
       render: (amount: number) => (
-        <Text strong style={{ color: '#52c41a' }}>
+        <Text strong css={{ color: '#52c41a' }}>
           ${amount?.toFixed(2) || '0.00'}
         </Text>
       ),
@@ -120,7 +120,7 @@ const AdminOrdersPage = () => {
           </div>
         </HeaderStyled>
 
-        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Row gutter={[16, 16]} css={{ marginBottom: 24 }}>
           <Col xs={24} sm={12} lg={6}>
             <StatCardStyled>
               <Statistic
@@ -165,10 +165,10 @@ const AdminOrdersPage = () => {
         </Row>
 
         <Card>
-          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+          <Space direction="vertical" size="middle" css={{ width: '100%' }}>
             <Space>
               <Text strong>Filter by status:</Text>
-              <Select value={statusFilter} onChange={setStatusFilter} style={{ width: 200 }}>
+              <Select value={statusFilter} onChange={setStatusFilter} css={{ width: 200 }}>
                 <Option value="all">All Orders</Option>
                 <Option value="pending">Pending</Option>
                 <Option value="processing">Processing</Option>

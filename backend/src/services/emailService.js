@@ -43,7 +43,7 @@ export class EmailService {
 
     try {
       await this.transporter.sendMail(mailOptions);
-      console.log('Password reset email sent to:', email);
+      console.warn('Password reset email sent to:', email);
     } catch (error) {
       console.error('Error sending email:', error);
       throw new Error('Failed to send password reset email');
@@ -75,7 +75,7 @@ export class EmailService {
 
     try {
       await this.transporter.sendMail(mailOptions);
-      console.log('Welcome email sent to:', email);
+      console.warn('Welcome email sent to:', email);
     } catch (error) {
       console.error('Error sending welcome email:', error);
     }

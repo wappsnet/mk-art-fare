@@ -56,7 +56,7 @@ const RegisterPage = () => {
       <Space
         direction="vertical"
         size="large"
-        style={{ width: '100%' }} /* width needed for Space */
+        css={{ width: '100%' }} /* width needed for Space */
       >
         <CenterTextStyled>
           <Title level={2}>Create Account</Title>

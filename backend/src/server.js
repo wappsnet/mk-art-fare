@@ -6,14 +6,14 @@ const startServer = async () => {
   try {
     // Test database connection
     const connection = await pool.getConnection();
-    console.log('✅ Database connected successfully');
+    console.info('✅ Database connected successfully');
     connection.release();
 
     // Start server
     app.listen(config.port, () => {
-      console.log(`🚀 Server running on port ${config.port}`);
-      console.log(`📝 Environment: ${config.nodeEnv}`);
-      console.log(`🌐 API URL: ${config.apiUrl}`);
+      console.info(`🚀 Server running on port ${config.port}`);
+      console.info(`📝 Environment: ${config.nodeEnv}`);
+      console.info(`🌐 API URL: ${config.apiUrl}`);
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);
@@ -25,13 +25,13 @@ startServer();
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {
-  console.log('SIGTERM signal received: closing HTTP server');
+  console.info('SIGTERM signal received: closing HTTP server');
   await pool.end();
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
-  console.log('SIGINT signal received: closing HTTP server');
+  console.info('SIGINT signal received: closing HTTP server');
   await pool.end();
   process.exit(0);
 });

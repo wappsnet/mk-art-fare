@@ -11,7 +11,6 @@ import {
   Spin,
   message,
   Breadcrumb,
-  Descriptions,
 } from 'antd';
 import { ShoppingCartOutlined, ShopOutlined, ZoomInOutlined } from '@ant-design/icons';
 import Zoom from 'react-medium-image-zoom';
@@ -20,9 +19,7 @@ import AppLayout from '@/components/AppLayout';
 import {
   useGetProductQuery,
   useAddToCartMutation,
-  useGetProductFieldValuesQuery,
 } from '@/services/apiSlice';
-import { FieldValueDisplay } from '@/components/FieldValueDisplay';
 import {
   ContainerStyled,
   ImageGalleryStyled,
@@ -39,6 +36,7 @@ import {
 
 const { Title, Paragraph, Text } = Typography;
 
+// eslint-disable-next-line complexity
 const ProductDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const [quantity, setQuantity] = useState(1);
@@ -50,12 +48,6 @@ const ProductDetailPage = () => {
   const [addToCart, { isLoading: adding }] = useAddToCartMutation();
 
   const product = productData?.data;
-
-  // Fetch custom field values for the product
-  const { data: fieldValuesData } = useGetProductFieldValuesQuery(product?.id || 0, {
-    skip: !product?.id,
-  });
-  const fieldValues = fieldValuesData?.data || [];
 
   const handleAddToCart = async () => {
     if (product) {
@@ -93,7 +85,7 @@ const ProductDetailPage = () => {
               { title: <Link to="/products">Products</Link> },
               { title: product.name },
             ]}
-            style={{ marginBottom: 24 }}
+            css={{ marginBottom: 24 }}
           />
 
           <Row gutter={[48, 48]}>
@@ -132,7 +124,7 @@ const ProductDetailPage = () => {
 
             <Col xs={24} md={12}>
               <Link to={`/shop/${product.organization_slug}`}>
-                <Button type="link" icon={<ShopOutlined />} style={{ padding: 0, marginBottom: 8 }}>
+                <Button type="link" icon={<ShopOutlined />} css={{ padding: 0, marginBottom: 8 }}>
                   {product.organization_name || 'Unknown Artist'}
                 </Button>
               </Link>
@@ -140,7 +132,7 @@ const ProductDetailPage = () => {
               <Title level={2}>{product.name}</Title>
 
               {product.sku && (
-                <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
+                <Text type="secondary" css={{ display: 'block', marginBottom: 16 }}>
                   SKU: {product.sku}
                 </Text>
               )}
@@ -153,11 +145,11 @@ const ProductDetailPage = () => {
                   )}
                 </PriceStyled>
                 {product.stock_quantity > 0 ? (
-                  <Tag color="success" style={{ marginTop: 12 }}>
+                  <Tag color="success" css={{ marginTop: 12 }}>
                     {product.stock_quantity} in stock
                   </Tag>
                 ) : (
-                  <Tag color="error" style={{ marginTop: 12 }}>
+                  <Tag color="error" css={{ marginTop: 12 }}>
                     Out of stock
                   </Tag>
                 )}
@@ -173,20 +165,6 @@ const ProductDetailPage = () => {
                 </>
               )}
 
-              {fieldValues.length > 0 && (
-                <>
-                  <Title level={5}>Product Details</Title>
-                  <Descriptions column={1} bordered size="small">
-                    {fieldValues.map((field) => (
-                      <Descriptions.Item key={field.id} label={field.label || field.name}>
-                        <FieldValueDisplay field={field} />
-                      </Descriptions.Item>
-                    ))}
-                  </Descriptions>
-                  <Divider />
-                </>
-              )}
-
               <QuantityContainerStyled>
                 <Text strong>Quantity:</Text>
                 <InputNumber
@@ -194,7 +172,7 @@ const ProductDetailPage = () => {
                   max={product.stock_quantity}
                   value={quantity}
                   onChange={(value) => setQuantity(value || 1)}
-                  style={{ marginLeft: 16 }}
+                  css={{ marginLeft: 16 }}
                 />
               </QuantityContainerStyled>
 

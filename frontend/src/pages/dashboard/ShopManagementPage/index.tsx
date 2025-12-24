@@ -79,11 +79,11 @@ const ShopManagementPage = () => {
             <Button
               icon={<ArrowLeftOutlined />}
               onClick={() => navigate('/dashboard')}
-              style={{ marginBottom: 16 }}
+              css={{ marginBottom: 16 }}
             >
               Back to Dashboard
             </Button>
-            <Title level={2} style={{ margin: 0 }}>
+            <Title level={2} css={{ margin: 0 }}>
               Manage {organization.name}
             </Title>
           </div>

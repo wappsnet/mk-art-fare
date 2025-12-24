@@ -71,13 +71,13 @@ const AdminOrganizationModerationPage = () => {
             <Text strong>{name}</Text>
             {record.moderation_status === 'approved' && (
               <Badge
-                count={<SafetyCertificateOutlined style={{ color: '#52c41a' }} />}
+                count={<SafetyCertificateOutlined css={{ color: '#52c41a' }} />}
                 title="Moderated"
               />
             )}
           </Space>
           <br />
-          <Text type="secondary" style={{ fontSize: 12 }}>
+          <Text type="secondary" css={{ fontSize: 12 }}>
             /{record.slug}
           </Text>
         </div>
@@ -205,7 +205,7 @@ const AdminOrganizationModerationPage = () => {
           width={600}
         >
           {selectedOrg && (
-            <Space direction="vertical" size="large" style={{ width: '100%' }}>
+            <Space direction="vertical" size="large" css={{ width: '100%' }}>
               <div>
                 <Title level={4}>{selectedOrg.name}</Title>
                 <Paragraph type="secondary">{selectedOrg.description}</Paragraph>

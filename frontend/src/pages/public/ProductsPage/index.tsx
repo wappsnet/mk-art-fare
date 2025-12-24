@@ -6,7 +6,6 @@ import AppLayout from '@/components/AppLayout';
 import {
   useGetProductsQuery,
   useGetGlobalCategoriesQuery,
-  useGetProductFilterFieldsQuery,
 } from '@/services/apiSlice';
 import {
   PageContainerStyled,
@@ -31,16 +30,12 @@ const ProductsPage = () => {
   const [search, setSearch] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
-  const [customFieldFilters, setCustomFieldFilters] = useState<Record<string, string>>({});
   const [page, setPage] = useState(1);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const limit = 12;
 
   const { data: categoriesData } = useGetGlobalCategoriesQuery();
   const categories = useMemo(() => categoriesData?.data || [], [categoriesData?.data]);
-
-  const { data: filterFieldsData } = useGetProductFilterFieldsQuery();
-  const filterFields = useMemo(() => filterFieldsData?.data || [], [filterFieldsData?.data]);
 
   // Debounce search input
   useEffect(() => {
@@ -52,18 +47,11 @@ const ProductsPage = () => {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  // Build custom fields query string (format: fieldId1:value1,fieldId2:value2)
-  const customFieldsQuery = Object.entries(customFieldFilters)
-    .filter(([_, value]) => value.trim())
-    .map(([fieldId, value]) => `${fieldId}:${value}`)
-    .join(',');
-
   const { data: productsData, isLoading: loading } = useGetProductsQuery({
     search,
     category: selectedCategories.length > 0 ? selectedCategories.join(',') : undefined,
     minPrice: priceRange[0],
     maxPrice: priceRange[1],
-    customFields: customFieldsQuery || undefined,
     page,
     limit,
   });
@@ -92,28 +80,16 @@ const ProductsPage = () => {
     setSearch('');
     setSelectedCategories([]);
     setPriceRange([0, 10000]);
-    setCustomFieldFilters({});
-    setPage(1);
-  };
-
-  const handleChangeCustomFilter = ({ id, value }: { id: number; value: string }) => {
-    setCustomFieldFilters((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
     setPage(1);
   };
 
   const Filters = useMemo(() => {
     return (
       <FilterPanel
-        filterFields={filterFields}
         categories={categories}
         searchInput={searchInput}
         setSearchInput={setSearchInput}
         handleSearch={handleSearch}
-        customFieldFilters={customFieldFilters}
-        handleChangeCustomFilter={handleChangeCustomFilter}
         handleClearFilters={handleClearFilters}
         selectedCategories={selectedCategories}
         handleCategoryChange={handleCategoryChange}
@@ -121,7 +97,7 @@ const ProductsPage = () => {
         handlePriceChange={handlePriceChange}
       />
     );
-  }, [categories, customFieldFilters, filterFields, priceRange, searchInput, selectedCategories]);
+  }, [categories, priceRange, searchInput, selectedCategories]);
 
   return (
     <AppLayout>
@@ -197,7 +173,7 @@ const ProductsPage = () => {
                             }
                           >
                             <ProductShop
-                              style={{
+                              css={{
                                 display: 'block',
                                 color: '#666',
                                 marginBottom: 8,

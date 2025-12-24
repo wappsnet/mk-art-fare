@@ -19,7 +19,7 @@ export const RequireRole = ({ children, allowedRoles, fallbackPath = '/403' }: R
   // Wait for profile to load if authenticated but user data not available yet
   if (isAuthenticated && !user && isLoading) {
     return (
-      <Flex justify="center" align="center" style={{ minHeight: '100vh' }}>
+      <Flex justify="center" align="center" css={{ minHeight: '100vh' }}>
         <Spin size="large" />
       </Flex>
     );

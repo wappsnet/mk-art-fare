@@ -15,7 +15,8 @@ export const sendError = (res, error, statusCode = 400) => {
   return res.status(statusCode).json(response);
 };
 
-export const sendPaginated = (res, data, page, limit, total, message) => {
+export const sendPaginated = (res, data, paginationInfo, message = '') => {
+  const { page, limit, total } = paginationInfo;
   const response = {
     success: true,
     message,

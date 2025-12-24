@@ -136,7 +136,7 @@ const AdminPage = () => {
             {record.first_name} {record.last_name}
           </Text>
           <br />
-          <Text type="secondary" style={{ fontSize: 12 }}>
+          <Text type="secondary" css={{ fontSize: 12 }}>
             {record.email}
           </Text>
         </div>
@@ -197,7 +197,7 @@ const AdminPage = () => {
         <div>
           <Text strong>{name}</Text>
           <br />
-          <Text type="secondary" style={{ fontSize: 12 }}>
+          <Text type="secondary" css={{ fontSize: 12 }}>
             /{record.slug}
           </Text>
         </div>
@@ -231,7 +231,7 @@ const AdminPage = () => {
         <div>
           <Text strong>{title}</Text>
           <br />
-          <Text type="secondary" style={{ fontSize: 12 }}>
+          <Text type="secondary" css={{ fontSize: 12 }}>
             /{record.slug}
           </Text>
         </div>
