@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Layout as AntLayout } from 'antd';
+import { Layout as AntLayout, Space } from 'antd';
 import { Link } from 'react-router';
 
 const { Footer } = AntLayout;
@@ -7,21 +7,20 @@ const { Footer } = AntLayout;
 export const FooterStyled = styled(Footer)`
   background: #001529;
   color: rgba(255, 255, 255, 0.65);
-  padding: 48px 50px 24px;
+  padding: 50px;
 
   @media (max-width: 768px) {
-    padding: 32px 20px 16px;
+    padding: 20px;
   }
 `;
 
-export const FooterSectionStyled = styled.div`
+export const FooterSectionStyled = styled(Space)`
   margin-bottom: 24px;
+  color: #fff;
 
-  h3 {
-    color: #fff;
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 16px;
+  h3,
+  p {
+    color: currentColor;
   }
 `;
 

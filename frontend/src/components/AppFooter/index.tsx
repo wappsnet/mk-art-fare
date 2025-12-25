@@ -9,29 +9,29 @@ import { Row, Col, Space, Typography } from 'antd';
 import {
   CopyrightStyled,
   FooterLinkStyled,
-  FooterSectionStyled,
   SocialIconStyled,
   FooterStyled,
+  FooterSectionStyled,
 } from './styles.ts';
 
-const { Title, Paragraph } = Typography;
+const { Title } = Typography;
 
 const AppFooter = () => {
   return (
     <FooterStyled>
       <Row gutter={[32, 32]}>
         <Col xs={24} sm={12} md={6}>
-          <FooterSectionStyled>
+          <FooterSectionStyled direction="vertical">
             <Title level={3}>Art Fare</Title>
-            <Paragraph>
+            <p>
               A comprehensive e-commerce platform connecting artists with art lovers. Discover
               amazing artworks and support talented artists.
-            </Paragraph>
+            </p>
           </FooterSectionStyled>
         </Col>
 
         <Col xs={24} sm={12} md={6}>
-          <FooterSectionStyled>
+          <FooterSectionStyled direction="vertical">
             <Title level={3}>Quick Links</Title>
             <FooterLinkStyled to="/products">Browse Products</FooterLinkStyled>
             <FooterLinkStyled to="/blog">Blog</FooterLinkStyled>
@@ -40,7 +40,7 @@ const AppFooter = () => {
         </Col>
 
         <Col xs={24} sm={12} md={6}>
-          <FooterSectionStyled>
+          <FooterSectionStyled direction="vertical">
             <Title level={3}>For Artists</Title>
             <FooterLinkStyled to="/register">Create Shop</FooterLinkStyled>
             <FooterLinkStyled to="/dashboard">Artist Dashboard</FooterLinkStyled>
@@ -50,7 +50,7 @@ const AppFooter = () => {
         </Col>
 
         <Col xs={24} sm={12} md={6}>
-          <FooterSectionStyled>
+          <FooterSectionStyled direction="vertical">
             <Title level={3}>Connect With Us</Title>
             <Space size="large">
               <SocialIconStyled

@@ -2,6 +2,7 @@ import { authService } from '../services/authService.js';
 import { emailService } from '../services/emailService.js';
 import { sendSuccess } from '../utils/response.js';
 import { AppError } from '../middleware/errorHandler.js';
+import { transformImageUrls } from '../utils/helpers.js';
 
 export class AuthController {
   async register(req, res) {
@@ -27,8 +28,11 @@ export class AuthController {
 
     await authService.saveRefreshToken(user.id, refreshToken);
 
-    const userResponse = { ...user };
+    let userResponse = { ...user };
     delete userResponse.password_hash;
+
+    // Transform avatar URL to full path
+    userResponse = transformImageUrls(userResponse, 'avatar_url', 'users');
 
     sendSuccess(
       res,
@@ -69,8 +73,11 @@ export class AuthController {
 
     await authService.saveRefreshToken(user.id, refreshToken);
 
-    const userResponse = { ...user };
+    let userResponse = { ...user };
     delete userResponse.password_hash;
+
+    // Transform avatar URL to full path
+    userResponse = transformImageUrls(userResponse, 'avatar_url', 'users');
 
     sendSuccess(
       res,
@@ -169,8 +176,11 @@ export class AuthController {
       throw new AppError('User not found', 404);
     }
 
-    const userResponse = { ...user };
+    let userResponse = { ...user };
     delete userResponse.password_hash;
+
+    // Transform avatar URL to full path
+    userResponse = transformImageUrls(userResponse, 'avatar_url', 'users');
 
     sendSuccess(res, userResponse);
   }

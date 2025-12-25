@@ -1,6 +1,6 @@
 import { userService } from '../services/userService.js';
 import { sendSuccess, sendPaginated } from '../utils/response.js';
-import { getPaginationParams } from '../utils/helpers.js';
+import { getPaginationParams, transformImageUrls } from '../utils/helpers.js';
 
 export class UserController {
   async updateProfile(req, res) {
@@ -13,8 +13,11 @@ export class UserController {
       avatarUrl,
     });
 
-    const userResponse = { ...user };
+    let userResponse = { ...user };
     delete userResponse.password_hash;
+
+    // Transform avatar URL to full path
+    userResponse = transformImageUrls(userResponse, 'avatar_url', 'users');
 
     sendSuccess(res, userResponse, 'Profile updated successfully');
   }
@@ -48,11 +51,13 @@ export class UserController {
 
     const { users, total } = await userService.getAllUsers(page, limit, offset);
 
-    const usersResponse = users.map((user) => {
+    // Transform avatar URLs for all users
+    let usersResponse = users.map((user) => {
       const u = { ...user };
       delete u.password_hash;
       return u;
     });
+    usersResponse = transformImageUrls(usersResponse, 'avatar_url', 'users');
 
     sendPaginated(res, usersResponse, { page, limit, total });
   }
@@ -63,8 +68,11 @@ export class UserController {
 
     const user = await userService.updateUserRole(userId, role);
 
-    const userResponse = { ...user };
+    let userResponse = { ...user };
     delete userResponse.password_hash;
+
+    // Transform avatar URL to full path
+    userResponse = transformImageUrls(userResponse, 'avatar_url', 'users');
 
     sendSuccess(res, userResponse, 'User role updated successfully');
   }
@@ -75,8 +83,11 @@ export class UserController {
 
     const user = await userService.toggleUserStatus(userId, isActive);
 
-    const userResponse = { ...user };
+    let userResponse = { ...user };
     delete userResponse.password_hash;
+
+    // Transform avatar URL to full path
+    userResponse = transformImageUrls(userResponse, 'avatar_url', 'users');
 
     sendSuccess(res, userResponse, 'User status updated successfully');
   }

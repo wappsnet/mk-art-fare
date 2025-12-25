@@ -15,5 +15,4 @@ export const ContentStyled = styled(Content)`
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
-  padding: 0 10px;
 `;

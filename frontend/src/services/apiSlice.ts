@@ -268,7 +268,7 @@ export const api = createApi({
 
     // Order endpoints
     getOrders: builder.query<ApiResponse<Order[]>, void>({
-      query: () => '/orders',
+      query: () => '/orders/my',
       providesTags: ['Order'],
     }),
     getOrder: builder.query<ApiResponse<Order>, number>({
@@ -468,6 +468,14 @@ export const api = createApi({
         url: '/users/profile',
         method: 'PATCH',
         body: data,
+      }),
+      invalidatesTags: ['User'],
+    }),
+    uploadAvatar: builder.mutation<ApiResponse<{ avatar_url: string }>, FormData>({
+      query: (formData) => ({
+        url: '/users/avatar',
+        method: 'POST',
+        body: formData,
       }),
       invalidatesTags: ['User'],
     }),
@@ -818,6 +826,7 @@ export const {
   useGetUsersQuery,
   useUpdateUserMutation,
   useUpdateProfileMutation,
+  useUploadAvatarMutation,
   useChangePasswordMutation,
   useForgotPasswordMutation,
   useResetPasswordMutation,

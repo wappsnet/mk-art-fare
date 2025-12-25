@@ -8,7 +8,6 @@ export const ShopHeaderStyled = styled.div<{ bgColor?: string; textColor?: strin
   text-align: center;
   position: relative;
   overflow: hidden;
-  margin: 0 -20px;
 `;
 
 export const BannerImageStyled = styled.div<{ url?: string }>`

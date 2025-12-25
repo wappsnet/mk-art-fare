@@ -4,7 +4,7 @@ import { UserOutlined, UploadOutlined } from '@ant-design/icons';
 import { Form, Input, Button, message, Avatar, Upload } from 'antd';
 
 import { useAppSelector } from '@/hooks/useRedux';
-import { useUpdateProfileMutation } from '@/services/apiSlice';
+import { useUpdateProfileMutation, useUploadAvatarMutation } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
 
 import {
@@ -26,7 +26,8 @@ const ProfilePage = () => {
   const { user } = useAppSelector((state) => state.auth);
   const [form] = Form.useForm<ProfileFormValues>();
   const [updateProfile, { isLoading }] = useUpdateProfileMutation();
-  const [avatarUrl] = useState(user?.avatar_url);
+  const [uploadAvatar, { isLoading: isUploading }] = useUploadAvatarMutation();
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url);
 
   const handleSubmit = async (values: ProfileFormValues) => {
     try {
@@ -37,10 +38,18 @@ const ProfilePage = () => {
     }
   };
 
-  const handleAvatarUpload = async (_file: File) => {
-    // TODO: Implement avatar upload
-    message.info('Avatar upload will be implemented');
-    return false;
+  const handleAvatarUpload = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      const response = await uploadAvatar(formData).unwrap();
+      setAvatarUrl(response.data?.avatar_url);
+      message.success('Avatar uploaded successfully');
+    } catch (error) {
+      message.error(getErrorMessage(error) || 'Failed to upload avatar');
+    }
+    return false; // Prevent default upload behavior
   };
 
   return (
@@ -48,7 +57,9 @@ const ProfilePage = () => {
       <AvatarSectionStyled>
         <Avatar size={100} src={avatarUrl} icon={<UserOutlined />} />
         <Upload accept="image/*" showUploadList={false} beforeUpload={handleAvatarUpload}>
-          <UploadButtonStyled icon={<UploadOutlined />}>Change Avatar</UploadButtonStyled>
+          <UploadButtonStyled icon={<UploadOutlined />} loading={isUploading}>
+            Change Avatar
+          </UploadButtonStyled>
         </Upload>
       </AvatarSectionStyled>
 
