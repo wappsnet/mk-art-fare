@@ -308,11 +308,17 @@ export class OrganizationService {
     );
 
     return products.map((p) => {
-      const parsedImages = Array.isArray(p.images)
-        ? p.images
-        : typeof p.images === 'string' && p.images.length
-        ? JSON.parse(p.images)
-        : [];
+      const getProductImages = () => {
+        if (Array.isArray(p.images)) {
+          return p.images;
+        }
+        if (typeof p.images === 'string' && p.images.length) {
+          return JSON.parse(p.images);
+        }
+        return [];
+      };
+
+      const parsedImages = getProductImages();
 
       return {
         ...transformImageUrls(p, 'featured_image_url', 'products'),
