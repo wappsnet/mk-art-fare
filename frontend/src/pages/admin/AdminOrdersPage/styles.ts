@@ -4,7 +4,6 @@ import { Card } from 'antd';
 export const ContainerStyled = styled.div`
   max-width: 1400px;
   margin: 0 auto;
-  padding: 24px;
 `;
 
 export const HeaderStyled = styled.div`

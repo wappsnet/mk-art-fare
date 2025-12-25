@@ -1,15 +1,18 @@
 import { useState } from 'react';
-import { Card, Table, Tag, Typography, Space, Statistic, Row, Col, Select } from 'antd';
+
 import {
   ShoppingOutlined,
   DollarOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
 } from '@ant-design/icons';
+import { Card, Table, Tag, Typography, Space, Statistic, Row, Col, Select } from 'antd';
 import dayjs from 'dayjs';
+
 import AppLayout from '@/components/AppLayout';
 import { useGetOrdersQuery } from '@/services/apiSlice';
 import { Order, OrderStatus } from '@/types/common';
+
 import { ContainerStyled, HeaderStyled, StatCardStyled } from './styles';
 
 const { Title, Text } = Typography;
@@ -104,7 +107,7 @@ const AdminOrdersPage = () => {
       key: 'created_at',
       render: (date: string) => dayjs(date).format('MMM DD, YYYY HH:mm'),
       sorter: (a: Order, b: Order) => dayjs(a.created_at).unix() - dayjs(b.created_at).unix(),
-      defaultSortOrder: 'descend' as const,
+      defaultSortOrder: 'descend',
     },
   ];
 

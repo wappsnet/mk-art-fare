@@ -1,18 +1,19 @@
-import type { AppRouteObject } from '@/types/routes';
 import { RequireGuest } from '@/guards';
-import HomePage from '@/pages/public/HomePage';
-import LoginPage from '@/pages/public/LoginPage';
-import RegisterPage from '@/pages/public/RegisterPage';
-import ForgotPasswordPage from '@/pages/public/ForgotPasswordPage';
-import ProductsPage from '@/pages/public/ProductsPage';
-import ProductDetailPage from '@/pages/public/ProductDetailPage';
-import ShopPage from '@/pages/public/ShopPage';
-import CartPage from '@/pages/public/CartPage';
-import CheckoutPage from '@/pages/public/CheckoutPage';
 import BlogPage from '@/pages/public/BlogPage';
 import BlogPostPage from '@/pages/public/BlogPostPage';
-import PricingPage from '@/pages/public/PricingPage';
+import CartPage from '@/pages/public/CartPage';
+import CheckoutPage from '@/pages/public/CheckoutPage';
+import ForgotPasswordPage from '@/pages/public/ForgotPasswordPage';
 import HelpCenterPage from '@/pages/public/HelpCenterPage';
+import HomePage from '@/pages/public/HomePage';
+import LoginPage from '@/pages/public/LoginPage';
+import PricingPage from '@/pages/public/PricingPage';
+import ProductDetailPage from '@/pages/public/ProductDetailPage';
+import ProductsPage from '@/pages/public/ProductsPage';
+import RegisterPage from '@/pages/public/RegisterPage';
+import ShopPage from '@/pages/public/ShopPage';
+
+import type { AppRouteObject } from '@/types/routes';
 
 export const publicRoutes: AppRouteObject[] = [
   {

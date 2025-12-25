@@ -3,7 +3,6 @@ import styled from '@emotion/styled';
 export const ContainerStyled = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px;
 `;
 
 export const ImageGalleryStyled = styled.div`
@@ -22,33 +21,20 @@ export const MainImageContainerStyled = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: zoom-in;
+
+  .ant-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
   img {
     width: 100%;
     height: 100%;
     object-fit: contain;
   }
-
-  &:hover .zoom-hint {
-    opacity: 1;
-  }
-`;
-
-export const ZoomHintStyled = styled.div`
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: rgba(0, 0, 0, 0.6);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  opacity: 0;
-  transition: opacity 0.3s;
-  display: flex;
-  align-items: center;
-  gap: 4px;
 `;
 
 export const ThumbnailsContainerStyled = styled.div`
@@ -80,7 +66,6 @@ export const ThumbnailStyled = styled.div<{ active: boolean }>`
 
 export const PriceSectionStyled = styled.div`
   background: #fafafa;
-  padding: 24px;
   border-radius: 8px;
   margin: 24px 0;
 `;

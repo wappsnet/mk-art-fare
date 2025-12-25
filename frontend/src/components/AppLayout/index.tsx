@@ -1,7 +1,10 @@
-import AppHeader from '@/components/AppHeader';
-import AppFooter from '@/components/AppFooter';
-import { ContentStyled, LayoutStyled } from './style.ts';
 import { ReactNode } from 'react';
+
+import AppFooter from '@/components/AppFooter';
+import AppHeader from '@/components/AppHeader';
+
+import { ContentStyled, LayoutStyled } from './style.ts';
+
 
 interface LayoutProps {
   children: ReactNode;

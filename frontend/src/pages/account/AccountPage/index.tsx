@@ -1,7 +1,9 @@
-import { useNavigate, Outlet, useLocation } from 'react-router';
-import { Card, Typography, Tabs } from 'antd';
 import { UserOutlined, LockOutlined, ShoppingOutlined, CrownOutlined } from '@ant-design/icons';
+import { Card, Typography, Tabs } from 'antd';
+import { useNavigate, Outlet, useLocation } from 'react-router';
+
 import AppLayout from '@/components/AppLayout';
+
 import { ContainerStyled, HeaderStyled, OutletContainer } from './styles';
 
 const { Title } = Typography;

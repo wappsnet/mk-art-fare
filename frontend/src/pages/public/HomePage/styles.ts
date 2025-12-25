@@ -39,11 +39,7 @@ export const BecomeArtistButtonStyled = styled(Button)`
 `;
 
 export const SectionStyled = styled.div`
-  padding: 80px 50px;
-
-  @media (max-width: 768px) {
-    padding: 40px 20px;
-  }
+  padding: 20px;
 `;
 
 export const SectionHeaderStyled = styled.div`
@@ -79,12 +75,8 @@ export const IconWrapperStyled = styled.div`
 
 export const StatsSectionStyled = styled.div`
   background: #f5f5f5;
-  padding: 60px 50px;
+  padding: 20px;
   text-align: center;
-
-  @media (max-width: 768px) {
-    padding: 40px 20px;
-  }
 `;
 
 export const StatsTitleStyled = styled(AntTitle)`

@@ -1,14 +1,19 @@
-import { FC, useMemo } from 'react';
-import { Form, Input, Select, InputNumber, Switch, Divider, FormInstance } from 'antd';
-import { FieldType } from '@/types/fields';
-import { FieldFormValues } from '../../types';
+import { FC, useEffect, useRef } from 'react';
+
+import { Form, Input, Select, Switch, Divider, FormInstance } from 'antd';
+
+import { FieldType, FieldFormValues } from '@/types/fields';
+
+import DefaultValueField from './Addons/components/DefaultValueField';
+import OptionsListField from './Addons/components/OptionsListField';
+import { FullWidthInputNumber } from './styles';
 
 const { TextArea } = Input;
 
 interface FieldDefinitionFormProps {
   form: FormInstance;
-  selectedFieldType: FieldType | undefined;
-  fieldTypeNeedsOptions: (fieldType: FieldType | undefined) => boolean;
+  selectedFieldType?: FieldType;
+  fieldTypeNeedsOptions: (fieldType?: FieldType) => boolean;
   onFinish: (values: FieldFormValues) => void;
 }
 
@@ -24,59 +29,21 @@ const FieldDefinitionForm: FC<FieldDefinitionFormProps> = ({
   }));
 
   const needsOptions = fieldTypeNeedsOptions(selectedFieldType);
+  const previousFieldType = useRef<FieldType | undefined>(selectedFieldType);
 
-  const defaultValueField = useMemo(() => {
-    if (!selectedFieldType) {
-      return null;
-    }
+  // Clear incompatible values when field type changes
+  useEffect(() => {
+    if (previousFieldType.current && previousFieldType.current !== selectedFieldType) {
+      // Field type changed, clear default_value
+      form.setFieldValue('default_value', undefined);
 
-    switch (selectedFieldType) {
-      case FieldType.NUMBER:
-        return (
-          <Form.Item name="default_value" label="Default Value">
-            <InputNumber placeholder="Default number value" style={{ width: '100%' }} />
-          </Form.Item>
-        );
-      case FieldType.TOGGLE:
-        return (
-          <Form.Item name="default_value" label="Default Value" valuePropName="checked">
-            <Switch />
-          </Form.Item>
-        );
-      case FieldType.TEXT:
-      case FieldType.DATE:
-      case FieldType.TIME:
-      case FieldType.COLOR:
-      case FieldType.SELECT:
-      case FieldType.RADIO:
-        return (
-          <Form.Item name="default_value" label="Default Value">
-            <Input placeholder="Default value" />
-          </Form.Item>
-        );
-      case FieldType.RICHTEXT:
-        return (
-          <Form.Item name="default_value" label="Default Value">
-            <TextArea rows={3} placeholder="Default rich text content" />
-          </Form.Item>
-        );
-      case FieldType.CHECKBOX:
-      case FieldType.IMAGE:
-      case FieldType.FILE:
-        return (
-          <Form.Item name="default_value" label="Default Value (JSON)" help="Enter as JSON array">
-            <TextArea
-              rows={2}
-              placeholder={
-                selectedFieldType === FieldType.CHECKBOX
-                  ? '["value1", "value2"]'
-                  : '[{"url": "...", "name": "..."}]'
-              }
-            />
-          </Form.Item>
-        );
+      // Clear options if new type doesn't need them
+      if (!needsOptions) {
+        form.setFieldValue('options', undefined);
+      }
     }
-  }, [selectedFieldType]);
+    previousFieldType.current = selectedFieldType;
+  }, [selectedFieldType, needsOptions, form]);
 
   return (
     <Form form={form} layout="vertical" onFinish={onFinish}>
@@ -95,19 +62,7 @@ const FieldDefinitionForm: FC<FieldDefinitionFormProps> = ({
         <Select placeholder="Select field type" options={fieldTypeOptions} />
       </Form.Item>
 
-      {needsOptions && (
-        <Form.Item
-          name="options"
-          label="Options (JSON)"
-          rules={[{ required: true }]}
-          help='Enter as JSON array: [{"label": "Option 1", "value": "opt1"}]'
-        >
-          <TextArea
-            rows={4}
-            placeholder='[{"label": "Small", "value": "small"}, {"label": "Large", "value": "large"}]'
-          />
-        </Form.Item>
-      )}
+      {needsOptions && <OptionsListField />}
 
       <Form.Item name="placeholder" label="Placeholder">
         <Input placeholder="Placeholder text" />
@@ -116,7 +71,7 @@ const FieldDefinitionForm: FC<FieldDefinitionFormProps> = ({
         <TextArea rows={2} placeholder="Additional information for users" />
       </Form.Item>
 
-      {defaultValueField}
+      {selectedFieldType && <DefaultValueField selectedFieldType={selectedFieldType} form={form} />}
 
       <Divider>Advanced Options</Divider>
 
@@ -127,7 +82,7 @@ const FieldDefinitionForm: FC<FieldDefinitionFormProps> = ({
         <Switch />
       </Form.Item>
       <Form.Item name="sort_order" label="Sort Order">
-        <InputNumber min={0} style={{ width: '100%' }} />
+        <FullWidthInputNumber min={0} />
       </Form.Item>
     </Form>
   );

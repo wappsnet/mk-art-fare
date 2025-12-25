@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+
+import {
+  CheckOutlined,
+  CloseOutlined,
+  EyeOutlined,
+  ShoppingOutlined,
+  SafetyCertificateOutlined,
+} from '@ant-design/icons';
 import {
   Card,
   Table,
@@ -13,18 +20,14 @@ import {
   Image,
   Badge,
 } from 'antd';
-import {
-  CheckOutlined,
-  CloseOutlined,
-  EyeOutlined,
-  ShoppingOutlined,
-  SafetyCertificateOutlined,
-} from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { useNavigate } from 'react-router';
+
 import AppLayout from '@/components/AppLayout';
 import { useGetProductsQuery, useModerateProductMutation } from '@/services/apiSlice';
-import { getErrorMessage } from '@/types/errors';
 import { Product } from '@/types/common';
+import { getErrorMessage } from '@/types/errors';
+
 import { ContainerStyled, HeaderStyled } from './styles';
 
 const { Title, Text, Paragraph } = Typography;
@@ -210,7 +213,30 @@ const AdminProductModerationPage = () => {
             setModerationNote('');
             setSelectedProduct(null);
           }}
-          footer={null}
+          footer={
+            selectedProduct
+              ? [
+                  <Button
+                    key="decline"
+                    danger
+                    icon={<CloseOutlined />}
+                    onClick={() => handleModerate(selectedProduct.id, 'declined')}
+                    loading={isModerating}
+                  >
+                    Decline
+                  </Button>,
+                  <Button
+                    key="approve"
+                    type="primary"
+                    icon={<CheckOutlined />}
+                    onClick={() => handleModerate(selectedProduct.id, 'approved')}
+                    loading={isModerating}
+                  >
+                    Approve
+                  </Button>,
+                ]
+              : null
+          }
           width={600}
         >
           {selectedProduct && (
@@ -225,7 +251,9 @@ const AdminProductModerationPage = () => {
                     css={{ objectFit: 'cover', borderRadius: 8, marginBottom: 16 }}
                   />
                 )}
-                <Title level={4}>{selectedProduct.name}</Title>
+                <Text strong css={{ fontSize: 16, display: 'block', marginBottom: 8 }}>
+                  {selectedProduct.name}
+                </Text>
                 <Paragraph type="secondary">{selectedProduct.description}</Paragraph>
                 <Space>
                   <Text strong>Price:</Text>
@@ -247,25 +275,6 @@ const AdminProductModerationPage = () => {
                   placeholder="Add a note about this moderation decision..."
                 />
               </div>
-
-              <Space css={{ width: '100%', justifyContent: 'flex-end' }}>
-                <Button
-                  danger
-                  icon={<CloseOutlined />}
-                  onClick={() => handleModerate(selectedProduct.id, 'declined')}
-                  loading={isModerating}
-                >
-                  Decline
-                </Button>
-                <Button
-                  type="primary"
-                  icon={<CheckOutlined />}
-                  onClick={() => handleModerate(selectedProduct.id, 'approved')}
-                  loading={isModerating}
-                >
-                  Approve
-                </Button>
-              </Space>
             </Space>
           )}
         </Modal>

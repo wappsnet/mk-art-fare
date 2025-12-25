@@ -1,15 +1,18 @@
+import { createElement } from 'react';
+
 import { Typography, Space, Modal, message, Spin, Alert } from 'antd';
+
 import {
   useGetCurrentSubscriptionQuery,
   useUpgradeSubscriptionMutation,
   useDowngradeSubscriptionMutation,
 } from '@/services/apiSlice';
+import { subscriptionPlans } from '@/config/subscriptionPlans';
 import { getErrorMessage } from '@/types/errors';
+
+import CurrentPlanBanner from './Addons/components/CurrentPlanBanner';
+import PlanCard from './Addons/components/PlanCard';
 import { ContainerStyled } from './styles';
-import { CurrentPlanBanner } from './CurrentPlanBanner';
-import { PlanCard } from './PlanCard';
-import { subscriptionPlans } from './subscriptionPlans';
-import { createElement } from 'react';
 
 const { Title, Text, Paragraph } = Typography;
 

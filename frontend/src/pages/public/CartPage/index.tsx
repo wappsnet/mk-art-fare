@@ -1,6 +1,7 @@
-import { Link, useNavigate } from 'react-router';
-import { Col, Typography, InputNumber, List, Empty, Divider, Space, message, Button } from 'antd';
 import { DeleteOutlined, ShoppingOutlined } from '@ant-design/icons';
+import { Col, Typography, InputNumber, List, Empty, Divider, Space, message, Button } from 'antd';
+import { Link, useNavigate } from 'react-router';
+
 import AppLayout from '@/components/AppLayout';
 import { useAppSelector } from '@/hooks/useRedux';
 import {
@@ -9,6 +10,7 @@ import {
   useRemoveFromCartMutation,
   useClearCartMutation,
 } from '@/services/apiSlice';
+
 import {
   ContainerStyled,
   LoadingContainerStyled,
@@ -16,10 +18,10 @@ import {
   CartItemCardStyled,
   ProductImageStyled,
   ProductTitle,
-  SmallText,
-  Price,
+  SmallTextStyled,
+  PriceStyled,
   RightAlignColStyled,
-  TotalPrice,
+  TotalPriceStyled,
   ClearCartButtonStyled,
   SummaryCardStyled,
   SummaryRowStyled,
@@ -144,8 +146,8 @@ const CartPage = () => {
                         <Link to={`/products/${item.slug}`}>
                           <ProductTitle level={5}>{item.name}</ProductTitle>
                         </Link>
-                        <SmallText type="secondary">by {item.organization_name}</SmallText>
-                        <Price strong>${item.price.toFixed(2)}</Price>
+                        <SmallTextStyled type="secondary">by {item.organization_name}</SmallTextStyled>
+                        <PriceStyled strong>${item.price.toFixed(2)}</PriceStyled>
                       </Space>
                     </Col>
                     <Col xs={12} sm={4}>
@@ -158,7 +160,7 @@ const CartPage = () => {
                     <Col xs={12} sm={4}>
                       <RightAlignColStyled>
                         <Space direction="vertical" align="end">
-                          <TotalPrice strong>${(item.price * item.quantity).toFixed(2)}</TotalPrice>
+                          <TotalPriceStyled strong>${(item.price * item.quantity).toFixed(2)}</TotalPriceStyled>
                           <Button
                             type="text"
                             danger

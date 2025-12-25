@@ -1,10 +1,10 @@
 import styled from '@emotion/styled';
 import { Space } from 'antd';
 
-export const CenteredContent = styled.div`
+export const CenteredContentStyled = styled.div`
   text-align: center;
 `;
 
-export const FullWidthSpace = styled(Space)`
+export const FullWidthSpaceStyled = styled(Space)`
   width: 100%;
 `;

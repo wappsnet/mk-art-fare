@@ -1,15 +1,15 @@
 import styled from '@emotion/styled';
 import { Space, Card } from 'antd';
 
-export const FullWidthSpace = styled(Space)`
+export const FullWidthSpaceStyled = styled(Space)`
   width: 100%;
 `;
 
-export const FullWidthVerticalSpace = styled(Space)`
+export const FullWidthVerticalSpaceStyled = styled(Space)`
   width: 100%;
 `;
 
-export const UploadCard = styled(Card)`
+export const UploadCardStyled = styled(Card)`
   text-align: center;
   cursor: pointer;
   transition: all 0.3s;
@@ -19,32 +19,18 @@ export const UploadCard = styled(Card)`
   }
 `;
 
-export const DragDropSpace = styled(Space)`
+export const DragDropSpaceStyled = styled(Space)`
   margin-bottom: 8px;
 `;
 
-export const FlexSpace = styled(Space)`
+export const FlexSpaceStyled = styled(Space)`
   flex: 1;
 `;
 
-export const ImageGridContainer = styled.div`
+export const ImageGridContainerStyled = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 16px;
-`;
-
-export const AltTextInput = styled.input`
-  margin-bottom: 8px;
-  width: 100%;
-  padding: 4px 11px;
-  border: 1px solid #d9d9d9;
-  border-radius: 6px;
-
-  &:focus {
-    border-color: #4096ff;
-    outline: 0;
-    box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.1);
-  }
 `;
 
 export const DragHandleSpace = styled(Space)`
@@ -66,14 +52,14 @@ export const AltTextInputStyled = styled.input`
   }
 `;
 
-export const AltTextDisplay = styled.div<{ hasAltText: boolean }>`
+export const AltTextDisplayStyled = styled.div<{ hasAltText: boolean }>`
   font-size: 13px;
   color: ${(props) => (props.hasAltText ? '#333' : '#999')};
   min-height: 40px;
   font-style: ${(props) => (props.hasAltText ? 'normal' : 'italic')};
 `;
 
-export const FlexButton = styled.button`
+export const FlexButtonStyled = styled.button`
   flex: 1;
 `;
 

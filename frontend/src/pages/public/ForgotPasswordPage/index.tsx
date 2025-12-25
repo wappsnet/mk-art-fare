@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { Form, Input, Button, Typography, message } from 'antd';
+
 import { MailOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Typography, message } from 'antd';
 import { Link, useNavigate } from 'react-router';
+
+import AppAuthLayout from '@/components/AppAuthLayout';
 import { useForgotPasswordMutation } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
-import { CenteredContent, FullWidthSpace } from './styles';
-import AppAuthLayout from '@/components/AppAuthLayout';
+
+import { CenteredContentStyled, FullWidthSpaceStyled } from './styles';
 
 const { Title, Text } = Typography;
 
@@ -26,8 +29,8 @@ const ForgotPasswordPage = () => {
 
   return (
     <AppAuthLayout>
-      <FullWidthSpace direction="vertical" size={24}>
-        <CenteredContent>
+      <FullWidthSpaceStyled direction="vertical" size={24}>
+        <CenteredContentStyled>
           <Title level={2}>Forgot Password</Title>
           {submitted ? (
             <Text type="success">Check your email for password reset instructions.</Text>
@@ -36,14 +39,14 @@ const ForgotPasswordPage = () => {
               Enter your email address and we'll send you instructions to reset your password.
             </Text>
           )}
-        </CenteredContent>
+        </CenteredContentStyled>
 
         {submitted ? (
-          <CenteredContent>
+          <CenteredContentStyled>
             <Button type="primary" onClick={() => navigate('/login')} size="large">
               Back to Login
             </Button>
-          </CenteredContent>
+          </CenteredContentStyled>
         ) : (
           <Form layout="vertical" onFinish={handleSubmit}>
             <Form.Item
@@ -63,14 +66,14 @@ const ForgotPasswordPage = () => {
               </Button>
             </Form.Item>
 
-            <CenteredContent>
+            <CenteredContentStyled>
               <Text>
                 Remember your password? <Link to="/login">Back to Login</Link>
               </Text>
-            </CenteredContent>
+            </CenteredContentStyled>
           </Form>
         )}
-      </FullWidthSpace>
+      </FullWidthSpaceStyled>
     </AppAuthLayout>
   );
 };

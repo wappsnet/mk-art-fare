@@ -1,5 +1,6 @@
-import { Typography, Row, Col } from 'antd';
 import { MailOutlined, PhoneOutlined, EnvironmentOutlined } from '@ant-design/icons';
+import { Typography, Row, Col } from 'antd';
+
 import { ContactCardStyled, IconWrapperStyled } from './styles';
 
 const { Title, Text } = Typography;

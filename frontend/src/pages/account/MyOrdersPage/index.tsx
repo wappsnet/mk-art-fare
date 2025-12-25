@@ -1,8 +1,10 @@
 import { Card, Table, Tag, Typography, Empty, Space } from 'antd';
 import dayjs from 'dayjs';
+
 import { useGetOrdersQuery } from '@/services/apiSlice';
 import { Order, OrderStatus } from '@/types/common';
-import { OrdersContainerStyled, PriceTextStyled, EmptyIcon } from './styles';
+
+import { OrdersContainerStyled, PriceTextStyled, EmptyIconStyled } from './styles';
 
 const { Title, Text } = Typography;
 
@@ -23,7 +25,7 @@ const MyOrdersPage = () => {
       key: 'created_at',
       render: (date: string) => dayjs(date).format('MMM DD, YYYY'),
       sorter: (a: Order, b: Order) => dayjs(a.created_at).unix() - dayjs(b.created_at).unix(),
-      defaultSortOrder: 'descend' as const,
+      defaultSortOrder: 'descend',
     },
     {
       title: 'Items',
@@ -79,7 +81,7 @@ const MyOrdersPage = () => {
       ) : (
         <Card>
           <Empty
-            image={<EmptyIcon />}
+            image={<EmptyIconStyled />}
             description={
               <Space direction="vertical">
                 <Title level={4}>No orders yet</Title>

@@ -1,8 +1,10 @@
-import { useParams } from 'react-router';
 import { Table, Tag } from 'antd';
+import { useParams } from 'react-router';
+
 import { useGetOrganizationOrdersQuery } from '@/services/apiSlice';
-import { PageTitleStyled } from './styles';
 import { getStatusTheme } from '@/utils/themeHelpers.ts';
+
+import { PageTitleStyled } from './styles';
 
 const ShopOrdersPage = () => {
   const { id } = useParams<{ id: string }>();

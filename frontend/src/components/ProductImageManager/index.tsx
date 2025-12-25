@@ -1,5 +1,5 @@
 import { useEffect, useState, FC } from 'react';
-import { Upload, Button, Space, Input, Switch, message, Modal, Tabs } from 'antd';
+
 import {
   UploadOutlined,
   DeleteOutlined,
@@ -8,26 +8,30 @@ import {
   LinkOutlined,
   PictureOutlined,
 } from '@ant-design/icons';
-import type { UploadFile } from 'antd/es/upload/interface';
-import { ProductImage } from '@/types/common';
+import { Upload, Button, Space, Input, Switch, message, Modal, Tabs } from 'antd';
+import axios from 'axios';
+
 import {
   useAddProductImageMutation,
   useUpdateProductImageMutation,
   useDeleteProductImageMutation,
 } from '@/services/apiSlice';
+import { ProductImage } from '@/types/common';
 import { getErrorMessage } from '@/types/errors';
-import axios from 'axios';
+
 import {
   ImageCardFooterStyled,
   ImageCardStyled,
   ImageCardActionsStyled,
   ImageCardContentStyled,
   ThumbnailBadgeStyled,
-  FullWidthSpace,
-  FullWidthVerticalSpace,
-  ImageGridContainer,
-  AltTextDisplay,
+  FullWidthSpaceStyled,
+  FullWidthVerticalSpaceStyled,
+  ImageGridContainerStyled,
+  AltTextDisplayStyled,
 } from './style.ts';
+
+import type { UploadFile } from 'antd/es/upload/interface';
 
 interface ProductImageManagerProps {
   productId: number;
@@ -59,43 +63,52 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
     setLocalImages(images);
   }, [images]);
 
-  const handleAddImage = async () => {
-    if (imageUrl) {
-      try {
-        const resp = await addImage({
-          productId,
-          data: {
-            url: imageUrl,
-            alt_text: altText || undefined,
-            is_thumbnail: isThumbnail,
-          },
-        }).unwrap();
-        message.success('Image added successfully!');
-
-        const created = resp.data;
-        if (created) {
-          setLocalImages((prev) => {
-            const next = [...prev];
-            if (created.is_thumbnail) {
-              for (const existingImg of next) {
-                existingImg.is_thumbnail = false;
-              }
-            }
-            next.push(created);
-            return next;
-          });
-        }
-
-        setImageUrl('');
-        setAltText('');
-        setIsThumbnail(false);
-        onUpdate();
-      } catch (error) {
-        message.error(getErrorMessage(error) || 'Failed to add image');
+  const updateImagesWithNewImage = (newImage: ProductImage) => {
+    setLocalImages((prev) => {
+      const next = [...prev];
+      if (newImage.is_thumbnail) {
+        next.forEach((img) => {
+          img.is_thumbnail = false;
+        });
       }
+      next.push(newImage);
+      return next;
+    });
+  };
+
+  const resetImageForm = () => {
+    setImageUrl('');
+    setAltText('');
+    setIsThumbnail(false);
+  };
+
+  const handleAddImage = async () => {
+    if (!imageUrl) {
+      message.error('Please enter an image URL');
       return;
     }
-    message.error('Please enter an image URL');
+
+    try {
+      const resp = await addImage({
+        productId,
+        data: {
+          url: imageUrl,
+          alt_text: altText || undefined,
+          is_thumbnail: isThumbnail,
+        },
+      }).unwrap();
+
+      message.success('Image added successfully!');
+
+      if (resp.data) {
+        updateImagesWithNewImage(resp.data);
+      }
+
+      resetImageForm();
+      onUpdate();
+    } catch (error) {
+      message.error(getErrorMessage(error) || 'Failed to add image');
+    }
   };
 
   const handleSetThumbnail = async (imageId: number, currentStatus: boolean) => {
@@ -113,21 +126,22 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
     }
   };
 
-  const handleDeleteImage = async (imageId: number) => {
+  const executeImageDeletion = async (imageId: number) => {
+    try {
+      await deleteImage({ productId, imageId }).unwrap();
+      message.success('Image deleted successfully!');
+      setLocalImages((prev) => prev.filter((img) => img.id !== imageId));
+      onUpdate();
+    } catch (error) {
+      message.error(getErrorMessage(error) || 'Failed to delete image');
+    }
+  };
+
+  const handleDeleteImage = (imageId: number) => {
     Modal.confirm({
       title: 'Delete Image',
       content: 'Are you sure you want to delete this image?',
-      onOk: async () => {
-        try {
-          await deleteImage({ productId, imageId }).unwrap();
-          message.success('Image deleted successfully!');
-          // Optimistically update UI
-          setLocalImages((prev) => prev.filter((img) => img.id !== imageId));
-          onUpdate();
-        } catch (error) {
-          message.error(getErrorMessage(error) || 'Failed to delete image');
-        }
-      },
+      onOk: () => executeImageDeletion(imageId),
     });
   };
 
@@ -155,73 +169,86 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
     }
   };
 
-  const handleUploadSelected = async () => {
-    if (fileList.length > 0) {
-      setUploading(true);
-      const formData = new FormData();
-      // Append as multiple under 'images' field to leverage backend multi-upload
-      fileList.forEach((f) => {
-        const origin = f.originFileObj;
-        if (origin && origin instanceof File) {
-          formData.append('images', origin);
-          // Append matching alt text per file (backend supports multiple alt_text fields)
-          formData.append('alt_text', altTexts[f.uid] || '');
-        }
-      });
-      formData.append('is_thumbnail', isThumbnail.toString());
+  const prepareUploadFormData = () => {
+    const formData = new FormData();
+    fileList.forEach((f) => {
+      const origin = f.originFileObj;
+      if (origin) {
+        formData.append('images', origin);
+        formData.append('alt_text', altTexts[f.uid] || '');
+      }
+    });
+    formData.append('is_thumbnail', isThumbnail.toString());
+    return formData;
+  };
 
-      try {
-        const token = localStorage.getItem('accessToken');
-        const apiUrl = import.meta.env.VITE_API_URL;
-        const resp = await axios.post(`${apiUrl}/products/${productId}/images/upload`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        message.success('Image(s) uploaded successfully!');
-
-        const created = resp.data?.data as ProductImage | ProductImage[] | undefined;
-        if (created) {
-          setLocalImages((prev) => {
-            const next = [...prev];
-            const addOne = (img: ProductImage) => {
-              if (img.is_thumbnail) {
-                for (const existing of next) {
-                  existing.is_thumbnail = false;
-                }
-              }
-              next.push(img);
-            };
-
-            if (Array.isArray(created)) {
-              created.forEach(addOne);
-            } else {
-              addOne(created);
-            }
-
-            return next;
+  const updateImagesAfterUpload = (created: ProductImage | ProductImage[]) => {
+    setLocalImages((prev) => {
+      const next = [...prev];
+      const addOne = (img: ProductImage) => {
+        if (img.is_thumbnail) {
+          next.forEach((existing) => {
+            existing.is_thumbnail = false;
           });
         }
+        next.push(img);
+      };
 
-        setFileList([]);
-        setAltTexts({});
-        setAltText('');
-        setIsThumbnail(false);
-        onUpdate();
-      } catch (error) {
-        message.error(getErrorMessage(error) || 'Failed to upload image(s)');
-      } finally {
-        setUploading(false);
+      if (Array.isArray(created)) {
+        created.forEach(addOne);
+      } else {
+        addOne(created);
       }
+
+      return next;
+    });
+  };
+
+  const resetUploadForm = () => {
+    setFileList([]);
+    setAltTexts({});
+    setAltText('');
+    setIsThumbnail(false);
+  };
+
+  const handleUploadSelected = async () => {
+    if (fileList.length === 0) {
+      message.error('Please select image file(s)');
       return;
     }
-    message.error('Please select image file(s)');
+
+    setUploading(true);
+    const formData = prepareUploadFormData();
+
+    try {
+      const token = localStorage.getItem('accessToken');
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const resp = await axios.post(`${apiUrl}/products/${productId}/images/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      message.success('Image(s) uploaded successfully!');
+
+      const created = resp.data?.data;
+      if (created) {
+        updateImagesAfterUpload(created);
+      }
+
+      resetUploadForm();
+      onUpdate();
+    } catch (error) {
+      message.error(getErrorMessage(error) || 'Failed to upload image(s)');
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
     <div>
-      <FullWidthSpace direction="vertical" size="large">
+      <FullWidthSpaceStyled direction="vertical" size="large">
         <div>
           <h4>Add New Image</h4>
           <Tabs
@@ -234,7 +261,7 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
                   </span>
                 ),
                 children: (
-                  <FullWidthVerticalSpace direction="vertical">
+                  <FullWidthVerticalSpaceStyled direction="vertical">
                     <Upload
                       multiple
                       fileList={fileList}
@@ -267,7 +294,7 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
                     >
                       Upload Image{fileList.length > 1 ? 's' : ''}
                     </Button>
-                  </FullWidthVerticalSpace>
+                  </FullWidthVerticalSpaceStyled>
                 ),
               },
               {
@@ -278,7 +305,7 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
                   </span>
                 ),
                 children: (
-                  <FullWidthVerticalSpace direction="vertical">
+                  <FullWidthVerticalSpaceStyled direction="vertical">
                     <Input
                       placeholder="Image URL (e.g., https://example.com/image.jpg)"
                       value={imageUrl}
@@ -301,7 +328,7 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
                     >
                       Add Image
                     </Button>
-                  </FullWidthVerticalSpace>
+                  </FullWidthVerticalSpaceStyled>
                 ),
               },
             ]}
@@ -310,87 +337,87 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
 
         <div>
           <h4>Current Images ({localImages.length})</h4>
-          <ImageGridContainer>
-              {localImages.map((img) => (
-                <ImageCardStyled key={img.id}>
-                  <ImageCardContentStyled>
-                    <img src={img.url} alt={img.alt_text || 'Product image'} />
-                    {!!img.is_thumbnail && <ThumbnailBadgeStyled>Thumbnail</ThumbnailBadgeStyled>}
-                  </ImageCardContentStyled>
-                  <ImageCardFooterStyled>
-                    {editingAltId === img.id ? (
-                      <div>
-                        <Input
-                          placeholder="Enter alt text"
-                          value={editingAltText}
-                          onChange={(e) => setEditingAltText(e.target.value)}
-                          onPressEnter={() => handleUpdateAltText(img.id)}
-                          autoFocus
-                          css={{ marginBottom: 8 }}
-                        />
-                        <Space>
-                          <Button
-                            type="primary"
-                            size="small"
-                            onClick={() => handleUpdateAltText(img.id)}
-                            loading={updating}
-                          >
-                            Save
-                          </Button>
-                          <Button
-                            size="small"
-                            onClick={() => {
-                              setEditingAltId(null);
-                              setEditingAltText('');
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                        </Space>
-                      </div>
-                    ) : (
-                      <>
-                        <AltTextDisplay hasAltText={!!img.alt_text}>
-                          {img.alt_text || 'No alt text'}
-                        </AltTextDisplay>
+          <ImageGridContainerStyled>
+            {localImages.map((img) => (
+              <ImageCardStyled key={img.id}>
+                <ImageCardContentStyled>
+                  <img src={img.url} alt={img.alt_text || 'Product image'} />
+                  {!!img.is_thumbnail && <ThumbnailBadgeStyled>Thumbnail</ThumbnailBadgeStyled>}
+                </ImageCardContentStyled>
+                <ImageCardFooterStyled>
+                  {editingAltId === img.id ? (
+                    <div>
+                      <Input
+                        placeholder="Enter alt text"
+                        value={editingAltText}
+                        onChange={(e) => setEditingAltText(e.target.value)}
+                        onPressEnter={() => handleUpdateAltText(img.id)}
+                        autoFocus
+                        css={{ marginBottom: 8 }}
+                      />
+                      <Space>
+                        <Button
+                          type="primary"
+                          size="small"
+                          onClick={() => handleUpdateAltText(img.id)}
+                          loading={updating}
+                        >
+                          Save
+                        </Button>
                         <Button
                           size="small"
-                          block
                           onClick={() => {
-                            setEditingAltId(img.id);
-                            setEditingAltText(img.alt_text || '');
+                            setEditingAltId(null);
+                            setEditingAltText('');
                           }}
                         >
-                          Edit Alt Text
+                          Cancel
                         </Button>
-                      </>
-                    )}
-                    <ImageCardActionsStyled>
+                      </Space>
+                    </div>
+                  ) : (
+                    <>
+                      <AltTextDisplayStyled hasAltText={!!img.alt_text}>
+                        {img.alt_text || 'No alt text'}
+                      </AltTextDisplayStyled>
                       <Button
-                        icon={img.is_thumbnail ? <StarFilled /> : <StarOutlined />}
-                        onClick={() => handleSetThumbnail(img.id, img.is_thumbnail || false)}
-                        loading={updating && editingAltId !== img.id}
-                        type={img.is_thumbnail ? 'primary' : 'default'}
                         size="small"
-                        css={{ flex: 1 }}
+                        block
+                        onClick={() => {
+                          setEditingAltId(img.id);
+                          setEditingAltText(img.alt_text || '');
+                        }}
                       >
-                        {img.is_thumbnail ? 'Thumbnail' : 'Set as Thumbnail'}
+                        Edit Alt Text
                       </Button>
-                      <Button
-                        danger
-                        icon={<DeleteOutlined />}
-                        onClick={() => handleDeleteImage(img.id)}
-                        size="small"
-                      >
-                        Delete
-                      </Button>
-                    </ImageCardActionsStyled>
-                  </ImageCardFooterStyled>
-                </ImageCardStyled>
-              ))}
-            </ImageGridContainer>
-          </div>
-      </FullWidthSpace>
+                    </>
+                  )}
+                  <ImageCardActionsStyled>
+                    <Button
+                      icon={img.is_thumbnail ? <StarFilled /> : <StarOutlined />}
+                      onClick={() => handleSetThumbnail(img.id, img.is_thumbnail || false)}
+                      loading={updating && editingAltId !== img.id}
+                      type={img.is_thumbnail ? 'primary' : 'default'}
+                      size="small"
+                      css={{ flex: 1 }}
+                    >
+                      {img.is_thumbnail ? 'Thumbnail' : 'Set as Thumbnail'}
+                    </Button>
+                    <Button
+                      danger
+                      icon={<DeleteOutlined />}
+                      onClick={() => handleDeleteImage(img.id)}
+                      size="small"
+                    >
+                      Delete
+                    </Button>
+                  </ImageCardActionsStyled>
+                </ImageCardFooterStyled>
+              </ImageCardStyled>
+            ))}
+          </ImageGridContainerStyled>
+        </div>
+      </FullWidthSpaceStyled>
     </div>
   );
 };

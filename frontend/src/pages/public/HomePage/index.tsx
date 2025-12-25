@@ -1,8 +1,10 @@
-import { Button, Row, Col, Typography, Space } from 'antd';
 import { ShoppingOutlined, BankOutlined, ReadOutlined } from '@ant-design/icons';
+import { Button, Row, Col, Typography, Space } from 'antd';
 import { Link } from 'react-router';
+
 import AppLayout from '@/components/AppLayout';
 import { withKeys } from '@/utils/arrayHelpers';
+
 import {
   HeroSectionStyled,
   HeroTitleStyled,
@@ -83,9 +85,9 @@ const HomePage = () => {
           {withKeys(features).map((feature) => (
             <Col xs={24} sm={12} lg={8} key={feature._key}>
               <FeatureCardStyled>
-                <IconWrapperStyled>{feature.icon}</IconWrapperStyled>
-                <Title level={4}>{feature.title}</Title>
-                <Paragraph type="secondary">{feature.description}</Paragraph>
+                <IconWrapperStyled>{feature.value.icon}</IconWrapperStyled>
+                <Title level={4}>{feature.value.title}</Title>
+                <Paragraph type="secondary">{feature.value.description}</Paragraph>
               </FeatureCardStyled>
             </Col>
           ))}
@@ -97,8 +99,8 @@ const HomePage = () => {
         <Row gutter={[32, 32]}>
           {withKeys(stats).map((stat) => (
             <Col xs={12} sm={12} md={8} key={stat._key}>
-              <StatNumberStyled>{stat.number}</StatNumberStyled>
-              <StatLabelStyled>{stat.label}</StatLabelStyled>
+              <StatNumberStyled>{stat.value.number}</StatNumberStyled>
+              <StatLabelStyled>{stat.value.label}</StatLabelStyled>
             </Col>
           ))}
         </Row>

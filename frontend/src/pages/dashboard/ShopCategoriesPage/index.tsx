@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { useParams } from 'react-router';
-import { Table, Button, Space, Modal, Form, Input, message, Tag, Typography } from 'antd';
+
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Table, Button, Space, Modal, Form, Input, message, Tag, Typography } from 'antd';
+import { useParams } from 'react-router';
+
 import {
   useGetOrganizationCategoriesQuery,
   useCreateCategoryMutation,
@@ -10,6 +12,7 @@ import {
 } from '@/services/apiSlice';
 import { Category } from '@/types/common';
 import { getErrorMessage } from '@/types/errors.ts';
+
 import { TopSpaceStyled } from './styles';
 
 const { Text } = Typography;

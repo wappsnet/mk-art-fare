@@ -1,5 +1,5 @@
-import { Card, Layout as AntLayout } from 'antd';
 import styled from '@emotion/styled';
+import { Card, Layout as AntLayout } from 'antd';
 
 const { Content } = AntLayout;
 

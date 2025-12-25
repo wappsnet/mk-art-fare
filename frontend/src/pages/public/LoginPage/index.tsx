@@ -1,10 +1,14 @@
 import { useEffect } from 'react';
-import { Input, Button, Typography, Divider, Form, message } from 'antd';
+
 import { MailOutlined, LockOutlined, GoogleOutlined } from '@ant-design/icons';
+import { Input, Button, Typography, Divider, Form, message } from 'antd';
 import { Link, useNavigate } from 'react-router';
+
+import AppAuthLayout from '@/components/AppAuthLayout';
 import { useAppSelector } from '@/hooks/useRedux';
 import { useLoginMutation } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors.ts';
+
 import {
   FullWidthSpaceStyled,
   HeaderSectionStyled,
@@ -12,7 +16,6 @@ import {
   GoogleButtonStyled,
   FooterSectionStyled,
 } from './styles';
-import AppAuthLayout from '@/components/AppAuthLayout';
 
 const { Title, Text } = Typography;
 

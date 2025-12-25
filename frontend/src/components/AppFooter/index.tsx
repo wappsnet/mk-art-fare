@@ -1,10 +1,11 @@
-import { Row, Col, Space } from 'antd';
 import {
   FacebookOutlined,
   TwitterOutlined,
   InstagramOutlined,
   LinkedinOutlined,
 } from '@ant-design/icons';
+import { Row, Col, Space } from 'antd';
+
 import {
   CopyrightStyled,
   FooterLinkStyled,

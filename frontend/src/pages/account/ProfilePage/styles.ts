@@ -16,6 +16,6 @@ export const UploadButtonStyled = styled(Button)`
   margin-top: 16px;
 `;
 
-export const FullWidthSpace = styled(Space)`
+export const FullWidthSpaceStyled = styled(Space)`
   width: 100%;
 `;

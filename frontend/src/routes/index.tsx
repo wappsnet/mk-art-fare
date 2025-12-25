@@ -1,11 +1,14 @@
 import { createBrowserRouter, RouterProvider } from 'react-router';
-import { publicRoutes } from './publicRoutes';
-import { dashboardRoutes } from './dashboardRoutes';
+
+import ForbiddenPage from '@/pages/errors/ForbiddenPage';
+import NotFoundPage from '@/pages/errors/NotFoundPage';
+import { convertRoutes } from '@/utils/routeHelpers.ts';
+
 import { accountRoutes } from './accountRoutes';
 import { adminRoutes } from './adminRoutes';
-import { convertRoutes } from '@/utils/routeHelpers.ts';
-import NotFoundPage from '@/pages/errors/NotFoundPage';
-import ForbiddenPage from '@/pages/errors/ForbiddenPage';
+import { dashboardRoutes } from './dashboardRoutes';
+import { publicRoutes } from './publicRoutes';
+
 
 const router = createBrowserRouter(
   [

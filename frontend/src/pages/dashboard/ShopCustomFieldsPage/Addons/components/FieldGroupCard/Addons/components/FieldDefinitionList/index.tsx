@@ -1,7 +1,10 @@
 import { FC } from 'react';
-import { List, Button, Space, Tag, Typography, Modal } from 'antd';
+
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { List, Button, Space, Tag, Typography, Modal } from 'antd';
+
 import { FieldDefinition, FieldType } from '@/types/fields';
+
 import { FieldDefinitionItemStyled, FieldTypeTagStyled } from './styles';
 
 const { Text } = Typography;

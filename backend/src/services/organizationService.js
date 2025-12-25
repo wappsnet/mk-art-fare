@@ -79,7 +79,16 @@ export class OrganizationService {
   }
 
   async getOrganizationById(id) {
-    const results = await query('SELECT * FROM organizations WHERE id = ?', [id]);
+    const results = await query(
+      `SELECT o.*, st.primary_color, st.secondary_color, st.background_color,
+              st.text_color, st.custom_css,
+              u.first_name as owner_first_name, u.last_name as owner_last_name
+       FROM organizations o
+       LEFT JOIN shop_themes st ON o.id = st.organization_id
+       LEFT JOIN users u ON o.owner_id = u.id
+       WHERE o.id = ?`,
+      [id]
+    );
 
     return results.length > 0
       ? transformImageUrls(results[0], ['logo_url', 'banner_url'], 'organizations')
@@ -88,7 +97,12 @@ export class OrganizationService {
 
   async getOrganizationsByOwner(ownerId) {
     const results = await query(
-      'SELECT * FROM organizations WHERE owner_id = ? ORDER BY created_at DESC',
+      `SELECT o.*, st.primary_color, st.secondary_color, st.background_color,
+              st.text_color, st.custom_css
+       FROM organizations o
+       LEFT JOIN shop_themes st ON o.id = st.organization_id
+       WHERE o.owner_id = ?
+       ORDER BY o.created_at DESC`,
       [ownerId]
     );
 
@@ -192,7 +206,33 @@ export class OrganizationService {
       throw new AppError('Not authorized to delete this organization', 403);
     }
 
-    await query('DELETE FROM organizations WHERE id = ?', [orgId]);
+    const connection = await getConnection();
+
+    try {
+      await connection.beginTransaction();
+
+      // Set organization_id to NULL in order_items to preserve order history
+      // This allows us to keep the order records even after organization is deleted
+      await connection.execute(
+        'UPDATE order_items SET organization_id = NULL WHERE organization_id = ?',
+        [orgId]
+      );
+
+      // Delete the organization - CASCADE constraints will automatically delete:
+      // - shop_themes
+      // - products (and their product_images, cart_items via CASCADE)
+      // - field_groups (and their field_definitions via CASCADE)
+      // - product_field_group_assignments (via CASCADE from products and field_groups)
+      // - product_field_values (via CASCADE from products and field_definitions)
+      await connection.execute('DELETE FROM organizations WHERE id = ?', [orgId]);
+
+      await connection.commit();
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
 
   async getAllOrganizations(page, limit, offset, search) {
@@ -201,8 +241,11 @@ export class OrganizationService {
     const validOffset = Math.floor(Number(offset)) || 0;
 
     let queryStr = `
-      SELECT o.*, u.first_name as owner_first_name, u.last_name as owner_last_name
+      SELECT o.*, st.primary_color, st.secondary_color, st.background_color,
+             st.text_color, st.custom_css,
+             u.first_name as owner_first_name, u.last_name as owner_last_name
       FROM organizations o
+      LEFT JOIN shop_themes st ON o.id = st.organization_id
       LEFT JOIN users u ON o.owner_id = u.id
       WHERE o.is_active = TRUE
     `;

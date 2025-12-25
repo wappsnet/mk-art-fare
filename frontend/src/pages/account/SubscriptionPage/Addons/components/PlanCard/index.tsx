@@ -1,5 +1,6 @@
-import { Typography, Space, Tag } from 'antd';
 import { CheckOutlined } from '@ant-design/icons';
+import { Typography, Space, Tag } from 'antd';
+
 import { PlanCardStyled, FeatureListStyled, FeatureItemStyled, PriceStyled } from './styles';
 
 const { Title, Text } = Typography;
@@ -17,7 +18,7 @@ interface PlanCardProps {
   isCurrentPlan: boolean;
 }
 
-export const PlanCard = ({ plan, isCurrentPlan }: PlanCardProps) => {
+const PlanCard = ({ plan, isCurrentPlan }: PlanCardProps) => {
   return (
     <PlanCardStyled active={isCurrentPlan}>
       <Space direction="vertical" size={16}>
@@ -48,3 +49,5 @@ export const PlanCard = ({ plan, isCurrentPlan }: PlanCardProps) => {
     </PlanCardStyled>
   );
 };
+
+export default PlanCard;

@@ -1,14 +1,17 @@
 import { useState } from 'react';
-import { Form, Input, Button, message, Avatar, Upload } from 'antd';
+
 import { UserOutlined, UploadOutlined } from '@ant-design/icons';
+import { Form, Input, Button, message, Avatar, Upload } from 'antd';
+
 import { useAppSelector } from '@/hooks/useRedux';
 import { useUpdateProfileMutation } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
+
 import {
   ProfileContainerStyled,
   AvatarSectionStyled,
   UploadButtonStyled,
-  FullWidthSpace,
+  FullWidthSpaceStyled,
 } from './styles';
 
 interface ProfileFormValues {
@@ -60,7 +63,7 @@ const ProfilePage = () => {
         }}
         onFinish={handleSubmit}
       >
-        <FullWidthSpace direction="vertical" size="large">
+        <FullWidthSpaceStyled direction="vertical" size="large">
           <Form.Item
             name="first_name"
             label="First Name"
@@ -97,7 +100,7 @@ const ProfilePage = () => {
               Save Changes
             </Button>
           </Form.Item>
-        </FullWidthSpace>
+        </FullWidthSpaceStyled>
       </Form>
     </ProfileContainerStyled>
   );

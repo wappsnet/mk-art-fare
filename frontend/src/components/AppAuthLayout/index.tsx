@@ -1,8 +1,11 @@
-import { CardStyled, ContainerStyled, LayoutStyled } from './style.ts';
 import { ReactNode } from 'react';
+
 import { Flex, Image } from 'antd';
 import { Link } from 'react-router';
+
 import logo from '@/assets/base/logo.svg';
+
+import { CardStyled, ContainerStyled, LayoutStyled } from './style.ts';
 
 interface LayoutProps {
   children: ReactNode;

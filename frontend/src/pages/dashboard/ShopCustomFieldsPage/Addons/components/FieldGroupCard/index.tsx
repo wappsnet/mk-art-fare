@@ -1,11 +1,14 @@
 import { FC } from 'react';
-import { Card, Space, Button, Tag, Modal, Divider, message } from 'antd';
+
 import { PlusOutlined, EditOutlined, DeleteOutlined, SettingOutlined } from '@ant-design/icons';
-import { FieldGroup, FieldDefinition, FieldType } from '@/types/fields';
+import { Card, Space, Button, Tag, Modal, Divider, message } from 'antd';
+
 import { useDeleteFieldGroupMutation } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
-import { FieldGroupCardStyled } from './styles';
+import { FieldGroup, FieldDefinition, FieldType } from '@/types/fields';
+
 import FieldDefinitionList from './Addons/components/FieldDefinitionList';
+import { FieldGroupCardStyled } from './styles';
 
 interface FieldGroupCardProps {
   group: FieldGroup;

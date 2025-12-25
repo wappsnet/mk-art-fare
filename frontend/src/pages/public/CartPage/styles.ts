@@ -6,7 +6,6 @@ const { Text, Title: AntTitle } = Typography;
 export const ContainerStyled = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px;
   min-height: calc(100vh - 64px - 200px);
 `;
 
@@ -36,16 +35,16 @@ export const ProductImageStyled = styled.img`
 
 export const ProductTitle = AntTitle;
 
-export const SmallText = styled(Text)`
+export const SmallTextStyled = styled(Text)`
   font-size: 12px;
 `;
 
-export const Price = styled(Text)`
+export const PriceStyled = styled(Text)`
   font-size: 16px;
   color: #1890ff;
 `;
 
-export const TotalPrice = styled(Text)`
+export const TotalPriceStyled = styled(Text)`
   font-size: 18px;
 `;
 

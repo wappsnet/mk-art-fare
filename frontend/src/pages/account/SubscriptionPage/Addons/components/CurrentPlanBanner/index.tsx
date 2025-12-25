@@ -1,7 +1,7 @@
-import { Typography, Button, Space, Tag } from 'antd';
 import { CrownOutlined } from '@ant-design/icons';
-import { CurrentPlanCardStyled } from './styles';
-import type { UserSubscription, UsageStats } from '@/types/common';
+import { Typography, Button, Space, Tag, Card } from 'antd';
+
+import type { UserSubscription, UsageStats } from '@/types/subscription';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -15,7 +15,7 @@ interface CurrentPlanBannerProps {
   isDowngrading: boolean;
 }
 
-export const CurrentPlanBanner = ({
+const CurrentPlanBanner = ({
   subscription,
   usage,
   currentPlan,
@@ -25,15 +25,17 @@ export const CurrentPlanBanner = ({
   isDowngrading,
 }: CurrentPlanBannerProps) => {
   return (
-    <CurrentPlanCardStyled>
-      <Space direction="vertical" size={16}>
+    <Card
+      title={
         <Space>
           <Title level={3}>Current Plan</Title>
           <Tag color={currentPlan === 'pro' ? 'gold' : 'default'}>
             {subscription?.plan_name || 'Basic'}
           </Tag>
         </Space>
-
+      }
+    >
+      <Space direction="vertical" size={16}>
         {usage && (
           <Space direction="vertical" size={8}>
             <Text>
@@ -72,6 +74,8 @@ export const CurrentPlanBanner = ({
           </Button>
         )}
       </Space>
-    </CurrentPlanCardStyled>
+    </Card>
   );
 };
+
+export default CurrentPlanBanner;

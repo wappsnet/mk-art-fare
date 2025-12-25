@@ -4,7 +4,6 @@ import { Card, Tag } from 'antd';
 export const ContainerStyled = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px;
 `;
 
 export const HeroSectionStyled = styled.div`

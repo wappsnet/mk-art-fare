@@ -259,6 +259,24 @@ export interface FieldDefinitionFormData {
   name: string;
   label: string;
   field_type: FieldType;
+  placeholder?: string | null;
+  help_text?: string | null;
+  default_value?: string | number | boolean | string[] | ImageMetadata[] | FileMetadata[] | null;
+  options?: FieldOption[] | null;
+  validation_rules?: Partial<ValidationRules> | null;
+  is_searchable?: boolean;
+  is_filterable?: boolean;
+  sort_order?: number;
+}
+
+export interface ProductFieldValues {
+  [fieldDefinitionId: number]: FieldValue['value'];
+}
+
+export interface FieldFormValues {
+  name: string;
+  label: string;
+  field_type: FieldType;
   placeholder?: string;
   help_text?: string;
   default_value?: string | number | boolean | string[] | ImageMetadata[] | FileMetadata[];
@@ -267,8 +285,4 @@ export interface FieldDefinitionFormData {
   is_searchable?: boolean;
   is_filterable?: boolean;
   sort_order?: number;
-}
-
-export interface ProductFieldValues {
-  [fieldDefinitionId: number]: FieldValue['value'];
 }

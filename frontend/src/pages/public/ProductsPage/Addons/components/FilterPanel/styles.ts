@@ -3,7 +3,6 @@ import { Space, Typography } from 'antd';
 
 export const FilterSectionStyled = styled.div`
   background: #fafafa;
-  padding: 24px;
   border-radius: 8px;
   margin-bottom: 24px;
 `;

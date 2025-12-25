@@ -1,12 +1,15 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router';
-import { withKeys } from '@/utils/arrayHelpers';
-import { Typography, Avatar, Divider, Button, Input, List, Form, message, Spin } from 'antd';
+
 import { Comment as AntComment } from '@ant-design/compatible';
 import { UserOutlined, CalendarOutlined, EyeOutlined } from '@ant-design/icons';
+import { Typography, Avatar, Divider, Button, Input, List, Form, message, Spin } from 'antd';
+import { useParams, Link } from 'react-router';
+
 import AppLayout from '@/components/AppLayout';
-import { useGetBlogPostQuery } from '@/services/apiSlice';
 import { useAppSelector } from '@/hooks/useRedux';
+import { useGetBlogPostQuery } from '@/services/apiSlice';
+import { withKeys } from '@/utils/arrayHelpers';
+
 import {
   ContainerStyled,
   ArticleHeaderStyled,
@@ -19,7 +22,7 @@ import {
   CommentFormStyled,
   SignInPromptStyled,
   BreadcrumbStyled,
-  SmallSecondaryText,
+  SmallSecondaryTextStyled,
 } from './styles';
 
 const { Title, Paragraph, Text } = Typography;
@@ -124,7 +127,7 @@ const BlogPostPage = () => {
                 {post.first_name} {post.last_name}
               </Text>
               <br />
-              <SmallSecondaryText type="secondary">Author</SmallSecondaryText>
+              <SmallSecondaryTextStyled type="secondary">Author</SmallSecondaryTextStyled>
             </div>
           </AuthorInfoStyled>
 
@@ -184,9 +187,9 @@ const BlogPostPage = () => {
                   avatar={<Avatar src={comment.avatar_url} icon={<UserOutlined />} />}
                   content={<Paragraph>{comment.content}</Paragraph>}
                   datetime={
-                    <SmallSecondaryText type="secondary">
+                    <SmallSecondaryTextStyled type="secondary">
                       {formatDate(comment.created_at)}
-                    </SmallSecondaryText>
+                    </SmallSecondaryTextStyled>
                   }
                 />
               )}

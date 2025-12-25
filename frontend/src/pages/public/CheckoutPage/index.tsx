@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router';
+
+import { CreditCardOutlined, EnvironmentOutlined, ShoppingOutlined } from '@ant-design/icons';
 import {
   Row,
   Col,
@@ -14,7 +15,8 @@ import {
   Space,
   Modal,
 } from 'antd';
-import { CreditCardOutlined, EnvironmentOutlined, ShoppingOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router';
+
 import AppLayout from '@/components/AppLayout';
 import { useAppSelector } from '@/hooks/useRedux';
 import {
@@ -26,6 +28,7 @@ import {
 } from '@/services/apiSlice';
 import { CreateAddressInput } from '@/types/common';
 import { getErrorMessage } from '@/types/errors';
+
 import {
   ContainerStyled,
   PageTitleStyled,

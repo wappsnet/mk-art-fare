@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
+
 import {
   ApiResponse,
   User,
@@ -15,7 +15,6 @@ import {
   OrganizationTheme,
   ProductImage,
 } from '@/types/common';
-import { SubscriptionPlan, SubscriptionResponse, SubscriptionHistory } from '@/types/subscription';
 import {
   FieldGroup,
   FieldGroupFormData,
@@ -24,6 +23,9 @@ import {
   ProductFieldValues,
   FieldValue,
 } from '@/types/fields';
+import { SubscriptionPlan, SubscriptionResponse, SubscriptionHistory } from '@/types/subscription';
+
+import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_URL,
@@ -433,6 +435,13 @@ export const api = createApi({
       }),
       invalidatesTags: ['Organization'],
     }),
+    deleteOrganization: builder.mutation<ApiResponse<null>, number>({
+      query: (id) => ({
+        url: `/organizations/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Organization'],
+    }),
     moderateProduct: builder.mutation<
       ApiResponse<Product>,
       { id: number; status: 'approved' | 'declined'; note?: string }
@@ -811,6 +820,7 @@ export const {
   useUploadOrganizationLogoMutation,
   useUploadOrganizationBannerMutation,
   useModerateOrganizationMutation,
+  useDeleteOrganizationMutation,
   useModerateProductMutation,
   useGetUsersQuery,
   useUpdateUserMutation,

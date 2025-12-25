@@ -1,10 +1,11 @@
-import type { AppRouteObject } from '@/types/routes';
 import { RequireRole } from '@/guards';
-import { UserRole } from '@/types/common';
-import AdminPage from '@/pages/admin/AdminPage';
-import AdminOrganizationModerationPage from '@/pages/admin/AdminOrganizationModerationPage';
-import AdminProductModerationPage from '@/pages/admin/AdminProductModerationPage';
 import AdminOrdersPage from '@/pages/admin/AdminOrdersPage';
+import AdminOrganizationModerationPage from '@/pages/admin/AdminOrganizationModerationPage';
+import AdminPage from '@/pages/admin/AdminPage';
+import AdminProductModerationPage from '@/pages/admin/AdminProductModerationPage';
+import { UserRole } from '@/types/common';
+
+import type { AppRouteObject } from '@/types/routes';
 
 export const adminRoutes: AppRouteObject[] = [
   {

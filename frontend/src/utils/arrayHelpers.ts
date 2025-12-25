@@ -10,22 +10,15 @@
  */
 let keyCounter = 0;
 
-type ItemWithKey<T> = T extends object ? T & { _key: string } : { value: T; _key: string };
+type ItemWithKey<T> = { value: T; _key: string };
 
 export function withKeys<T>(items: T[]): Array<ItemWithKey<T>> {
   return items.map((item): ItemWithKey<T> => {
     const key = `item-${keyCounter++}`;
-
-    if (typeof item === 'object' && item !== null) {
-      return {
-        ...item,
-        _key: key,
-      } as ItemWithKey<T>;
-    }
     return {
       value: item,
       _key: key,
-    } as ItemWithKey<T>;
+    };
   });
 }
 

@@ -1,14 +1,15 @@
-import type { AppRouteObject } from '@/types/routes';
 import { RequireAuth, RequireRole } from '@/guards';
-import { UserRole } from '@/types/common';
 import DashboardPage from '@/pages/dashboard/DashboardPage';
-import ShopManagementPage from '@/pages/dashboard/ShopManagementPage';
-import ShopProductsPage from '@/pages/dashboard/ShopProductsPage';
-import ShopOrdersPage from '@/pages/dashboard/ShopOrdersPage';
 import ShopAnalyticsPage from '@/pages/dashboard/ShopAnalyticsPage';
 import ShopCategoriesPage from '@/pages/dashboard/ShopCategoriesPage';
-import ShopSettingsPage from '@/pages/dashboard/ShopSettingsPage';
 import ShopCustomFieldsPage from '@/pages/dashboard/ShopCustomFieldsPage';
+import ShopManagementPage from '@/pages/dashboard/ShopManagementPage';
+import ShopOrdersPage from '@/pages/dashboard/ShopOrdersPage';
+import ShopProductsPage from '@/pages/dashboard/ShopProductsPage';
+import ShopSettingsPage from '@/pages/dashboard/ShopSettingsPage';
+import { UserRole } from '@/types/common';
+
+import type { AppRouteObject } from '@/types/routes';
 
 export const dashboardRoutes: AppRouteObject[] = [
   {

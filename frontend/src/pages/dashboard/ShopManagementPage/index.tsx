@@ -1,10 +1,14 @@
-import { useParams, useNavigate, Outlet, useLocation } from 'react-router';
-import { Card, Typography, Button, Tabs, Spin } from 'antd';
+import { useMemo } from 'react';
+
 import { ArrowLeftOutlined } from '@ant-design/icons';
+import { Card, Typography, Button, Tabs, Spin } from 'antd';
+import { useParams, useNavigate, Outlet, useLocation } from 'react-router';
+
 import AppLayout from '@/components/AppLayout';
 import { useGetOrganizationByIdQuery } from '@/services/apiSlice';
+
 import { ContainerStyled, HeaderStyled, OutletWrapperStyled } from './styles';
-import { useMemo } from 'react';
+
 
 const { Title } = Typography;
 

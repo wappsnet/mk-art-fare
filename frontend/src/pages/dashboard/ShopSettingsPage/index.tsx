@@ -1,5 +1,13 @@
 import { useState } from 'react';
-import { useParams } from 'react-router';
+
+import {
+  UploadOutlined,
+  ShopOutlined,
+  BgColorsOutlined,
+  PictureOutlined,
+  EditOutlined,
+  LinkOutlined,
+} from '@ant-design/icons';
 import {
   Typography,
   Button,
@@ -16,15 +24,8 @@ import {
   Tag,
   Descriptions,
 } from 'antd';
-import type { Color } from 'antd/es/color-picker';
-import {
-  UploadOutlined,
-  ShopOutlined,
-  BgColorsOutlined,
-  PictureOutlined,
-  EditOutlined,
-  LinkOutlined,
-} from '@ant-design/icons';
+import { useParams } from 'react-router';
+
 import {
   useGetOrganizationByIdQuery,
   useUpdateOrganizationMutation,
@@ -33,18 +34,22 @@ import {
   useUploadOrganizationBannerMutation,
 } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
+
 import {
-  PageContainer,
-  SectionCard,
+  PageContainerStyled,
+  SectionCardStyled,
   LogoImageStyled,
   BannerImageStyled,
-  ColorSwatchContainer,
-  ColorSwatch,
-  ImagePreviewContainer,
-  EmptyImageContainer,
-  FullWidthSpace,
+  ColorSwatchContainerStyled,
+  ColorSwatchStyled,
+  ImagePreviewContainerStyled,
+  EmptyImageContainerStyled,
+  FullWidthSpaceStyled,
   CenteredSpace,
+  PageContentStyled,
 } from './styles';
+
+import type { Color } from 'antd/es/color-picker';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -125,21 +130,19 @@ const ShopSettingsPage = () => {
   }
 
   return (
-    <PageContainer>
-      <Space direction="vertical" size="large">
-        <div>
-          <Title level={2}>
-            <ShopOutlined /> Shop Settings
-          </Title>
-          <Paragraph type="secondary">
-            Manage your shop information, branding, and appearance
-          </Paragraph>
-        </div>
+    <PageContainerStyled>
+      <PageContentStyled direction="vertical" size="large">
+        <Title level={2}>
+          <ShopOutlined /> Shop Settings
+        </Title>
+        <Paragraph type="secondary">
+          Manage your shop information, branding, and appearance
+        </Paragraph>
 
         <Row gutter={[24, 24]}>
           <Col xs={24} lg={12}>
             {/* Basic Information Card */}
-            <SectionCard
+            <SectionCardStyled
               title={
                 <Space>
                   <ShopOutlined />
@@ -156,9 +159,11 @@ const ShopSettingsPage = () => {
                 </Button>
               }
             >
-              <Descriptions column={1} bordered>
+              <Descriptions column={1} bordered layout="vertical">
                 <Descriptions.Item label="Shop Name">
-                  <Text strong>{organization.name}</Text>
+                  <Text strong ellipsis>
+                    {organization.name}
+                  </Text>
                 </Descriptions.Item>
                 <Descriptions.Item
                   label={
@@ -173,10 +178,10 @@ const ShopSettingsPage = () => {
                   {organization.description || <Text type="secondary">No description</Text>}
                 </Descriptions.Item>
               </Descriptions>
-            </SectionCard>
+            </SectionCardStyled>
 
             {/* Theme Colors Card */}
-            <SectionCard
+            <SectionCardStyled
               title={
                 <Space>
                   <BgColorsOutlined />
@@ -194,8 +199,8 @@ const ShopSettingsPage = () => {
               }
             >
               <Paragraph type="secondary">Customize your shop's color scheme</Paragraph>
-              <ColorSwatchContainer>
-                <ColorSwatch $color={organization.primary_color || '#1890ff'}>
+              <ColorSwatchContainerStyled>
+                <ColorSwatchStyled $color={organization.primary_color || '#1890ff'}>
                   <div className="color-box" />
                   <CenteredSpace>
                     <Space direction="vertical" size={0}>
@@ -203,8 +208,8 @@ const ShopSettingsPage = () => {
                       <Text type="secondary">{organization.primary_color || '#1890ff'}</Text>
                     </Space>
                   </CenteredSpace>
-                </ColorSwatch>
-                <ColorSwatch $color={organization.secondary_color || '#52c41a'}>
+                </ColorSwatchStyled>
+                <ColorSwatchStyled $color={organization.secondary_color || '#52c41a'}>
                   <div className="color-box" />
                   <CenteredSpace>
                     <Space direction="vertical" size={0}>
@@ -212,14 +217,14 @@ const ShopSettingsPage = () => {
                       <Text type="secondary">{organization.secondary_color || '#52c41a'}</Text>
                     </Space>
                   </CenteredSpace>
-                </ColorSwatch>
-              </ColorSwatchContainer>
-            </SectionCard>
+                </ColorSwatchStyled>
+              </ColorSwatchContainerStyled>
+            </SectionCardStyled>
           </Col>
 
           <Col xs={24} lg={12}>
             {/* Branding Images Card */}
-            <SectionCard
+            <SectionCardStyled
               title={
                 <Space>
                   <PictureOutlined />
@@ -237,40 +242,40 @@ const ShopSettingsPage = () => {
               }
             >
               <Space direction="vertical" size="large">
-                <FullWidthSpace>
+                <FullWidthSpaceStyled>
                   <Text strong>Logo</Text>
-                  <ImagePreviewContainer>
+                  <ImagePreviewContainerStyled>
                     {organization.logo_url ? (
                       <LogoImageStyled src={organization.logo_url} alt="Shop logo" />
                     ) : (
-                      <EmptyImageContainer>
+                      <EmptyImageContainerStyled>
                         <PictureOutlined className="empty-icon" />
                         <div>No logo uploaded</div>
-                      </EmptyImageContainer>
+                      </EmptyImageContainerStyled>
                     )}
-                  </ImagePreviewContainer>
-                </FullWidthSpace>
+                  </ImagePreviewContainerStyled>
+                </FullWidthSpaceStyled>
 
                 <Divider />
 
-                <FullWidthSpace>
+                <FullWidthSpaceStyled>
                   <Text strong>Banner</Text>
-                  <ImagePreviewContainer>
+                  <ImagePreviewContainerStyled>
                     {organization.banner_url ? (
                       <BannerImageStyled src={organization.banner_url} alt="Shop banner" />
                     ) : (
-                      <EmptyImageContainer>
+                      <EmptyImageContainerStyled>
                         <PictureOutlined className="empty-icon" />
                         <div>No banner uploaded</div>
-                      </EmptyImageContainer>
+                      </EmptyImageContainerStyled>
                     )}
-                  </ImagePreviewContainer>
-                </FullWidthSpace>
+                  </ImagePreviewContainerStyled>
+                </FullWidthSpaceStyled>
               </Space>
-            </SectionCard>
+            </SectionCardStyled>
           </Col>
         </Row>
-      </Space>
+      </PageContentStyled>
 
       {/* Shop Details Drawer */}
       <Drawer
@@ -372,7 +377,7 @@ const ShopSettingsPage = () => {
           </Form.Item>
         </Form>
       </Drawer>
-    </PageContainer>
+    </PageContainerStyled>
   );
 };
 

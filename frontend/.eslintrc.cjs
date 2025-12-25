@@ -19,10 +19,19 @@ module.exports = {
       jsx: true,
     },
   },
-  plugins: ['react-refresh', '@typescript-eslint', 'react'],
+  plugins: ['react-refresh', '@typescript-eslint', 'react', 'import'],
   settings: {
     react: {
       version: 'detect',
+    },
+    'import/resolver': {
+      typescript: {
+        project: './tsconfig.json',
+        alwaysTryTypes: true,
+      },
+      node: {
+        extensions: ['.js', '.jsx', '.ts', '.tsx']
+      },
     },
   },
   rules: {
@@ -68,5 +77,93 @@ module.exports = {
     ],
     'prefer-const': 'error',
     'no-var': 'error',
+    'import/order': [
+      'error',
+      {
+        groups: ['object', 'external', 'internal', 'parent', 'sibling', 'index', 'unknown', 'type'],
+        pathGroups: [
+          {
+            pattern: '{.,..}/*.scss',
+            group: 'object',
+            position: 'before',
+          },
+          {
+            pattern: 'react',
+            group: 'external',
+            position: 'before',
+          },
+          {
+            pattern: 'types',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: 'config',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: 'assets',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: 'styles',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: 'utils',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: 'hooks',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: 'guards',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: 'store',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: 'services',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: 'routes',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: 'components',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: 'pages',
+            group: 'internal',
+            position: 'after',
+          },
+        ],
+
+        pathGroupsExcludedImportTypes: ['react'],
+
+        alphabetize: {
+          order: 'asc',
+          caseInsensitive: true,
+        },
+
+        warnOnUnassignedImports: true,
+        'newlines-between': 'always',
+      },
+    ],
   },
 };

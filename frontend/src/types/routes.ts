@@ -1,5 +1,5 @@
-import type { RouteObject } from 'react-router';
 import type { UserRole } from './common';
+import type { RouteObject } from 'react-router';
 
 export interface RouteMeta {
   requiresAuth?: boolean;

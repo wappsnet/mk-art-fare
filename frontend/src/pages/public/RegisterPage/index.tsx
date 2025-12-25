@@ -1,12 +1,15 @@
 import { useEffect } from 'react';
-import { Form, Input, Button, Typography, Divider, Space, message } from 'antd';
+
 import { MailOutlined, LockOutlined, UserOutlined, GoogleOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Typography, Divider, Space, message } from 'antd';
 import { Link, useNavigate } from 'react-router';
+
+import AppAuthLayout from '@/components/AppAuthLayout';
 import { useAppSelector } from '@/hooks/useRedux';
 import { useRegisterMutation } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
+
 import { GoogleButtonStyled, CenterTextStyled } from './styles';
-import AppAuthLayout from '@/components/AppAuthLayout';
 
 const { Title, Text } = Typography;
 

@@ -1,7 +1,9 @@
 import { useState, useMemo } from 'react';
-import { useParams } from 'react-router';
-import { Card, Button, Space, Typography, Drawer, Form, message } from 'antd';
+
 import { PlusOutlined } from '@ant-design/icons';
+import { Card, Button, Space, Typography, Drawer, Form, message } from 'antd';
+import { useParams } from 'react-router';
+
 import {
   useGetFieldGroupsQuery,
   useCreateFieldGroupMutation,
@@ -10,13 +12,13 @@ import {
   useUpdateFieldDefinitionMutation,
   useDeleteFieldDefinitionMutation,
 } from '@/services/apiSlice';
-import { FieldGroup, FieldDefinition, FieldType } from '@/types/fields';
 import { getErrorMessage } from '@/types/errors';
-import { TopSpaceStyled } from './styles';
-import { FieldFormValues } from './Addons/types';
+import { FieldGroup, FieldDefinition, FieldType, FieldFormValues } from '@/types/fields';
+
+import FieldDefinitionForm from './Addons/components/FieldDefinitionForm';
 import FieldGroupCard from './Addons/components/FieldGroupCard';
 import FieldGroupForm from './Addons/components/FieldGroupForm';
-import FieldDefinitionForm from './Addons/components/FieldDefinitionForm';
+import { TopSpaceStyled } from './styles';
 
 const { Title, Text } = Typography;
 
@@ -51,7 +53,7 @@ const getFieldTypeColor = (type: FieldType): string => {
   }
 };
 
-const fieldTypeNeedsOptions = (fieldType: FieldType | undefined): boolean => {
+const fieldTypeNeedsOptions = (fieldType?: FieldType): boolean => {
   if (!fieldType) return false;
 
   switch (fieldType) {
@@ -172,23 +174,24 @@ const ShopCustomFieldsPage = () => {
   };
 
   const handleFieldSubmit = async (values: FieldFormValues) => {
-    if (!selectedGroupId) return;
+    if (!selectedGroupId) {
+      return;
+    }
 
     try {
-      // With proper JSON types, we can pass values directly
-      // No need for parsing or stringification
+      // Convert default_value based on field type before sending to backend
       const fieldData = {
         name: values.name,
         label: values.label,
         field_type: values.field_type,
-        placeholder: values.placeholder,
-        help_text: values.help_text,
-        default_value: values.default_value,
-        options: values.options,
-        validation_rules: values.validation_rules,
-        is_searchable: values.is_searchable,
-        is_filterable: values.is_filterable,
-        sort_order: values.sort_order || 0,
+        placeholder: values.placeholder ?? null,
+        help_text: values.help_text ?? null,
+        default_value: values.default_value ?? null,
+        options: values.options ?? null,
+        validation_rules: values.validation_rules ?? null,
+        is_searchable: values.is_searchable ?? false,
+        is_filterable: values.is_filterable ?? false,
+        sort_order: values.sort_order ?? 0,
       };
 
       if (editingField) {

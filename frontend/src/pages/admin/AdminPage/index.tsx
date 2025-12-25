@@ -1,5 +1,13 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+
+import {
+  UserOutlined,
+  ShopOutlined,
+  ShoppingOutlined,
+  DollarOutlined,
+  TeamOutlined,
+  FileTextOutlined,
+} from '@ant-design/icons';
 import {
   Row,
   Col,
@@ -16,15 +24,9 @@ import {
   Form,
   Select,
 } from 'antd';
-import {
-  UserOutlined,
-  ShopOutlined,
-  ShoppingOutlined,
-  DollarOutlined,
-  TeamOutlined,
-  FileTextOutlined,
-} from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { useNavigate } from 'react-router';
+
 import AppLayout from '@/components/AppLayout';
 import {
   useGetUsersQuery,
@@ -32,8 +34,9 @@ import {
   useGetOrganizationsQuery,
   useGetBlogPostsQuery,
 } from '@/services/apiSlice';
-import { getErrorMessage } from '@/types/errors';
 import { Organization, UserRole } from '@/types/common';
+import { getErrorMessage } from '@/types/errors';
+
 import { ContainerStyled, StatCardStyled, HeaderStyled } from './styles';
 
 const { Title, Text } = Typography;
@@ -395,7 +398,20 @@ const AdminPage = () => {
             setEditUserModal(false);
             form.resetFields();
           }}
-          footer={null}
+          footer={[
+            <Button
+              key="cancel"
+              onClick={() => {
+                setEditUserModal(false);
+                form.resetFields();
+              }}
+            >
+              Cancel
+            </Button>,
+            <Button key="submit" type="primary" onClick={() => form.submit()}>
+              Update User
+            </Button>,
+          ]}
         >
           <Form form={form} layout="vertical" onFinish={handleUpdateUser}>
             <Form.Item
@@ -419,12 +435,6 @@ const AdminPage = () => {
                 <Select.Option value="active">Active</Select.Option>
                 <Select.Option value="inactive">Inactive</Select.Option>
               </Select>
-            </Form.Item>
-
-            <Form.Item>
-              <Button type="primary" htmlType="submit" block>
-                Update User
-              </Button>
             </Form.Item>
           </Form>
         </Modal>

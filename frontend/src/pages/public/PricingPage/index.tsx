@@ -1,8 +1,10 @@
-import { Typography, Button, Space, Row, Col, Tag, Flex } from 'antd';
 import { CheckOutlined, CrownOutlined, StarOutlined } from '@ant-design/icons';
-import AppLayout from '@/components/AppLayout';
+import { Typography, Button, Space, Row, Col, Tag, Flex } from 'antd';
 import { useNavigate } from 'react-router';
+
+import AppLayout from '@/components/AppLayout';
 import { useAppSelector } from '@/hooks/useRedux';
+
 import {
   ContainerStyled,
   HeaderStyled,
@@ -46,7 +48,7 @@ const PricingPage = () => {
         'Customer support',
       ],
       buttonText: 'Get Started',
-      buttonType: 'default' as const,
+      buttonType: 'default',
       popular: false,
     },
     {
@@ -66,7 +68,7 @@ const PricingPage = () => {
         'Bulk operations',
       ],
       buttonText: 'Upgrade to Pro',
-      buttonType: 'primary' as const,
+      buttonType: 'primary',
       popular: true,
     },
   ];
@@ -112,7 +114,7 @@ const PricingPage = () => {
                       </PriceStyled>
 
                       <Button
-                        type={plan.buttonType}
+                        type="primary"
                         size="large"
                         block
                         onClick={() => handleGetStarted(plan.name.toLowerCase())}

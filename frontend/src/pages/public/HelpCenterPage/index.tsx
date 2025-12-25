@@ -1,10 +1,12 @@
-import { Typography, Collapse, Space, Flex } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
+import { Typography, Collapse, Space, Flex } from 'antd';
+
 import AppLayout from '@/components/AppLayout';
-import { ContainerStyled, HeaderStyled } from './styles';
-import { faqData } from './faqData';
+
 import { ContactCards } from './ContactCards';
 import { ContactForm } from './ContactForm';
+import { faqData } from './faqData';
+import { ContainerStyled, HeaderStyled } from './styles';
 
 const { Title, Paragraph } = Typography;
 

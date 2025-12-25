@@ -1,18 +1,26 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
-import { Card, Table, Tag, Button, Space, Typography, Modal, message, Input, Badge } from 'antd';
+
 import {
   CheckOutlined,
   CloseOutlined,
+  DeleteOutlined,
   EyeOutlined,
   ShopOutlined,
   SafetyCertificateOutlined,
 } from '@ant-design/icons';
+import { Card, Table, Tag, Button, Space, Typography, Modal, message, Input, Badge } from 'antd';
 import dayjs from 'dayjs';
+import { useNavigate } from 'react-router';
+
 import AppLayout from '@/components/AppLayout';
-import { useGetOrganizationsQuery, useModerateOrganizationMutation } from '@/services/apiSlice';
-import { getErrorMessage } from '@/types/errors';
+import {
+  useGetOrganizationsQuery,
+  useModerateOrganizationMutation,
+  useDeleteOrganizationMutation,
+} from '@/services/apiSlice';
 import { Organization } from '@/types/common';
+import { getErrorMessage } from '@/types/errors';
+
 import { ContainerStyled, HeaderStyled } from './styles';
 
 const { Title, Text, Paragraph } = Typography;
@@ -26,6 +34,7 @@ const AdminOrganizationModerationPage = () => {
 
   const { data: orgsData, isLoading, refetch } = useGetOrganizationsQuery();
   const [moderateOrganization, { isLoading: isModerating }] = useModerateOrganizationMutation();
+  const [deleteOrganization, { isLoading: isDeleting }] = useDeleteOrganizationMutation();
 
   const organizations = orgsData?.data || [];
 
@@ -52,6 +61,36 @@ const AdminOrganizationModerationPage = () => {
   const openModerationModal = (org: Organization) => {
     setSelectedOrg(org);
     setModerationModal(true);
+  };
+
+  const handleDelete = (org: Organization) => {
+    Modal.confirm({
+      title: 'Delete Organization',
+      icon: <DeleteOutlined />,
+      content: (
+        <Space direction="vertical" css={{ width: '100%' }}>
+          <Text>
+            Are you sure you want to delete <Text strong>{org.name}</Text>?
+          </Text>
+          <Text type="danger">
+            This action cannot be undone. All shop data including products, custom fields, and
+            themes will be permanently deleted.
+          </Text>
+        </Space>
+      ),
+      okText: 'Delete',
+      okType: 'danger',
+      cancelText: 'Cancel',
+      onOk: async () => {
+        try {
+          await deleteOrganization(org.id).unwrap();
+          message.success('Organization deleted successfully');
+          refetch();
+        } catch (error) {
+          message.error(getErrorMessage(error) || 'Failed to delete organization');
+        }
+      },
+    });
   };
 
   const columns = [
@@ -142,6 +181,15 @@ const AdminOrganizationModerationPage = () => {
             disabled={record.moderation_status === 'approved'}
           >
             Moderate
+          </Button>
+          <Button
+            size="small"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => handleDelete(record)}
+            loading={isDeleting}
+          >
+            Delete
           </Button>
         </Space>
       ),

@@ -6,7 +6,6 @@ const { Text } = Typography;
 export const ContainerStyled = styled.div`
   max-width: 900px;
   margin: 0 auto;
-  padding: 40px 20px;
 `;
 
 export const ArticleHeaderStyled = styled.div`
@@ -67,6 +66,6 @@ export const BreadcrumbStyled = styled(Breadcrumb)`
   margin-bottom: 24px;
 `;
 
-export const SmallSecondaryText = styled(Text)`
+export const SmallSecondaryTextStyled = styled(Text)`
   font-size: 12px;
 `;

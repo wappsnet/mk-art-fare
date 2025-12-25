@@ -1,12 +1,16 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Row, Col, Button, Typography, Spin, Empty, Pagination, Drawer } from 'antd';
+
 import { ShoppingCartOutlined, FilterOutlined } from '@ant-design/icons';
+import { Row, Col, Button, Typography, Spin, Empty, Pagination, Drawer } from 'antd';
 import { Link } from 'react-router';
+
 import AppLayout from '@/components/AppLayout';
 import {
   useGetProductsQuery,
   useGetGlobalCategoriesQuery,
 } from '@/services/apiSlice';
+
+import FilterPanel from './Addons/components/FilterPanel';
 import {
   PageContainerStyled,
   PageHeaderStyled,
@@ -21,7 +25,6 @@ import {
   LoadingContainerStyled,
   PaginationContainerStyled,
 } from './styles';
-import FilterPanel from './Addons/components/FilterPanel';
 
 const { Title, Text } = Typography;
 

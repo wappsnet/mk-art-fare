@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useParams } from 'react-router';
+
+import { PlusOutlined, PictureOutlined } from '@ant-design/icons';
 import {
   Row,
   Col,
@@ -16,7 +17,10 @@ import {
   Select,
   Divider,
 } from 'antd';
-import { PlusOutlined, PictureOutlined } from '@ant-design/icons';
+import { useParams } from 'react-router';
+
+import { DynamicFieldRenderer } from '@/components/DynamicFieldRenderer';
+import { ProductImageManager } from '@/components/ProductImageManager';
 import {
   useGetOrganizationProductsByIdQuery,
   useCreateProductMutation,
@@ -30,11 +34,11 @@ import {
   useUnassignFieldGroupFromProductMutation,
   useBatchUpdateProductFieldValuesMutation,
 } from '@/services/apiSlice';
-import { ProductImageManager } from '@/components/ProductImageManager';
-import { DynamicFieldRenderer } from '@/components/DynamicFieldRenderer';
 import { Product, ProductFormData } from '@/types/common';
 import { getErrorMessage } from '@/types/errors';
 import { FieldValue } from '@/types/fields';
+import { generateFieldDefinition } from '@/utils/fieldHelpers.ts';
+
 import {
   TopSpaceStyled,
   ProductImageStyled,
@@ -42,7 +46,6 @@ import {
   ProductActionsStyled,
   FullWidthInputStyled,
 } from './styles';
-import { generateFieldDefinition } from '@/utils/fieldHelpers.ts';
 
 const { Text } = Typography;
 const { Option } = Select;

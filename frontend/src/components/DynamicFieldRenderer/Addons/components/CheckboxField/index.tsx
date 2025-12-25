@@ -1,5 +1,7 @@
 import { FC } from 'react';
+
 import { Checkbox } from 'antd';
+
 import { CheckboxFieldDefinition, CheckboxFieldValue } from '@/types/fields';
 
 interface CheckboxFieldProps {

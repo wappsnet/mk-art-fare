@@ -1,9 +1,11 @@
 import { ReactNode } from 'react';
-import { Navigate } from 'react-router';
+
 import { Spin, Flex } from 'antd';
+import { Navigate } from 'react-router';
+
 import { useAppSelector } from '@/hooks/useRedux.ts';
-import { UserRole } from '@/types/common.ts';
 import { useGetProfileQuery } from '@/services/apiSlice';
+import { UserRole } from '@/types/common.ts';
 
 interface RequireRoleProps {
   children: ReactNode;

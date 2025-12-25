@@ -10,10 +10,10 @@ export const AlertStyled = styled(Alert)`
   max-width: 600px;
 `;
 
-export const FormContainer = styled.div`
+export const FormContainerStyled = styled.div`
   max-width: 600px;
 `;
 
-export const FullWidthSpace = styled(Space)`
+export const FullWidthSpaceStyled = styled(Space)`
   width: 100%;
 `;

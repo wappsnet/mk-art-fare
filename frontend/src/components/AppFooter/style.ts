@@ -1,5 +1,5 @@
-import { Layout as AntLayout } from 'antd';
 import styled from '@emotion/styled';
+import { Layout as AntLayout } from 'antd';
 import { Link } from 'react-router';
 
 const { Footer } = AntLayout;

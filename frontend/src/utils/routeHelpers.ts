@@ -1,6 +1,7 @@
-import type { RouteObject } from 'react-router';
-import type { AppRouteObject } from '@/types/routes.ts';
 import { omit } from './commonHelpers.ts';
+
+import type { AppRouteObject } from '@/types/routes.ts';
+import type { RouteObject } from 'react-router';
 
 export const convertRoutes = (routes: AppRouteObject[]): RouteObject[] => {
   return routes.map((route): RouteObject => {

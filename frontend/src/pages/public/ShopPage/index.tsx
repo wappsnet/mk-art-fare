@@ -1,8 +1,10 @@
-import { useParams, Link } from 'react-router';
-import { Row, Col, Typography, Button, Tabs, Spin, Empty, Tag } from 'antd';
 import { ShoppingCartOutlined } from '@ant-design/icons';
+import { Row, Col, Typography, Button, Tabs, Spin, Empty, Tag } from 'antd';
+import { useParams, Link } from 'react-router';
+
 import AppLayout from '@/components/AppLayout';
 import { useGetOrganizationQuery, useGetOrganizationProductsQuery } from '@/services/apiSlice';
+
 import {
   ShopHeaderStyled,
   BannerImageStyled,

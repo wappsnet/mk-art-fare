@@ -1,9 +1,12 @@
 import { useState, type ReactNode } from 'react';
-import { Link } from 'react-router';
-import { Row, Col, Typography, Avatar, Spin, Empty, Pagination, Input } from 'antd';
+
 import { UserOutlined, EyeOutlined, CalendarOutlined, SearchOutlined } from '@ant-design/icons';
+import { Row, Col, Typography, Avatar, Spin, Empty, Pagination, Input } from 'antd';
+import { Link } from 'react-router';
+
 import AppLayout from '@/components/AppLayout';
 import { useGetBlogPostsQuery } from '@/services/apiSlice';
+
 import {
   ContainerStyled,
   HeroSectionStyled,

@@ -1,11 +1,19 @@
 import { useState } from 'react';
+
+import { ShopOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Row, Col, Card, Typography, Button, Modal, Form, Input, message, Space } from 'antd';
 import { useNavigate } from 'react-router';
-import { Row, Col, Card, Typography, Button, Modal, Form, Input, message } from 'antd';
-import { ShopOutlined, PlusOutlined } from '@ant-design/icons';
+
 import AppLayout from '@/components/AppLayout';
 import { useAppSelector } from '@/hooks/useRedux';
-import { useGetMyOrganizationsQuery, useCreateOrganizationMutation } from '@/services/apiSlice';
+import {
+  useGetMyOrganizationsQuery,
+  useCreateOrganizationMutation,
+  useDeleteOrganizationMutation,
+} from '@/services/apiSlice';
+import { Organization } from '@/types/common';
 import { getErrorMessage } from '@/types/errors';
+
 import {
   ContainerStyled,
   WelcomeSectionStyled,
@@ -32,6 +40,7 @@ const DashboardPage = () => {
 
   const { data: organizationsData, refetch } = useGetMyOrganizationsQuery();
   const [createOrganization, { isLoading: isCreating }] = useCreateOrganizationMutation();
+  const [deleteOrganization, { isLoading: isDeleting }] = useDeleteOrganizationMutation();
 
   const organizations = organizationsData?.data || [];
 
@@ -45,6 +54,36 @@ const DashboardPage = () => {
     } catch (error) {
       message.error(getErrorMessage(error) || 'Failed to create shop');
     }
+  };
+
+  const handleDelete = (org: Organization) => {
+    Modal.confirm({
+      title: 'Delete Shop',
+      icon: <DeleteOutlined />,
+      content: (
+        <Space direction="vertical" css={{ width: '100%' }}>
+          <Text>
+            Are you sure you want to delete <Text strong>{org.name}</Text>?
+          </Text>
+          <Text type="danger">
+            This action cannot be undone. All shop data including products, custom fields, and
+            themes will be permanently deleted.
+          </Text>
+        </Space>
+      ),
+      okText: 'Delete',
+      okType: 'danger',
+      cancelText: 'Cancel',
+      onOk: async () => {
+        try {
+          await deleteOrganization(org.id).unwrap();
+          message.success('Shop deleted successfully');
+          refetch();
+        } catch (error) {
+          message.error(getErrorMessage(error) || 'Failed to delete shop');
+        }
+      },
+    });
   };
 
   return (
@@ -87,6 +126,15 @@ const DashboardPage = () => {
                       </Button>
                       <Button size="small" onClick={() => navigate(`/shop/${org.slug}`)}>
                         View Shop
+                      </Button>
+                      <Button
+                        size="small"
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={() => handleDelete(org)}
+                        loading={isDeleting}
+                      >
+                        Delete
                       </Button>
                     </ShopCardActionsStyled>
                   </Card>

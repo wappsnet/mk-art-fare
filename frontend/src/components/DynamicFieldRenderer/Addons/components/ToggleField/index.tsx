@@ -1,5 +1,7 @@
 import { FC } from 'react';
+
 import { Switch } from 'antd';
+
 import { ToggleFieldDefinition, ToggleFieldValue } from '@/types/fields';
 
 interface ToggleFieldProps {

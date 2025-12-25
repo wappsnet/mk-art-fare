@@ -1,5 +1,7 @@
 import { FC } from 'react';
+
 import { InputNumber } from 'antd';
+
 import { NumberFieldDefinition, NumberFieldValue } from '@/types/fields';
 
 interface NumberFieldProps {

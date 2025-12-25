@@ -1,9 +1,10 @@
 import { ConfigProvider } from 'antd';
 import { Provider } from 'react-redux';
-import { store } from './store';
-import { useGetProfileQuery, useGetCartQuery } from './services/apiSlice';
-import { AppRouter } from './routes';
+
 import { theme } from './config/theme';
+import { AppRouter } from './routes';
+import { useGetProfileQuery, useGetCartQuery } from './services/apiSlice';
+import { store } from './store';
 import './styles/global.scss';
 
 function AppContent() {

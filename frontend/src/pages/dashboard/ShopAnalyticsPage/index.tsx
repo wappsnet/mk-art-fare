@@ -1,9 +1,12 @@
-import { useParams } from 'react-router';
 import { Row, Col, Card, Typography, Tag } from 'antd';
+import { useParams } from 'react-router';
+
 import { useGetOrganizationStatsQuery } from '@/services/apiSlice';
-import type { AnalyticsData } from '@/types/common';
-import { RowMarginTop16Styled, RowMarginTop24Styled, FullWidthSpaceStyled, FlexBetweenStyled } from './styles';
 import { getStatusTheme } from '@/utils/themeHelpers.ts';
+
+import { RowMarginTop16Styled, RowMarginTop24Styled, FullWidthSpaceStyled, FlexBetweenStyled } from './styles';
+
+import type { AnalyticsData } from '@/types/common';
 
 const { Title, Text } = Typography;
 

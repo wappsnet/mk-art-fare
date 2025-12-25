@@ -1,13 +1,16 @@
 import { FC } from 'react';
+
+import { SearchOutlined } from '@ant-design/icons';
 import { Button, Input, Select, Slider, Typography } from 'antd';
+
+import { Category } from '@/types/common.ts';
+
 import {
   FilterSectionStyled,
   PriceRangeText,
   PriceSliderWrapperStyled,
   SearchCompactStyled,
 } from './styles.ts';
-import { Category } from '@/types/common.ts';
-import { SearchOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
 

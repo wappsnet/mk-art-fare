@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router';
+
+import { ShoppingCartOutlined, ShopOutlined } from '@ant-design/icons';
 import {
   Row,
   Col,
@@ -11,20 +12,17 @@ import {
   Spin,
   message,
   Breadcrumb,
+  Image,
 } from 'antd';
-import { ShoppingCartOutlined, ShopOutlined, ZoomInOutlined } from '@ant-design/icons';
-import Zoom from 'react-medium-image-zoom';
-import 'react-medium-image-zoom/dist/styles.css';
+import { useParams, Link } from 'react-router';
+
 import AppLayout from '@/components/AppLayout';
-import {
-  useGetProductQuery,
-  useAddToCartMutation,
-} from '@/services/apiSlice';
+import { useGetProductQuery, useAddToCartMutation } from '@/services/apiSlice';
+
 import {
   ContainerStyled,
   ImageGalleryStyled,
   MainImageContainerStyled,
-  ZoomHintStyled,
   ThumbnailsContainerStyled,
   ThumbnailStyled,
   PriceSectionStyled,
@@ -92,14 +90,15 @@ const ProductDetailPage = () => {
             <Col xs={24} md={12}>
               {images.length > 0 ? (
                 <ImageGalleryStyled>
-                  <Zoom>
-                    <MainImageContainerStyled>
-                      <img src={currentImage?.url} alt={currentImage?.alt_text || product.name} />
-                      <ZoomHintStyled className="zoom-hint">
-                        <ZoomInOutlined /> Click to zoom
-                      </ZoomHintStyled>
-                    </MainImageContainerStyled>
-                  </Zoom>
+                  <MainImageContainerStyled>
+                    <Image
+                      src={currentImage?.url}
+                      alt={currentImage?.alt_text || product.name}
+                      preview={{
+                        src: currentImage?.url,
+                      }}
+                    />
+                  </MainImageContainerStyled>
 
                   {images.length > 1 && (
                     <ThumbnailsContainerStyled>
