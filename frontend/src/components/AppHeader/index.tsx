@@ -8,7 +8,7 @@ import {
   ShopOutlined,
   MenuOutlined,
 } from '@ant-design/icons';
-import { Badge, Avatar, Dropdown, Button, Space, Flex, Image, Drawer } from 'antd';
+import { Badge, Avatar, Dropdown, Button, Space, Flex, Image, Drawer, Typography } from 'antd';
 import { Link, useNavigate } from 'react-router';
 
 import ArtFareLogo from '@/assets/base/logo.svg';
@@ -23,9 +23,11 @@ import {
   MobileMenuButtonStyled,
   MobileMenuStyled,
   DesktopMenuContainerStyled,
-} from './style.ts';
+} from './styles.ts';
 
 import type { MenuProps } from 'antd';
+
+const { Text } = Typography;
 
 const AppHeader = () => {
   const navigate = useNavigate();
@@ -159,7 +161,7 @@ const AppHeader = () => {
                   <Avatar src={user.avatar_url} icon={<UserOutlined />} />
                 </Flex>
                 <Flex align="center">
-                  <span>{user.first_name || user.email}</span>
+                  <Text>{user.first_name || user.email}</Text>
                 </Flex>
               </UserMenuTriggerStyled>
             </Dropdown>

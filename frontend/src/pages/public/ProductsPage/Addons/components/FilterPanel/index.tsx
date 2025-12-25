@@ -7,6 +7,7 @@ import { Category } from '@/types/common.ts';
 
 import {
   FilterSectionStyled,
+  FullWidthSpaceStyled,
   PriceRangeText,
   PriceSliderWrapperStyled,
   SearchCompactStyled,
@@ -37,7 +38,7 @@ const FilterPanel: FC<FilterPanelProps> = ({
   handlePriceChange,
   handleClearFilters,
 }) => (
-  <>
+  <FullWidthSpaceStyled direction="vertical" size="large">
     <FilterSectionStyled>
       <Title level={5}>Search</Title>
       <SearchCompactStyled>
@@ -96,7 +97,7 @@ const FilterPanel: FC<FilterPanelProps> = ({
     <Button block onClick={handleClearFilters}>
       Clear All Filters
     </Button>
-  </>
+  </FullWidthSpaceStyled>
 );
 
 export default FilterPanel;

@@ -2,12 +2,12 @@ import { createElement } from 'react';
 
 import { Typography, Space, Modal, message, Spin, Alert } from 'antd';
 
+import { subscriptionPlans } from '@/config/subscription.ts';
 import {
   useGetCurrentSubscriptionQuery,
   useUpgradeSubscriptionMutation,
   useDowngradeSubscriptionMutation,
 } from '@/services/apiSlice';
-import { subscriptionPlans } from '@/config/subscriptionPlans';
 import { getErrorMessage } from '@/types/errors';
 
 import CurrentPlanBanner from './Addons/components/CurrentPlanBanner';
@@ -31,12 +31,12 @@ const SubscriptionPage = () => {
       content: (
         <Space direction="vertical">
           <Paragraph>You are about to upgrade to the Pro plan. You will get:</Paragraph>
-          <ul>
-            <li>Unlimited shops</li>
-            <li>Unlimited products</li>
-            <li>Advanced features</li>
-            <li>Priority support</li>
-          </ul>
+          <Space direction="vertical" size={4}>
+            <Text>• Unlimited shops</Text>
+            <Text>• Unlimited products</Text>
+            <Text>• Advanced features</Text>
+            <Text>• Priority support</Text>
+          </Space>
           <Paragraph type="secondary">
             No payment required at this time. This is for demonstration purposes.
           </Paragraph>
@@ -65,24 +65,24 @@ const SubscriptionPage = () => {
           <Paragraph>
             You are about to downgrade to the Basic plan. You will be limited to:
           </Paragraph>
-          <ul>
-            <li>1 shop only</li>
-            <li>Up to 10 products</li>
-            <li>Basic features only</li>
-          </ul>
+          <Space direction="vertical" size={4}>
+            <Text>• 1 shop only</Text>
+            <Text>• Up to 10 products</Text>
+            <Text>• Basic features only</Text>
+          </Space>
           {exceedsLimits && (
             <Alert
               type="warning"
               message="Cannot Downgrade"
               description={
-                <div>
-                  <p>You currently have:</p>
-                  <ul>
-                    <li>{orgCount} shop(s) (Basic allows 1)</li>
-                    <li>{productCount} product(s) (Basic allows 10)</li>
-                  </ul>
-                  <p>Please delete extra shops or products before downgrading.</p>
-                </div>
+                <Space direction="vertical">
+                  <Paragraph>You currently have:</Paragraph>
+                  <Space direction="vertical" size={4}>
+                    <Text>• {orgCount} shop(s) (Basic allows 1)</Text>
+                    <Text>• {productCount} product(s) (Basic allows 10)</Text>
+                  </Space>
+                  <Paragraph>Please delete extra shops or products before downgrading.</Paragraph>
+                </Space>
               }
             />
           )}
@@ -126,12 +126,12 @@ const SubscriptionPage = () => {
   return (
     <ContainerStyled>
       <Space direction="vertical" size={32}>
-        <div>
+        <Space direction="vertical" size={8}>
           <Title level={2}>Your Subscription</Title>
           <Paragraph type="secondary">
             Manage your subscription plan and billing information
           </Paragraph>
-        </div>
+        </Space>
 
         <CurrentPlanBanner
           subscription={subscription}
@@ -143,7 +143,7 @@ const SubscriptionPage = () => {
           isDowngrading={isDowngrading}
         />
 
-        <div>
+        <Space direction="vertical" size={16}>
           <Title level={3}>Available Plans</Title>
           <Space direction="vertical" size={24}>
             {subscriptionPlans.map((plan) => (
@@ -157,7 +157,7 @@ const SubscriptionPage = () => {
               />
             ))}
           </Space>
-        </div>
+        </Space>
       </Space>
     </ContainerStyled>
   );

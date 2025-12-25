@@ -1,10 +1,10 @@
 import { FC } from 'react';
 
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-import { Form, Input, Button, Row, Col, Flex } from 'antd';
+import { Form, Input, Button, Row, Col, Flex, Space } from 'antd';
 
 const OptionsListField: FC = () => (
-  <div>
+  <Space direction="vertical" style={{ width: '100%' }}>
     <Form.Item label="Options" required>
       <Form.List
         name="options"
@@ -60,7 +60,7 @@ const OptionsListField: FC = () => (
         )}
       </Form.List>
     </Form.Item>
-  </div>
+  </Space>
 );
 
 export default OptionsListField;

@@ -45,20 +45,12 @@ const AdminOrdersPage = () => {
     {
       title: 'Customer',
       key: 'customer',
-      render: (record: Order) => (
-        <div>
-          <Text>{record.user_id}</Text>
-        </div>
-      ),
+      render: (record: Order) => <Text>{record.user_id}</Text>,
     },
     {
       title: 'Organization',
       key: 'organization',
-      render: (record: Order) => (
-        <div>
-          <Text>{record.organization_id}</Text>
-        </div>
-      ),
+      render: (record: Order) => <Text>{record.organization_id}</Text>,
     },
     {
       title: 'Total',
@@ -107,7 +99,6 @@ const AdminOrdersPage = () => {
       key: 'created_at',
       render: (date: string) => dayjs(date).format('MMM DD, YYYY HH:mm'),
       sorter: (a: Order, b: Order) => dayjs(a.created_at).unix() - dayjs(b.created_at).unix(),
-      defaultSortOrder: 'descend',
     },
   ];
 
@@ -115,12 +106,12 @@ const AdminOrdersPage = () => {
     <AppLayout>
       <ContainerStyled>
         <HeaderStyled>
-          <div>
+          <Space direction="vertical" size={0}>
             <Title level={2}>
               <ShoppingOutlined /> All Orders
             </Title>
             <Text type="secondary">View and manage all platform orders</Text>
-          </div>
+          </Space>
         </HeaderStyled>
 
         <Row gutter={[16, 16]} css={{ marginBottom: 24 }}>

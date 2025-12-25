@@ -134,15 +134,14 @@ const AdminPage = () => {
       title: 'Name',
       key: 'name',
       render: (record: User) => (
-        <div>
+        <Space direction="vertical" size={0}>
           <Text strong>
             {record.first_name} {record.last_name}
           </Text>
-          <br />
           <Text type="secondary" css={{ fontSize: 12 }}>
             {record.email}
           </Text>
-        </div>
+        </Space>
       ),
     },
     {
@@ -197,13 +196,12 @@ const AdminPage = () => {
       dataIndex: 'name',
       key: 'name',
       render: (name: string, record: Organization) => (
-        <div>
+        <Space direction="vertical" size={0}>
           <Text strong>{name}</Text>
-          <br />
           <Text type="secondary" css={{ fontSize: 12 }}>
             /{record.slug}
           </Text>
-        </div>
+        </Space>
       ),
     },
     {
@@ -231,13 +229,12 @@ const AdminPage = () => {
       dataIndex: 'title',
       key: 'title',
       render: (title: string, record: BlogPost) => (
-        <div>
+        <Space direction="vertical" size={0}>
           <Text strong>{title}</Text>
-          <br />
           <Text type="secondary" css={{ fontSize: 12 }}>
             /{record.slug}
           </Text>
-        </div>
+        </Space>
       ),
     },
     {

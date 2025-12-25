@@ -14,6 +14,7 @@ import {
   RegisterFormData,
   OrganizationTheme,
   ProductImage,
+  AnalyticsData,
 } from '@/types/common';
 import {
   FieldGroup,
@@ -297,15 +298,7 @@ export const api = createApi({
       },
       providesTags: ['Order'],
     }),
-    getOrganizationStats: builder.query<
-      ApiResponse<{
-        total: unknown;
-        byStatus: unknown[];
-        recentRevenue: unknown[];
-        topProducts: unknown[];
-      }>,
-      number
-    >({
+    getOrganizationStats: builder.query<ApiResponse<AnalyticsData>, number>({
       query: (organizationId) => `/orders/organization/${organizationId}/stats`,
       providesTags: ['Order'],
     }),

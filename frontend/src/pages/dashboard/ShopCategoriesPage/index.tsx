@@ -124,7 +124,7 @@ const ShopCategoriesPage = () => {
   ];
 
   return (
-    <div>
+    <Space direction="vertical" size="large" style={{ width: '100%' }}>
       <TopSpaceStyled direction="vertical">
         <Button type="primary" icon={<PlusOutlined />} onClick={() => openCategoryModal()}>
           Create Custom Category
@@ -173,7 +173,7 @@ const ShopCategoriesPage = () => {
           </Form.Item>
         </Form>
       </Modal>
-    </div>
+    </Space>
   );
 };
 

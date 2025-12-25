@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { Comment as AntComment } from '@ant-design/compatible';
 import { UserOutlined, CalendarOutlined, EyeOutlined } from '@ant-design/icons';
-import { Typography, Avatar, Divider, Button, Input, List, Form, message, Spin } from 'antd';
+import { Typography, Avatar, Divider, Button, Input, List, Form, message, Spin, Space } from 'antd';
 import { useParams, Link } from 'react-router';
 
 import AppLayout from '@/components/AppLayout';
@@ -122,22 +122,21 @@ const BlogPostPage = () => {
 
           <AuthorInfoStyled>
             <Avatar size={48} src={post.avatar_url} icon={<UserOutlined />} />
-            <div>
+            <Space direction="vertical" size={0}>
               <Text strong>
                 {post.first_name} {post.last_name}
               </Text>
-              <br />
               <SmallSecondaryTextStyled type="secondary">Author</SmallSecondaryTextStyled>
-            </div>
+            </Space>
           </AuthorInfoStyled>
 
           <MetaInfoStyled>
-            <span>
+            <Text>
               <CalendarOutlined /> {formatDate(post.published_at || post.created_at)}
-            </span>
-            <span>
+            </Text>
+            <Text>
               <EyeOutlined /> {post.view_count} views
-            </span>
+            </Text>
           </MetaInfoStyled>
         </ArticleHeaderStyled>
 

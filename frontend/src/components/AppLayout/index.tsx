@@ -3,7 +3,7 @@ import { ReactNode } from 'react';
 import AppFooter from '@/components/AppFooter';
 import AppHeader from '@/components/AppHeader';
 
-import { ContentStyled, LayoutStyled } from './style.ts';
+import { ContentStyled, LayoutStyled } from './styles.ts';
 
 
 interface LayoutProps {

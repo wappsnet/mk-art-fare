@@ -5,7 +5,7 @@ import { Link } from 'react-router';
 
 import logo from '@/assets/base/logo.svg';
 
-import { CardStyled, ContainerStyled, LayoutStyled } from './style.ts';
+import { CardStyled, ContainerStyled, LayoutStyled } from './styles.ts';
 
 interface LayoutProps {
   children: ReactNode;

@@ -1,4 +1,4 @@
-import { Table, Tag } from 'antd';
+import { Table, Tag, Space } from 'antd';
 import { useParams } from 'react-router';
 
 import { useGetOrganizationOrdersQuery } from '@/services/apiSlice';
@@ -63,10 +63,10 @@ const ShopOrdersPage = () => {
   ];
 
   return (
-    <div>
+    <Space direction="vertical" size="large" style={{ width: '100%' }}>
       <PageTitleStyled level={4}>Recent Orders</PageTitleStyled>
       <Table dataSource={orders} rowKey="id" columns={columns} pagination={{ pageSize: 10 }} />
-    </div>
+    </Space>
   );
 };
 

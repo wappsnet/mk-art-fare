@@ -4,10 +4,14 @@ import { Space, Typography } from 'antd';
 export const FilterSectionStyled = styled.div`
   background: #fafafa;
   border-radius: 8px;
-  margin-bottom: 24px;
+  padding: 8px;
 `;
 
 export const SearchCompactStyled = styled(Space.Compact)`
+  width: 100%;
+`;
+
+export const FullWidthSpaceStyled = styled(Space)`
   width: 100%;
 `;
 

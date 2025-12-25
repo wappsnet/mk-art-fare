@@ -90,18 +90,18 @@ const BlogPage = () => {
                   </Paragraph>
 
                   <PostMetaStyled>
-                    <span>
+                    <Text>
                       <Avatar size="small" src={post.avatar_url} icon={<UserOutlined />} />
                       <Text css={{ marginLeft: 8 }}>
                         {post.first_name} {post.last_name}
                       </Text>
-                    </span>
-                    <span>
+                    </Text>
+                    <Text>
                       <CalendarOutlined /> {formatDate(post.published_at || post.created_at)}
-                    </span>
-                    <span>
+                    </Text>
+                    <Text>
                       <EyeOutlined /> {post.view_count} views
-                    </span>
+                    </Text>
                   </PostMetaStyled>
                 </PostCardStyled>
               </Link>

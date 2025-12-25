@@ -188,8 +188,8 @@ const ShopProductsPage = () => {
   const saveFieldValues = async (productId: number) => {
     const fieldValueUpdates: Record<number, FieldValue['value']> = {};
     selectedFieldDefinitions.forEach((field) => {
-      if (field.value !== undefined) {
-        fieldValueUpdates[field.id] = field.value;
+      if (field.fieldValue) {
+        fieldValueUpdates[field.id] = field.fieldValue.value;
       }
     });
 
@@ -231,7 +231,7 @@ const ShopProductsPage = () => {
   };
 
   return (
-    <div>
+    <Space direction="vertical" size="large" style={{ width: '100%' }}>
       <TopSpaceStyled>
         <Button type="primary" icon={<PlusOutlined />} onClick={() => openProductModal()}>
           Add Product
@@ -423,7 +423,7 @@ const ShopProductsPage = () => {
           />
         )}
       </Drawer>
-    </div>
+    </Space>
   );
 };
 

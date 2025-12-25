@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Card, Typography, Row, Button } from 'antd';
+import { Card, Typography, Row, Button, Image } from 'antd';
 
 const { Text, Title: AntTitle } = Typography;
 
@@ -20,15 +20,9 @@ export const ContentRowStyled = styled(Row)`
 
 export const CartItemCardStyled = styled(Card)`
   margin-bottom: 16px;
-
-  .ant-card-body {
-    padding: 16px;
-  }
 `;
 
-export const ProductImageStyled = styled.img`
-  width: 100px;
-  height: 100px;
+export const ProductImageStyled = styled(Image)`
   object-fit: cover;
   border-radius: 4px;
 `;
@@ -46,20 +40,6 @@ export const PriceStyled = styled(Text)`
 
 export const TotalPriceStyled = styled(Text)`
   font-size: 18px;
-`;
-
-export const TotalTitle = styled(AntTitle)`
-  &.ant-typography {
-    color: #1890ff;
-  }
-`;
-
-export const PriceWrapperStyled = styled.div`
-  margin-top: 8px;
-`;
-
-export const RightAlignColStyled = styled.div`
-  text-align: right;
 `;
 
 export const ClearCartButtonStyled = styled(Button)`

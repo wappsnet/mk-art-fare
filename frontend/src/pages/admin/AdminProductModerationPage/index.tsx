@@ -94,7 +94,7 @@ const AdminProductModerationPage = () => {
       dataIndex: 'name',
       key: 'name',
       render: (name: string, record: Product) => (
-        <div>
+        <Space direction="vertical" size={0}>
           <Space>
             <Text strong>{name}</Text>
             {record.moderation_status === 'approved' && (
@@ -104,11 +104,10 @@ const AdminProductModerationPage = () => {
               />
             )}
           </Space>
-          <br />
           <Text type="secondary" css={{ fontSize: 12 }}>
             {record.sku}
           </Text>
-        </div>
+        </Space>
       ),
     },
     {
@@ -187,12 +186,12 @@ const AdminProductModerationPage = () => {
     <AppLayout>
       <ContainerStyled>
         <HeaderStyled>
-          <div>
+          <Space direction="vertical" size={0}>
             <Title level={2}>
               <ShoppingOutlined /> Product Moderation
             </Title>
             <Text type="secondary">Review and moderate product listings</Text>
-          </div>
+          </Space>
         </HeaderStyled>
 
         <Card>
@@ -241,17 +240,17 @@ const AdminProductModerationPage = () => {
         >
           {selectedProduct && (
             <Space direction="vertical" size="large" css={{ width: '100%' }}>
-              <div>
+              <Space direction="vertical" size="small" css={{ width: '100%' }}>
                 {selectedProduct.primary_image_url && (
                   <Image
                     src={selectedProduct.primary_image_url}
                     alt={selectedProduct.name}
                     width="100%"
                     height={200}
-                    css={{ objectFit: 'cover', borderRadius: 8, marginBottom: 16 }}
+                    css={{ objectFit: 'cover', borderRadius: 8 }}
                   />
                 )}
-                <Text strong css={{ fontSize: 16, display: 'block', marginBottom: 8 }}>
+                <Text strong css={{ fontSize: 16 }}>
                   {selectedProduct.name}
                 </Text>
                 <Paragraph type="secondary">{selectedProduct.description}</Paragraph>
@@ -259,14 +258,13 @@ const AdminProductModerationPage = () => {
                   <Text strong>Price:</Text>
                   <Text>${(selectedProduct.price || 0).toFixed(2)}</Text>
                 </Space>
-                <br />
                 <Space>
                   <Text strong>SKU:</Text>
                   <Text>{selectedProduct.sku}</Text>
                 </Space>
-              </div>
+              </Space>
 
-              <div>
+              <Space direction="vertical" size="small" css={{ width: '100%' }}>
                 <Text strong>Moderation Note (Optional):</Text>
                 <TextArea
                   rows={4}
@@ -274,7 +272,7 @@ const AdminProductModerationPage = () => {
                   onChange={(e) => setModerationNote(e.target.value)}
                   placeholder="Add a note about this moderation decision..."
                 />
-              </div>
+              </Space>
             </Space>
           )}
         </Modal>

@@ -1,5 +1,17 @@
 import { DeleteOutlined, ShoppingOutlined } from '@ant-design/icons';
-import { Col, Typography, InputNumber, List, Empty, Divider, Space, message, Button } from 'antd';
+import {
+  Col,
+  Typography,
+  InputNumber,
+  List,
+  Empty,
+  Divider,
+  Space,
+  message,
+  Button,
+  Descriptions,
+  Flex,
+} from 'antd';
 import { Link, useNavigate } from 'react-router';
 
 import AppLayout from '@/components/AppLayout';
@@ -20,12 +32,10 @@ import {
   ProductTitle,
   SmallTextStyled,
   PriceStyled,
-  RightAlignColStyled,
   TotalPriceStyled,
   ClearCartButtonStyled,
   SummaryCardStyled,
   SummaryRowStyled,
-  TotalTitle,
   CheckoutButtonStyled,
   ContinueShoppingButtonStyled,
 } from './styles';
@@ -131,46 +141,59 @@ const CartPage = () => {
               dataSource={cart.items}
               renderItem={(item) => (
                 <CartItemCardStyled>
-                  <ContentRowStyled gutter={16} align="middle">
-                    <Col xs={6} sm={4}>
-                      <ProductImageStyled
-                        src="/placeholder-image.jpg"
-                        alt={item.name}
-                        onError={(e) => {
-                          e.currentTarget.src = 'https://via.placeholder.com/100';
-                        }}
-                      />
-                    </Col>
-                    <Col xs={18} sm={12}>
-                      <Space direction="vertical" size={4}>
-                        <Link to={`/products/${item.slug}`}>
-                          <ProductTitle level={5}>{item.name}</ProductTitle>
-                        </Link>
-                        <SmallTextStyled type="secondary">by {item.organization_name}</SmallTextStyled>
-                        <PriceStyled strong>${item.price.toFixed(2)}</PriceStyled>
+                  <ContentRowStyled gutter={[16, 16]}>
+                    <Col xs={24} sm={24} md={14}>
+                      <Space size={16} align="center" wrap>
+                        <Flex justify="center" flex="auto" gap={8} wrap>
+                          <ProductImageStyled
+                            src={item.image_url || 'https://via.placeholder.com/100'}
+                            alt={item.name}
+                            onError={(e) => {
+                              e.currentTarget.src = 'https://via.placeholder.com/100';
+                            }}
+                            width={150}
+                            height={150}
+                          />
+                          <Space direction="vertical" size={4}>
+                            <Link to={`/products/${item.slug}`}>
+                              <ProductTitle level={5}>{item.name}</ProductTitle>
+                            </Link>
+                            <SmallTextStyled type="secondary">
+                              by {item.organization_name}
+                            </SmallTextStyled>
+                            <PriceStyled strong>${item.price.toFixed(2)}</PriceStyled>
+                          </Space>
+                        </Flex>
                       </Space>
                     </Col>
-                    <Col xs={12} sm={4}>
-                      <InputNumber
-                        min={1}
-                        value={item.quantity}
-                        onChange={(value) => handleUpdateQuantity(item.product_id, value || 1)}
-                      />
-                    </Col>
-                    <Col xs={12} sm={4}>
-                      <RightAlignColStyled>
-                        <Space direction="vertical" align="end">
-                          <TotalPriceStyled strong>${(item.price * item.quantity).toFixed(2)}</TotalPriceStyled>
-                          <Button
-                            type="text"
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={() => handleRemoveItem(item.product_id)}
-                          >
-                            Remove
-                          </Button>
-                        </Space>
-                      </RightAlignColStyled>
+                    <Col xs={24} sm={24} md={10}>
+                      <Flex vertical gap={8}>
+                        <Descriptions column={1} size="middle" bordered layout="horizontal">
+                          <Descriptions.Item label={<Text type="secondary">Quantity</Text>}>
+                            <InputNumber
+                              min={1}
+                              value={item.quantity}
+                              onChange={(value) =>
+                                handleUpdateQuantity(item.product_id, value || 1)
+                              }
+                            />
+                          </Descriptions.Item>
+                          <Descriptions.Item label={<Text type="secondary">Total</Text>}>
+                            <TotalPriceStyled strong>
+                              ${(item.price * item.quantity).toFixed(2)}
+                            </TotalPriceStyled>
+                          </Descriptions.Item>
+                        </Descriptions>
+                        <Button
+                          type="primary"
+                          danger
+                          icon={<DeleteOutlined />}
+                          onClick={() => handleRemoveItem(item.product_id)}
+                          block
+                        >
+                          Remove
+                        </Button>
+                      </Flex>
                     </Col>
                   </ContentRowStyled>
                 </CartItemCardStyled>
@@ -199,7 +222,9 @@ const CartPage = () => {
               <Divider />
               <SummaryRowStyled>
                 <Title level={4}>Total:</Title>
-                <TotalTitle level={4}>${total.toFixed(2)}</TotalTitle>
+                <Title color="primary" level={4}>
+                  ${total.toFixed(2)}
+                </Title>
               </SummaryRowStyled>
               <CheckoutButtonStyled type="primary" size="large" block onClick={handleCheckout}>
                 Proceed to Checkout

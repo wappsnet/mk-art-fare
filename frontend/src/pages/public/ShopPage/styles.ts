@@ -8,10 +8,7 @@ export const ShopHeaderStyled = styled.div<{ bgColor?: string; textColor?: strin
   text-align: center;
   position: relative;
   overflow: hidden;
-
-  @media (max-width: 768px) {
-    padding: 60px 20px;
-  }
+  margin: 0 -20px;
 `;
 
 export const BannerImageStyled = styled.div<{ url?: string }>`
@@ -58,18 +55,6 @@ export const ProductCardStyled = styled(Card)`
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
-  }
-
-  .ant-card-cover {
-    height: 250px;
-    overflow: hidden;
-    background: #f5f5f5;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
   }
 `;
 

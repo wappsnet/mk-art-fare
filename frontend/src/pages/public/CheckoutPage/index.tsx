@@ -46,7 +46,7 @@ import {
   TermsTextStyled,
 } from './styles';
 
-const { Text } = Typography;
+const { Text, Paragraph } = Typography;
 
 interface CheckoutFormValues extends CreateAddressInput {
   notes?: string;
@@ -129,15 +129,15 @@ const CheckoutPage = () => {
           Modal.success({
             title: 'Order Placed Successfully!',
             content: (
-              <div>
-                <p>
-                  Order Number: <strong>{orderResponse.data.order_number}</strong>
-                </p>
-                <p>
-                  Total: <strong>${orderResponse.data.total.toFixed(2)}</strong>
-                </p>
-                <p>We'll send you an email confirmation shortly.</p>
-              </div>
+              <Space direction="vertical">
+                <Paragraph>
+                  Order Number: <Text strong>{orderResponse.data.order_number}</Text>
+                </Paragraph>
+                <Paragraph>
+                  Total: <Text strong>${orderResponse.data.total.toFixed(2)}</Text>
+                </Paragraph>
+                <Paragraph>We'll send you an email confirmation shortly.</Paragraph>
+              </Space>
             ),
             onOk: () => navigate('/dashboard'),
           });
@@ -184,14 +184,13 @@ const CheckoutPage = () => {
                           <Space direction="vertical" css={{ width: '100%' }}>
                             {addresses.map((address) => (
                               <Radio key={address.id} value={address.id}>
-                                <div>
+                                <Space direction="vertical" size={0}>
                                   <Text strong>{address.address_line1}</Text>
                                   {address.address_line2 && <Text>, {address.address_line2}</Text>}
-                                  <br />
                                   <Text type="secondary">
                                     {address.city}, {address.state} {address.postal_code}
                                   </Text>
-                                </div>
+                                </Space>
                               </Radio>
                             ))}
                           </Space>
@@ -339,11 +338,10 @@ const CheckoutPage = () => {
                 <CartItemsContainerStyled>
                   {items.map((item) => (
                     <CartItemStyled key={item.product_id}>
-                      <div>
+                      <Space direction="vertical" size={0}>
                         <Text strong>{item.name}</Text>
-                        <br />
                         <Text type="secondary">Quantity: {item.quantity}</Text>
-                      </div>
+                      </Space>
                       <Text>${(item.price * item.quantity).toFixed(2)}</Text>
                     </CartItemStyled>
                   ))}

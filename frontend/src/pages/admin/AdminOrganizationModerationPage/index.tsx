@@ -105,7 +105,7 @@ const AdminOrganizationModerationPage = () => {
       dataIndex: 'name',
       key: 'name',
       render: (name: string, record: Organization) => (
-        <div>
+        <Space direction="vertical" size={0}>
           <Space>
             <Text strong>{name}</Text>
             {record.moderation_status === 'approved' && (
@@ -115,21 +115,16 @@ const AdminOrganizationModerationPage = () => {
               />
             )}
           </Space>
-          <br />
           <Text type="secondary" css={{ fontSize: 12 }}>
             /{record.slug}
           </Text>
-        </div>
+        </Space>
       ),
     },
     {
       title: 'Owner',
       key: 'owner',
-      render: (record: Organization) => (
-        <div>
-          <Text>{record.owner_id}</Text>
-        </div>
-      ),
+      render: (record: Organization) => <Text>{record.owner_id}</Text>,
     },
     {
       title: 'Status',
@@ -200,12 +195,12 @@ const AdminOrganizationModerationPage = () => {
     <AppLayout>
       <ContainerStyled>
         <HeaderStyled>
-          <div>
+          <Space direction="vertical" size={0}>
             <Title level={2}>
               <ShopOutlined /> Organization Moderation
             </Title>
             <Text type="secondary">Review and moderate shop listings</Text>
-          </div>
+          </Space>
         </HeaderStyled>
 
         <Card>
@@ -254,13 +249,13 @@ const AdminOrganizationModerationPage = () => {
         >
           {selectedOrg && (
             <Space direction="vertical" size="large" css={{ width: '100%' }}>
-              <div>
+              <Space direction="vertical" size="small" css={{ width: '100%' }}>
                 <Title level={4}>{selectedOrg.name}</Title>
                 <Paragraph type="secondary">{selectedOrg.description}</Paragraph>
                 <Text type="secondary">Slug: /{selectedOrg.slug}</Text>
-              </div>
+              </Space>
 
-              <div>
+              <Space direction="vertical" size="small" css={{ width: '100%' }}>
                 <Text strong>Moderation Note (Optional):</Text>
                 <TextArea
                   rows={4}
@@ -268,7 +263,7 @@ const AdminOrganizationModerationPage = () => {
                   onChange={(e) => setModerationNote(e.target.value)}
                   placeholder="Add a note about this moderation decision..."
                 />
-              </div>
+              </Space>
             </Space>
           )}
         </Modal>

@@ -31,8 +31,8 @@ const PlanCard = ({ plan, isCurrentPlan }: PlanCardProps) => {
             </Space>
             <Text type="secondary">{plan.description}</Text>
             <PriceStyled>
-              <span className="amount">{plan.price}</span>
-              <span className="period">/{plan.period}</span>
+              <Text className="amount">{plan.price}</Text>
+              <Text className="period">/{plan.period}</Text>
             </PriceStyled>
           </Space>
         </Space>
@@ -41,7 +41,7 @@ const PlanCard = ({ plan, isCurrentPlan }: PlanCardProps) => {
           {plan.features.map((feature) => (
             <FeatureItemStyled key={feature}>
               <CheckOutlined />
-              <span>{feature}</span>
+              <Text>{feature}</Text>
             </FeatureItemStyled>
           ))}
         </FeatureListStyled>

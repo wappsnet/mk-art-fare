@@ -1,5 +1,6 @@
 import { query } from '../config/database.js';
 import { AppError } from '../middleware/errorHandler.js';
+import { transformImageUrls } from '../utils/helpers.js';
 
 /**
  * Cart Service
@@ -56,7 +57,11 @@ class CartService {
       return { items: [], total: 0 };
     }
 
-    const items = await this.getCartItems(cartId);
+    let items = await this.getCartItems(cartId);
+
+    // Transform image URLs to full paths
+    items = transformImageUrls(items, 'image_url', 'products');
+
     const total = this.calculateCartTotal(items);
 
     return { id: cartId, items, total };
@@ -71,7 +76,11 @@ class CartService {
   async getCartItems(cartId) {
     return await query(
       `SELECT ci.*, p.name, p.price, p.stock_quantity, p.slug,
-              o.name as organization_name, o.slug as organization_slug
+              o.name as organization_name, o.slug as organization_slug,
+              COALESCE(
+                (SELECT url FROM product_images WHERE product_id = p.id AND is_thumbnail = TRUE LIMIT 1),
+                (SELECT url FROM product_images WHERE product_id = p.id LIMIT 1)
+              ) as image_url
        FROM cart_items ci
        LEFT JOIN products p ON ci.product_id = p.id
        LEFT JOIN organizations o ON p.organization_id = o.id

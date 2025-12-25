@@ -232,7 +232,7 @@ const ShopCustomFieldsPage = () => {
   const selectedFieldType = Form.useWatch('field_type', fieldForm);
 
   return (
-    <div>
+    <Space direction="vertical" size="large" style={{ width: '100%' }}>
       <TopSpaceStyled>
         <Title level={2}>Custom Fields</Title>
         <Button type="primary" icon={<PlusOutlined />} onClick={() => openGroupDrawer()}>
@@ -337,7 +337,7 @@ const ShopCustomFieldsPage = () => {
           onFinish={handleFieldSubmit}
         />
       </Drawer>
-    </div>
+    </Space>
   );
 };
 

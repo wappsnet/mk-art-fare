@@ -1,14 +1,13 @@
 import { useMemo } from 'react';
 
 import { ArrowLeftOutlined } from '@ant-design/icons';
-import { Card, Typography, Button, Tabs, Spin } from 'antd';
+import { Card, Typography, Button, Tabs, Spin, Space } from 'antd';
 import { useParams, useNavigate, Outlet, useLocation } from 'react-router';
 
 import AppLayout from '@/components/AppLayout';
 import { useGetOrganizationByIdQuery } from '@/services/apiSlice';
 
 import { ContainerStyled, HeaderStyled, OutletWrapperStyled } from './styles';
-
 
 const { Title } = Typography;
 
@@ -79,7 +78,7 @@ const ShopManagementPage = () => {
     <AppLayout>
       <ContainerStyled>
         <HeaderStyled>
-          <div>
+          <Space direction="vertical" size="small">
             <Button
               icon={<ArrowLeftOutlined />}
               onClick={() => navigate('/dashboard')}
@@ -90,7 +89,7 @@ const ShopManagementPage = () => {
             <Title level={2} css={{ margin: 0 }}>
               Manage {organization.name}
             </Title>
-          </div>
+          </Space>
         </HeaderStyled>
 
         <Card>

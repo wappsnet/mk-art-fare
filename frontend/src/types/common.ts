@@ -109,6 +109,7 @@ export interface CartItem {
   slug: string;
   organization_name: string;
   organization_slug: string;
+  image_url?: string;
 }
 
 export interface Cart {
@@ -231,6 +232,7 @@ export interface RegisterFormData {
 export interface AnalyticsRevenueData {
   date: string;
   revenue: number;
+  orders: number;
 }
 
 export interface AnalyticsStatusData {
@@ -240,19 +242,16 @@ export interface AnalyticsStatusData {
 }
 
 export interface AnalyticsTopProduct {
-  id?: number;
   name: string;
-  quantity_sold?: number;
   total_sold: number;
   revenue: number;
 }
 
 export interface AnalyticsData {
   total: {
-    total_orders?: number;
-    total_revenue?: number;
-    total_items_sold?: number;
-    product_revenue?: number;
+    total_orders: number;
+    total_revenue: number;
+    total_items_sold: number;
   };
   byStatus: AnalyticsStatusData[];
   recentRevenue: AnalyticsRevenueData[];

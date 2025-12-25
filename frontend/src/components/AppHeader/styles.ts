@@ -53,10 +53,6 @@ export const NavMenuStyled = styled(Menu)`
 
 export const MobileMenuStyled = styled(Menu)`
   border-right: none;
-
-  .ant-menu-item {
-    margin: 4px 0;
-  }
 `;
 
 export const DesktopMenuContainerStyled = styled.div`

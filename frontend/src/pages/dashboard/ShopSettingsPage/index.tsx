@@ -126,7 +126,7 @@ const ShopSettingsPage = () => {
   };
 
   if (organization === null || organization === undefined) {
-    return <div>Loading...</div>;
+    return <Text>Loading...</Text>;
   }
 
   return (
@@ -146,7 +146,7 @@ const ShopSettingsPage = () => {
               title={
                 <Space>
                   <ShopOutlined />
-                  <span>Basic Information</span>
+                  <Text>Basic Information</Text>
                 </Space>
               }
               extra={
@@ -168,7 +168,7 @@ const ShopSettingsPage = () => {
                 <Descriptions.Item
                   label={
                     <Space>
-                      <LinkOutlined /> Shop URL
+                      <LinkOutlined /> <Text>Shop URL</Text>
                     </Space>
                   }
                 >
@@ -185,7 +185,7 @@ const ShopSettingsPage = () => {
               title={
                 <Space>
                   <BgColorsOutlined />
-                  <span>Theme Colors</span>
+                  <Text>Theme Colors</Text>
                 </Space>
               }
               extra={
@@ -228,7 +228,7 @@ const ShopSettingsPage = () => {
               title={
                 <Space>
                   <PictureOutlined />
-                  <span>Branding Images</span>
+                  <Text>Branding Images</Text>
                 </Space>
               }
               extra={
@@ -250,7 +250,7 @@ const ShopSettingsPage = () => {
                     ) : (
                       <EmptyImageContainerStyled>
                         <PictureOutlined className="empty-icon" />
-                        <div>No logo uploaded</div>
+                        <Text>No logo uploaded</Text>
                       </EmptyImageContainerStyled>
                     )}
                   </ImagePreviewContainerStyled>
@@ -266,7 +266,7 @@ const ShopSettingsPage = () => {
                     ) : (
                       <EmptyImageContainerStyled>
                         <PictureOutlined className="empty-icon" />
-                        <div>No banner uploaded</div>
+                        <Text>No banner uploaded</Text>
                       </EmptyImageContainerStyled>
                     )}
                   </ImagePreviewContainerStyled>

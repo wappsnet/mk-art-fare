@@ -102,15 +102,15 @@ const PricingPage = () => {
                     <Space direction="vertical" size={24}>
                       <Space direction="vertical" size={8}>
                         <Space size={12}>
-                          <span style={{ fontSize: 32 }}>{plan.icon}</span>
+                          <Text style={{ fontSize: 32 }}>{plan.icon}</Text>
                           <Title level={2}>{plan.name}</Title>
                         </Space>
                         <Text type="secondary">{plan.description}</Text>
                       </Space>
 
                       <PriceStyled>
-                        <span className="amount">{plan.price}</span>
-                        <span className="period">/{plan.period}</span>
+                        <Text className="amount">{plan.price}</Text>
+                        <Text className="period">/{plan.period}</Text>
                       </PriceStyled>
 
                       <Button
@@ -126,7 +126,7 @@ const PricingPage = () => {
                         {plan.features.map((feature) => (
                           <FeatureItemStyled key={feature}>
                             <CheckOutlined />
-                            <span>{feature}</span>
+                            <Text>{feature}</Text>
                           </FeatureItemStyled>
                         ))}
                       </FeatureListStyled>

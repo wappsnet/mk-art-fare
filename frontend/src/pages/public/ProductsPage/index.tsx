@@ -5,10 +5,7 @@ import { Row, Col, Button, Typography, Spin, Empty, Pagination, Drawer } from 'a
 import { Link } from 'react-router';
 
 import AppLayout from '@/components/AppLayout';
-import {
-  useGetProductsQuery,
-  useGetGlobalCategoriesQuery,
-} from '@/services/apiSlice';
+import { useGetProductsQuery, useGetGlobalCategoriesQuery } from '@/services/apiSlice';
 
 import FilterPanel from './Addons/components/FilterPanel';
 import {
@@ -130,7 +127,7 @@ const ProductsPage = () => {
             placement="left"
             onClose={() => setDrawerOpen(false)}
             open={drawerOpen}
-            width={300}
+            width={500}
           >
             {Filters}
           </Drawer>
