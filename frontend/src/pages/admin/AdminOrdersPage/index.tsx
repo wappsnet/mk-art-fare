@@ -1,24 +1,35 @@
-import { useState } from 'react';
+import { FC, useState } from 'react';
 
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import HomeIcon from '@mui/icons-material/Home';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import {
-  ShoppingOutlined,
-  DollarOutlined,
-  CheckCircleOutlined,
-  ClockCircleOutlined,
-} from '@ant-design/icons';
-import { Card, Table, Tag, Typography, Space, Statistic, Row, Col, Select } from 'antd';
+  Card,
+  CardContent,
+  Chip,
+  Typography,
+  Stack,
+  Grid,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Box,
+  Breadcrumbs,
+  Link as MuiLink,
+} from '@mui/material';
 import dayjs from 'dayjs';
+import { Link } from 'react-router';
 
+import AppDataTable, { Column } from '@/components/AppDataTable';
 import AppLayout from '@/components/AppLayout';
 import { useGetOrdersQuery } from '@/services/apiSlice';
 import { Order, OrderStatus } from '@/types/common';
 
-import { ContainerStyled, HeaderStyled, StatCardStyled } from './styles';
-
-const { Title, Text } = Typography;
-const { Option } = Select;
-
-const AdminOrdersPage = () => {
+const AdminOrdersPage: FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const { data: ordersData, isLoading } = useGetOrdersQuery();
@@ -34,155 +45,221 @@ const AdminOrdersPage = () => {
     completedOrders: orders.filter((o: Order) => o.status === OrderStatus.DELIVERED).length,
   };
 
-  const columns = [
+  const getStatusColor = (
+    status: string
+  ): 'default' | 'warning' | 'info' | 'success' | 'error' => {
+    const colorMap: Record<string, 'default' | 'warning' | 'info' | 'success' | 'error'> = {
+      pending: 'warning',
+      processing: 'info',
+      shipped: 'info',
+      delivered: 'success',
+      completed: 'success',
+      cancelled: 'error',
+    };
+    return colorMap[status] || 'default';
+  };
+
+  const getPaymentStatusColor = (
+    status: string
+  ): 'default' | 'warning' | 'success' | 'error' => {
+    const colorMap: Record<string, 'default' | 'warning' | 'success' | 'error'> = {
+      pending: 'warning',
+      paid: 'success',
+      failed: 'error',
+      refunded: 'default',
+    };
+    return colorMap[status] || 'default';
+  };
+
+  const columns: Column<Order>[] = [
     {
-      title: 'Order ID',
-      dataIndex: 'id',
-      key: 'id',
-      width: 100,
-      render: (id: number) => <Text strong>#{id}</Text>,
-    },
-    {
-      title: 'Customer',
-      key: 'customer',
-      render: (record: Order) => <Text>{record.user_id}</Text>,
-    },
-    {
-      title: 'Organization',
-      key: 'organization',
-      render: (record: Order) => <Text>{record.organization_id}</Text>,
-    },
-    {
-      title: 'Total',
-      dataIndex: 'total_amount',
-      key: 'total_amount',
-      render: (amount: number) => (
-        <Text strong css={{ color: '#52c41a' }}>
-          ${amount?.toFixed(2) || '0.00'}
-        </Text>
+      id: 'id',
+      label: 'Order ID',
+      render: (order) => (
+        <Typography variant="body2" fontWeight="bold">
+          #{order.id}
+        </Typography>
       ),
-      sorter: (a: Order, b: Order) => (a.total_amount || 0) - (b.total_amount || 0),
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: string) => {
-        const colorMap: Record<string, string> = {
-          pending: 'warning',
-          processing: 'processing',
-          shipped: 'blue',
-          delivered: 'success',
-          completed: 'success',
-          cancelled: 'error',
-        };
-        return <Tag color={colorMap[status] || 'default'}>{status?.toUpperCase()}</Tag>;
-      },
+      id: 'customer',
+      label: 'Customer',
+      render: (order) => <Typography variant="body2">{order.user_id}</Typography>,
     },
     {
-      title: 'Payment Status',
-      dataIndex: 'payment_status',
-      key: 'payment_status',
-      render: (status: string) => {
-        const colorMap: Record<string, string> = {
-          pending: 'warning',
-          paid: 'success',
-          failed: 'error',
-          refunded: 'default',
-        };
-        return <Tag color={colorMap[status] || 'default'}>{status?.toUpperCase()}</Tag>;
-      },
+      id: 'organization',
+      label: 'Organization',
+      render: (order) => <Typography variant="body2">{order.organization_id}</Typography>,
     },
     {
-      title: 'Order Date',
-      dataIndex: 'created_at',
-      key: 'created_at',
-      render: (date: string) => dayjs(date).format('MMM DD, YYYY HH:mm'),
-      sorter: (a: Order, b: Order) => dayjs(a.created_at).unix() - dayjs(b.created_at).unix(),
+      id: 'total',
+      label: 'Total',
+      render: (order) => (
+        <Typography variant="body2" fontWeight="bold" color="success.main">
+          ${order.total_amount?.toFixed(2) || '0.00'}
+        </Typography>
+      ),
+    },
+    {
+      id: 'status',
+      label: 'Status',
+      render: (order) => (
+        <Chip
+          label={order.status?.toUpperCase()}
+          color={getStatusColor(order.status)}
+          size="small"
+        />
+      ),
+    },
+    {
+      id: 'payment_status',
+      label: 'Payment Status',
+      render: (order) => (
+        <Chip
+          label={order.payment_status?.toUpperCase() || 'N/A'}
+          color={getPaymentStatusColor(order.payment_status || 'pending')}
+          size="small"
+        />
+      ),
+    },
+    {
+      id: 'created_at',
+      label: 'Order Date',
+      render: (order) => (
+        <Typography variant="body2">
+          {dayjs(order.created_at).format('MMM DD, YYYY HH:mm')}
+        </Typography>
+      ),
     },
   ];
 
   return (
     <AppLayout>
-      <ContainerStyled>
-        <HeaderStyled>
-          <Space direction="vertical" size={0}>
-            <Title level={2}>
-              <ShoppingOutlined /> All Orders
-            </Title>
-            <Text type="secondary">View and manage all platform orders</Text>
-          </Space>
-        </HeaderStyled>
+      <Box sx={{ py: 4, px: 3 }}>
+        <Stack spacing={4}>
+          <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
+            <MuiLink
+              component={Link}
+              to="/admin"
+              underline="hover"
+              color="inherit"
+              sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
+            >
+              <HomeIcon fontSize="small" />
+              Admin Dashboard
+            </MuiLink>
+            <Typography color="text.primary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <ShoppingCartIcon fontSize="small" />
+              All Orders
+            </Typography>
+          </Breadcrumbs>
 
-        <Row gutter={[16, 16]} css={{ marginBottom: 24 }}>
-          <Col xs={24} sm={12} lg={6}>
-            <StatCardStyled>
-              <Statistic
-                title="Total Orders"
-                value={stats.totalOrders}
-                prefix={<ShoppingOutlined />}
-                valueStyle={{ color: '#1890ff' }}
-              />
-            </StatCardStyled>
-          </Col>
-          <Col xs={24} sm={12} lg={6}>
-            <StatCardStyled>
-              <Statistic
-                title="Total Revenue"
-                value={stats.totalRevenue}
-                prefix={<DollarOutlined />}
-                precision={2}
-                valueStyle={{ color: '#52c41a' }}
-              />
-            </StatCardStyled>
-          </Col>
-          <Col xs={24} sm={12} lg={6}>
-            <StatCardStyled>
-              <Statistic
-                title="Pending Orders"
-                value={stats.pendingOrders}
-                prefix={<ClockCircleOutlined />}
-                valueStyle={{ color: '#faad14' }}
-              />
-            </StatCardStyled>
-          </Col>
-          <Col xs={24} sm={12} lg={6}>
-            <StatCardStyled>
-              <Statistic
-                title="Completed Orders"
-                value={stats.completedOrders}
-                prefix={<CheckCircleOutlined />}
-                valueStyle={{ color: '#52c41a' }}
-              />
-            </StatCardStyled>
-          </Col>
-        </Row>
+          <Box>
+            <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <ShoppingCartIcon /> All Orders
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              View and manage all platform orders
+            </Typography>
+          </Box>
 
-        <Card>
-          <Space direction="vertical" size="middle" css={{ width: '100%' }}>
-            <Space>
-              <Text strong>Filter by status:</Text>
-              <Select value={statusFilter} onChange={setStatusFilter} css={{ width: 200 }}>
-                <Option value="all">All Orders</Option>
-                <Option value="pending">Pending</Option>
-                <Option value="processing">Processing</Option>
-                <Option value="shipped">Shipped</Option>
-                <Option value="delivered">Delivered</Option>
-                <Option value="completed">Completed</Option>
-                <Option value="cancelled">Cancelled</Option>
-              </Select>
-            </Space>
+          {/* Stats Grid */}
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+              <Card>
+                <CardContent>
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <ShoppingCartIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+                    <Box>
+                      <Typography variant="h4">{stats.totalOrders}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Total Orders
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+              <Card>
+                <CardContent>
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <AttachMoneyIcon sx={{ fontSize: 40, color: 'success.main' }} />
+                    <Box>
+                      <Typography variant="h4">${stats.totalRevenue.toFixed(2)}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Total Revenue
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+              <Card>
+                <CardContent>
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <AccessTimeIcon sx={{ fontSize: 40, color: 'warning.main' }} />
+                    <Box>
+                      <Typography variant="h4">{stats.pendingOrders}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Pending Orders
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+              <Card>
+                <CardContent>
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <CheckCircleIcon sx={{ fontSize: 40, color: 'success.main' }} />
+                    <Box>
+                      <Typography variant="h4">{stats.completedOrders}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Completed Orders
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
 
-            <Table
-              dataSource={filteredOrders}
-              columns={columns}
-              rowKey="id"
-              loading={isLoading}
-              pagination={{ pageSize: 20, showSizeChanger: true }}
-            />
-          </Space>
-        </Card>
-      </ContainerStyled>
+          {/* Orders Table */}
+          <Card>
+            <CardContent>
+              <Stack spacing={3}>
+                <FormControl sx={{ width: 200 }}>
+                  <InputLabel>Filter by status</InputLabel>
+                  <Select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    label="Filter by status"
+                  >
+                    <MenuItem value="all">All Orders</MenuItem>
+                    <MenuItem value="pending">Pending</MenuItem>
+                    <MenuItem value="processing">Processing</MenuItem>
+                    <MenuItem value="shipped">Shipped</MenuItem>
+                    <MenuItem value="delivered">Delivered</MenuItem>
+                    <MenuItem value="completed">Completed</MenuItem>
+                    <MenuItem value="cancelled">Cancelled</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <AppDataTable
+                  columns={columns}
+                  data={filteredOrders}
+                  isLoading={isLoading}
+                  getRowKey={(order) => order.id}
+                  emptyContent={<Typography color="text.secondary">No orders found</Typography>}
+                />
+              </Stack>
+            </CardContent>
+          </Card>
+        </Stack>
+      </Box>
     </AppLayout>
   );
 };

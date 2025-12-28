@@ -1,99 +1,160 @@
-import { Row, Col, Card, Typography, Tag } from 'antd';
+import { FC } from 'react';
+
+import { Grid, Card, CardContent, Typography, Chip, Stack, Box } from '@mui/material';
 import { useParams } from 'react-router';
 
 import { useGetOrganizationStatsQuery } from '@/services/apiSlice';
 import { getStatusTheme } from '@/utils/themeHelpers.ts';
 
-import { FullWidthSpaceStyled, FlexBetweenStyled } from './styles';
-
-const { Title, Text } = Typography;
-
-const ShopAnalyticsPage = () => {
+const ShopAnalyticsPage: FC = () => {
   const { id } = useParams<{ id: string }>();
   const orgId = Number.parseInt(id!);
 
   const { data: statsData } = useGetOrganizationStatsQuery(orgId, { skip: !orgId });
   const stats = statsData?.data;
 
+  const getStatusColor = (
+    status: string
+  ): 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' => {
+    const theme = getStatusTheme(status);
+    const colorMap: Record<
+      string,
+      'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'
+    > = {
+      success: 'success',
+      processing: 'info',
+      warning: 'warning',
+      error: 'error',
+      default: 'default',
+      blue: 'primary',
+    };
+    return colorMap[theme] || 'default';
+  };
+
   return (
-    <FullWidthSpaceStyled direction="vertical" size="large">
-      <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} lg={6}>
+    <Stack spacing={3}>
+      {/* Main Stats */}
+      <Grid container spacing={2}>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <Card>
-            <Title level={4}>{stats?.total?.total_orders || 0}</Title>
-            <Text type="secondary">Total Orders</Text>
+            <CardContent>
+              <Typography variant="h4" gutterBottom>
+                {stats?.total?.total_orders || 0}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Total Orders
+              </Typography>
+            </CardContent>
           </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <Card>
-            <Title level={4}>${(stats?.total?.total_revenue || 0).toFixed(2)}</Title>
-            <Text type="secondary">Total Revenue</Text>
+            <CardContent>
+              <Typography variant="h4" gutterBottom>
+                ${(stats?.total?.total_revenue || 0).toFixed(2)}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Total Revenue
+              </Typography>
+            </CardContent>
           </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <Card>
-            <Title level={4}>{stats?.total?.total_items_sold || 0}</Title>
-            <Text type="secondary">Products Sold</Text>
+            <CardContent>
+              <Typography variant="h4" gutterBottom>
+                {stats?.total?.total_items_sold || 0}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Products Sold
+              </Typography>
+            </CardContent>
           </Card>
-        </Col>
-      </Row>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+          <Card>
+            <CardContent>
+              <Typography variant="h4" gutterBottom>
+                $
+                {(
+                  Number.parseFloat(String(stats?.total?.total_revenue || 0)) /
+                  (stats?.total?.total_orders || 1)
+                ).toFixed(2)}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Avg Order Value
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
-      <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} lg={6}>
+      {/* Detailed Stats */}
+      <Grid container spacing={2}>
+        <Grid size={{ xs: 12, lg: 6 }}>
           <Card>
-            <Title level={4}>
-              $
-              {(
-                Number.parseFloat(String(stats?.total?.total_revenue || 0)) /
-                (stats?.total?.total_orders || 1)
-              ).toFixed(2)}
-            </Title>
-            <Text type="secondary">Avg Order Value</Text>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Orders by Status
+              </Typography>
+              {stats?.byStatus && stats.byStatus.length > 0 ? (
+                <Stack spacing={2} sx={{ mt: 2 }}>
+                  {stats.byStatus.map((item) => (
+                    <Box
+                      key={item.status}
+                      sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                    >
+                      <Chip
+                        label={item.status.toUpperCase()}
+                        color={getStatusColor(item.status)}
+                        size="small"
+                      />
+                      <Typography variant="body2">
+                        {item.count} orders (${item.revenue.toFixed(2)})
+                      </Typography>
+                    </Box>
+                  ))}
+                </Stack>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  No data available
+                </Typography>
+              )}
+            </CardContent>
           </Card>
-        </Col>
-      </Row>
-
-      <Row gutter={[16, 16]}>
-        <Col xs={24} lg={12}>
-          <Card title="Orders by Status">
-            {stats?.byStatus && stats.byStatus.length > 0 ? (
-              <FullWidthSpaceStyled direction="vertical">
-                {stats.byStatus.map((item) => (
-                  <FlexBetweenStyled key={item.status}>
-                    <Tag color={getStatusTheme(item.status)}>{item.status.toUpperCase()}</Tag>
-                    <Text>
-                      {item.count} orders ($
-                      {item.revenue.toFixed(2)})
-                    </Text>
-                  </FlexBetweenStyled>
-                ))}
-              </FullWidthSpaceStyled>
-            ) : (
-              <Text type="secondary">No data available</Text>
-            )}
+        </Grid>
+        <Grid size={{ xs: 12, lg: 6 }}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Top Selling Products
+              </Typography>
+              {stats?.topProducts && stats.topProducts.length > 0 ? (
+                <Stack spacing={2} sx={{ mt: 2 }}>
+                  {stats.topProducts.map((product) => (
+                    <Box
+                      key={product.name}
+                      sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                    >
+                      <Typography variant="body2" fontWeight="bold">
+                        {product.name}
+                      </Typography>
+                      <Typography variant="body2">
+                        {product.total_sold} sold (${product.revenue.toFixed(2)})
+                      </Typography>
+                    </Box>
+                  ))}
+                </Stack>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  No data available
+                </Typography>
+              )}
+            </CardContent>
           </Card>
-        </Col>
-        <Col xs={24} lg={12}>
-          <Card title="Top Selling Products">
-            {stats?.topProducts && stats.topProducts.length > 0 ? (
-              <FullWidthSpaceStyled direction="vertical">
-                {stats.topProducts.map((product) => (
-                  <FlexBetweenStyled key={product.name}>
-                    <Text strong>{product.name}</Text>
-                    <Text>
-                      {product.total_sold} sold ($
-                      {product.revenue.toFixed(2)})
-                    </Text>
-                  </FlexBetweenStyled>
-                ))}
-              </FullWidthSpaceStyled>
-            ) : (
-              <Text type="secondary">No data available</Text>
-            )}
-          </Card>
-        </Col>
-      </Row>
-    </FullWidthSpaceStyled>
+        </Grid>
+      </Grid>
+    </Stack>
   );
 };
 

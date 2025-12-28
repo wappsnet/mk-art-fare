@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-import { Spin, Flex } from 'antd';
+import { Box, CircularProgress } from '@mui/material';
 import { Navigate } from 'react-router';
 
 import { useAppSelector } from '@/hooks/useRedux.ts';
@@ -21,9 +21,16 @@ export const RequireRole = ({ children, allowedRoles, fallbackPath = '/403' }: R
   // Wait for profile to load if authenticated but user data not available yet
   if (isAuthenticated && !user && isLoading) {
     return (
-      <Flex justify="center" align="center" css={{ minHeight: '100vh' }}>
-        <Spin size="large" />
-      </Flex>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100vh',
+        }}
+      >
+        <CircularProgress size={48} />
+      </Box>
     );
   }
 

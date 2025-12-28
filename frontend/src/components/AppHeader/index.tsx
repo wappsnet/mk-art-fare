@@ -1,40 +1,43 @@
-import { useState } from 'react';
+import { FC, useState, MouseEvent } from 'react';
 
+import LoginIcon from '@mui/icons-material/Login';
+import LogoutIcon from '@mui/icons-material/Logout';
+import MenuIcon from '@mui/icons-material/Menu';
+import PersonIcon from '@mui/icons-material/Person';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import StorefrontIcon from '@mui/icons-material/Storefront';
 import {
-  ShoppingCartOutlined,
-  UserOutlined,
-  LoginOutlined,
-  LogoutOutlined,
-  ShopOutlined,
-  MenuOutlined,
-} from '@ant-design/icons';
-import { Badge, Avatar, Dropdown, Button, Space, Flex, Image, Drawer, Typography } from 'antd';
+  AppBar,
+  Toolbar,
+  Badge,
+  Avatar,
+  Button,
+  Stack,
+  Box,
+  Menu,
+  MenuItem,
+  IconButton,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Container,
+} from '@mui/material';
 import { Link, useNavigate } from 'react-router';
 
 import ArtFareLogo from '@/assets/base/logo.svg';
+import AppDrawer from '@/components/AppDrawer';
 import { useAppSelector } from '@/hooks/useRedux';
 import { useGetCartQuery, useLogoutMutation } from '@/services/apiSlice';
 
-import {
-  HeaderStyled,
-  LogoStyled,
-  NavMenuStyled,
-  UserMenuTriggerStyled,
-  MobileMenuButtonStyled,
-  MobileMenuStyled,
-  DesktopMenuContainerStyled,
-} from './styles.ts';
-
-import type { MenuProps } from 'antd';
-
-const { Text } = Typography;
-
-const AppHeader = () => {
+const AppHeader: FC = () => {
   const navigate = useNavigate();
   const { user } = useAppSelector((state) => state.auth);
   const { data: cartData } = useGetCartQuery();
   const [logout] = useLogoutMutation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
 
   const handleLogout = () => {
     logout()
@@ -42,166 +45,196 @@ const AppHeader = () => {
       .then(() => {
         navigate('/');
       });
+    setUserMenuAnchor(null);
   };
 
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
   };
 
-  // Build user menu items based on role and permissions
-  const userMenuItems: MenuProps['items'] = [];
+  const handleUserMenuOpen = (event: MouseEvent<HTMLElement>) => {
+    setUserMenuAnchor(event.currentTarget);
+  };
 
-  // Show Dashboard for artists, admins, or users who can create organizations
-  if (
-    user?.role === 'artist' ||
-    user?.role === 'admin' ||
-    user?.role === 'customer' // Customers can also create organizations
-  ) {
-    userMenuItems.push({
-      key: 'dashboard',
-      icon: <ShopOutlined />,
-      label: <Link to="/dashboard">Dashboard</Link>,
-    });
-  }
-
-  // Account is available to all authenticated users
-  userMenuItems.push({
-    key: 'account',
-    icon: <UserOutlined />,
-    label: <Link to="/account">Account</Link>,
-  });
-
-  // Admin menu only for admins
-  if (user?.role === 'admin') {
-    userMenuItems.push({
-      key: 'admin',
-      icon: <UserOutlined />,
-      label: <Link to="/admin">Admin</Link>,
-    });
-  }
-
-  // Logout for everyone
-  userMenuItems.push({
-    key: 'logout',
-    icon: <LogoutOutlined />,
-    label: 'Logout',
-    onClick: handleLogout,
-  });
-
-  const menuItems: MenuProps['items'] = [
-    {
-      key: 'home',
-      label: <Link to="/">Home</Link>,
-    },
-    {
-      key: 'products',
-      label: <Link to="/products">Products</Link>,
-    },
-    {
-      key: 'blog',
-      label: <Link to="/blog">Blog</Link>,
-    },
-  ];
-
-  // Mobile menu items (combines main nav + user menu)
-  const mobileMenuItems: MenuProps['items'] = [
-    ...menuItems,
-    { type: 'divider' },
-    ...(user
-      ? userMenuItems
-      : [
-          {
-            key: 'login',
-            icon: <LoginOutlined />,
-            label: <Link to="/login">Login</Link>,
-            onClick: closeMobileMenu,
-          },
-          {
-            key: 'register',
-            icon: <UserOutlined />,
-            label: <Link to="/register">Sign Up</Link>,
-            onClick: closeMobileMenu,
-          },
-        ]),
-  ];
+  const handleUserMenuClose = () => {
+    setUserMenuAnchor(null);
+  };
 
   return (
-    <HeaderStyled>
-      <Flex align="center" justify="start" wrap="nowrap" flex={1} gap={8}>
-        <LogoStyled to="/">
-          <Image preview={false} width={150} src={ArtFareLogo} />
-        </LogoStyled>
+    <AppBar position="sticky" color="default" elevation={0}>
+      <Toolbar component={Container} maxWidth="lg">
+        <Box component={Link} to="/" sx={{ display: 'flex', mr: 2 }}>
+          <img width={150} src={ArtFareLogo} alt="ArtFare" />
+        </Box>
 
         {/* Desktop Menu */}
-        <DesktopMenuContainerStyled>
-          <NavMenuStyled mode="horizontal" theme="light" items={menuItems} />
-        </DesktopMenuContainerStyled>
-      </Flex>
+        <Stack direction="row" spacing={1} sx={{ flex: 1, display: { xs: 'none', md: 'flex' } }}>
+          <Button component={Link} to="/">
+            Home
+          </Button>
+          <Button component={Link} to="/products">
+            Products
+          </Button>
+          <Button component={Link} to="/blog">
+            Blog
+          </Button>
+        </Stack>
 
-      <Flex align="center" justify="end" flex="auto" gap={8}>
-        {/* Cart - visible on all screen sizes */}
-        <Link to="/cart">
-          <Badge count={cartData?.data?.items?.length || 0}>
-            <Button
-              variant="filled"
-              color="primary"
-              shape="circle"
-              size="large"
-              icon={<ShoppingCartOutlined />}
-            />
-          </Badge>
-        </Link>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{ flex: 1, alignItems: 'center', justifyContent: 'flex-end' }}
+        >
+          {/* Cart - visible on all screen sizes */}
+          <IconButton component={Link} to="/cart" color="primary">
+            <Badge badgeContent={cartData?.data?.items?.length || 0} color="primary">
+              <ShoppingCartIcon />
+            </Badge>
+          </IconButton>
 
-        {/* Desktop User Menu */}
-        <DesktopMenuContainerStyled>
-          {user ? (
-            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-              <UserMenuTriggerStyled align="center">
-                <Flex align="center">
-                  <Avatar src={user.avatar_url} icon={<UserOutlined />} />
-                </Flex>
-                <Flex align="center">
-                  <Text>{user.first_name || user.email}</Text>
-                </Flex>
-              </UserMenuTriggerStyled>
-            </Dropdown>
-          ) : (
-            <Space>
-              <Link to="/login">
-                <Button type="text" icon={<LoginOutlined />}>
+          {/* Desktop User Menu */}
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, ml: 1 }}>
+            {user ? (
+              <>
+                <Button
+                  onClick={handleUserMenuOpen}
+                  startIcon={
+                    <Avatar src={user.avatar_url} sx={{ width: 32, height: 32 }}>
+                      <PersonIcon />
+                    </Avatar>
+                  }
+                >
+                  {user.first_name || user.email}
+                </Button>
+                <Menu
+                  anchorEl={userMenuAnchor}
+                  open={Boolean(userMenuAnchor)}
+                  onClose={handleUserMenuClose}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                >
+                  {(user.role === 'artist' ||
+                    user.role === 'admin' ||
+                    user.role === 'customer') && (
+                    <MenuItem component={Link} to="/dashboard" onClick={handleUserMenuClose}>
+                      <ListItemIcon>
+                        <StorefrontIcon fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText>Dashboard</ListItemText>
+                    </MenuItem>
+                  )}
+                  <MenuItem component={Link} to="/account" onClick={handleUserMenuClose}>
+                    <ListItemIcon>
+                      <PersonIcon fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText>Account</ListItemText>
+                  </MenuItem>
+                  {user.role === 'admin' && (
+                    <MenuItem component={Link} to="/admin" onClick={handleUserMenuClose}>
+                      <ListItemIcon>
+                        <PersonIcon fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText>Admin</ListItemText>
+                    </MenuItem>
+                  )}
+                  <MenuItem onClick={handleLogout}>
+                    <ListItemIcon>
+                      <LogoutIcon fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText>Logout</ListItemText>
+                  </MenuItem>
+                </Menu>
+              </>
+            ) : (
+              <Stack direction="row" spacing={1}>
+                <Button component={Link} to="/login" startIcon={<LoginIcon />}>
                   Login
                 </Button>
-              </Link>
-              <Link to="/register">
-                <Button type="primary">Sign Up</Button>
-              </Link>
-            </Space>
-          )}
-        </DesktopMenuContainerStyled>
+                <Button component={Link} to="/register" variant="contained">
+                  Sign Up
+                </Button>
+              </Stack>
+            )}
+          </Box>
 
-        {/* Mobile Menu Button */}
-        <MobileMenuButtonStyled
-          icon={<MenuOutlined />}
-          onClick={() => setMobileMenuOpen(true)}
-          size="large"
-        />
-      </Flex>
+          {/* Mobile Menu Button */}
+          <IconButton
+            onClick={() => setMobileMenuOpen(true)}
+            sx={{ display: { xs: 'flex', md: 'none' }, ml: 1 }}
+          >
+            <MenuIcon />
+          </IconButton>
+        </Stack>
 
-      {/* Mobile Drawer Menu */}
-      <Drawer
-        title="Menu"
-        placement="right"
-        onClose={closeMobileMenu}
-        open={mobileMenuOpen}
-        width={280}
-      >
-        <MobileMenuStyled
-          mode="inline"
-          items={mobileMenuItems}
-          onClick={closeMobileMenu}
-        />
-      </Drawer>
-    </HeaderStyled>
+        {/* Mobile Drawer Menu */}
+        <AppDrawer open={mobileMenuOpen} onClose={closeMobileMenu} title="Menu" width={280}>
+          <List>
+            <ListItem component={Link} to="/" onClick={closeMobileMenu}>
+              <ListItemText primary="Home" />
+            </ListItem>
+            <ListItem component={Link} to="/products" onClick={closeMobileMenu}>
+              <ListItemText primary="Products" />
+            </ListItem>
+            <ListItem component={Link} to="/blog" onClick={closeMobileMenu}>
+              <ListItemText primary="Blog" />
+            </ListItem>
+            <Divider />
+            {user ? (
+              <>
+                {(user.role === 'artist' || user.role === 'admin' || user.role === 'customer') && (
+                  <ListItem component={Link} to="/dashboard" onClick={closeMobileMenu}>
+                    <ListItemIcon>
+                      <StorefrontIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Dashboard" />
+                  </ListItem>
+                )}
+                <ListItem component={Link} to="/account" onClick={closeMobileMenu}>
+                  <ListItemIcon>
+                    <PersonIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Account" />
+                </ListItem>
+                {user.role === 'admin' && (
+                  <ListItem component={Link} to="/admin" onClick={closeMobileMenu}>
+                    <ListItemIcon>
+                      <PersonIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Admin" />
+                  </ListItem>
+                )}
+                <ListItem
+                  onClick={() => {
+                    handleLogout();
+                    closeMobileMenu();
+                  }}
+                >
+                  <ListItemIcon>
+                    <LogoutIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Logout" />
+                </ListItem>
+              </>
+            ) : (
+              <>
+                <ListItem component={Link} to="/login" onClick={closeMobileMenu}>
+                  <ListItemIcon>
+                    <LoginIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Login" />
+                </ListItem>
+                <ListItem component={Link} to="/register" onClick={closeMobileMenu}>
+                  <ListItemIcon>
+                    <PersonIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Sign Up" />
+                </ListItem>
+              </>
+            )}
+          </List>
+        </AppDrawer>
+      </Toolbar>
+    </AppBar>
   );
 };
 

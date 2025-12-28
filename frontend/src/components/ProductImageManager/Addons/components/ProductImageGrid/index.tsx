@@ -1,25 +1,26 @@
 import { useState, FC } from 'react';
 
-import { DeleteOutlined, StarOutlined, StarFilled } from '@ant-design/icons';
+import DeleteIcon from '@mui/icons-material/Delete';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
 import {
   Button,
-  Space,
-  Input,
-  message,
-  Modal,
-  Typography,
-  Row,
-  Col,
+  Stack,
+  TextField,
+  Grid,
   Card,
-  Badge,
-  Image,
-} from 'antd';
+  CardMedia,
+  CardContent,
+  CardActions,
+  Typography,
+  Chip,
+} from '@mui/material';
 
+import { useConfirm } from '@/components/ConfirmDialog';
 import { useUpdateProductImageMutation, useDeleteProductImageMutation } from '@/services/apiSlice';
 import { ProductImage } from '@/types/common';
 import { getErrorMessage } from '@/types/errors';
-
-const { Text } = Typography;
+import { message } from '@/utils/notification';
 
 interface ProductImageGridProps {
   productId: number;
@@ -30,6 +31,8 @@ interface ProductImageGridProps {
 export const ProductImageGrid: FC<ProductImageGridProps> = ({ productId, images, onUpdate }) => {
   const [editingAltId, setEditingAltId] = useState<number | null>(null);
   const [editingAltText, setEditingAltText] = useState('');
+
+  const { confirm } = useConfirm();
 
   const [updateImage, { isLoading: updating }] = useUpdateProductImageMutation();
   const [deleteImage] = useDeleteProductImageMutation();
@@ -60,10 +63,10 @@ export const ProductImageGrid: FC<ProductImageGridProps> = ({ productId, images,
   };
 
   const handleDeleteImage = (imageId: number) => {
-    Modal.confirm({
+    confirm({
       title: 'Delete Image',
       content: 'Are you sure you want to delete this image?',
-      onOk: () => executeImageDeletion(imageId),
+      onConfirm: () => executeImageDeletion(imageId),
     });
   };
 
@@ -84,48 +87,64 @@ export const ProductImageGrid: FC<ProductImageGridProps> = ({ productId, images,
   };
 
   if (images.length === 0) {
-    return <Text type="secondary">No images yet. Add your first image above.</Text>;
+    return (
+      <Typography color="text.secondary">No images yet. Add your first image above.</Typography>
+    );
   }
 
   return (
-    <Row gutter={[16, 16]}>
+    <Grid container spacing={2}>
       {images.map((img) => (
-        <Col key={img.id} xs={24} sm={24} md={12} lg={12}>
-          <Badge.Ribbon
-            text="Thumbnail"
-            color="blue"
-            style={{ display: img.is_thumbnail ? 'block' : 'none' }}
-          >
-            <Card
-              hoverable
-              cover={
-                <div style={{ height: 200, overflow: 'hidden', background: '#fafafa' }}>
-                  <Image
-                    src={img.url}
-                    alt={img.alt_text || 'Product image'}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    preview
-                  />
-                </div>
-              }
-              styles={{ body: { padding: 12 } }}
-            >
-              <Space direction="vertical" style={{ width: '100%' }} size="small">
+        <Grid size={{ xs: 12, sm: 12, md: 6 }} key={img.id}>
+          <Card sx={{ position: 'relative' }}>
+            {!!img.is_thumbnail && (
+              <Chip
+                label="Thumbnail"
+                color="primary"
+                size="small"
+                sx={{
+                  position: 'absolute',
+                  top: 8,
+                  right: 8,
+                  zIndex: 1,
+                }}
+              />
+            )}
+            <CardMedia
+              component="img"
+              height="200"
+              image={img.url}
+              alt={img.alt_text || 'Product image'}
+              sx={{
+                objectFit: 'cover',
+                bgcolor: 'grey.100',
+                height: '200px',
+              }}
+            />
+            <CardContent>
+              <Stack spacing={2}>
                 {editingAltId === img.id ? (
                   <>
-                    <Input
+                    <TextField
+                      label="Alt Text"
                       placeholder="Enter alt text"
                       value={editingAltText}
                       onChange={(e) => setEditingAltText(e.target.value)}
-                      onPressEnter={() => handleUpdateAltText(img.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleUpdateAltText(img.id);
+                        }
+                      }}
                       autoFocus
+                      fullWidth
+                      size="small"
                     />
-                    <Space>
+                    <Stack direction="row" spacing={1}>
                       <Button
-                        type="primary"
+                        variant="contained"
                         size="small"
                         onClick={() => handleUpdateAltText(img.id)}
-                        loading={updating}
+                        disabled={updating}
                       >
                         Save
                       </Button>
@@ -138,54 +157,56 @@ export const ProductImageGrid: FC<ProductImageGridProps> = ({ productId, images,
                       >
                         Cancel
                       </Button>
-                    </Space>
+                    </Stack>
                   </>
                 ) : (
-                  <>
-                    <Text
-                      type={img.alt_text ? undefined : 'secondary'}
-                      italic={!img.alt_text}
-                      style={{ minHeight: 40, display: 'block' }}
-                    >
-                      {img.alt_text || 'No alt text'}
-                    </Text>
-                    <Button
-                      size="small"
-                      block
-                      onClick={() => {
-                        setEditingAltId(img.id);
-                        setEditingAltText(img.alt_text || '');
-                      }}
-                    >
-                      Edit Alt Text
-                    </Button>
-                  </>
+                  <Typography
+                    variant="body2"
+                    color={img.alt_text ? 'text.primary' : 'text.secondary'}
+                    fontStyle={img.alt_text ? 'normal' : 'italic'}
+                    sx={{ minHeight: 40 }}
+                  >
+                    {img.alt_text || 'No alt text'}
+                  </Typography>
                 )}
-                <Space style={{ width: '100%' }}>
-                  <Button
-                    icon={img.is_thumbnail ? <StarFilled /> : <StarOutlined />}
-                    onClick={() => handleSetThumbnail(img.id, img.is_thumbnail || false)}
-                    loading={updating && editingAltId !== img.id}
-                    type={img.is_thumbnail ? 'primary' : 'default'}
-                    size="small"
-                    style={{ flex: 1 }}
-                  >
-                    {img.is_thumbnail ? 'Thumbnail' : 'Set as Thumbnail'}
-                  </Button>
-                  <Button
-                    danger
-                    icon={<DeleteOutlined />}
-                    onClick={() => handleDeleteImage(img.id)}
-                    size="small"
-                  >
-                    Delete
-                  </Button>
-                </Space>
-              </Space>
-            </Card>
-          </Badge.Ribbon>
-        </Col>
+              </Stack>
+            </CardContent>
+            <CardActions>
+              <Stack direction="column" spacing={1} flex={1}>
+                <Button
+                  size="medium"
+                  variant="outlined"
+                  fullWidth
+                  onClick={() => {
+                    setEditingAltId(img.id);
+                    setEditingAltText(img.alt_text || '');
+                  }}
+                >
+                  Edit Alt Text
+                </Button>
+                <Button
+                  startIcon={img.is_thumbnail ? <StarIcon /> : <StarBorderIcon />}
+                  onClick={() => handleSetThumbnail(img.id, img.is_thumbnail || false)}
+                  disabled={updating && editingAltId !== img.id}
+                  variant={img.is_thumbnail ? 'contained' : 'outlined'}
+                  size="medium"
+                  sx={{ flex: 1 }}
+                >
+                  {img.is_thumbnail ? 'Thumbnail' : 'Set as Thumbnail'}
+                </Button>
+                <Button
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                  onClick={() => handleDeleteImage(img.id)}
+                  size="medium"
+                >
+                  Delete
+                </Button>
+              </Stack>
+            </CardActions>
+          </Card>
+        </Grid>
       ))}
-    </Row>
+    </Grid>
   );
 };

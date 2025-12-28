@@ -1,29 +1,32 @@
-import { useState, type ReactNode } from 'react';
+import { FC, useState, ReactNode } from 'react';
 
-import { UserOutlined, EyeOutlined, CalendarOutlined, SearchOutlined } from '@ant-design/icons';
-import { Row, Col, Typography, Avatar, Spin, Empty, Pagination, Input } from 'antd';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import PersonIcon from '@mui/icons-material/Person';
+import SearchIcon from '@mui/icons-material/Search';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import {
+  Container,
+  Grid,
+  Typography,
+  Avatar,
+  CircularProgress,
+  Pagination,
+  TextField,
+  InputAdornment,
+  Card,
+  CardContent,
+  CardMedia,
+  Box,
+  Stack,
+  Chip,
+} from '@mui/material';
 import { Link } from 'react-router';
 
 import AppLayout from '@/components/AppLayout';
+import EmptyState from '@/components/EmptyState';
 import { useGetBlogPostsQuery } from '@/services/apiSlice';
 
-import {
-  ContainerStyled,
-  HeroSectionStyled,
-  PostCardStyled,
-  PostMetaStyled,
-  FeaturedBadgeStyled,
-  LoadingContainerStyled,
-  SearchContainerStyled,
-  PaginationContainerStyled,
-  CoverWrapperStyled,
-  NoImagePlaceholderStyled,
-} from './styles';
-
-const { Title, Paragraph, Text } = Typography;
-const { Search } = Input;
-
-const BlogPage = () => {
+const BlogPage: FC = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const limit = 9;
@@ -53,108 +56,182 @@ const BlogPage = () => {
   let content: ReactNode;
   if (loading) {
     content = (
-      <LoadingContainerStyled>
-        <Spin size="large" />
-      </LoadingContainerStyled>
+      <Box sx={{ textAlign: 'center', py: 12 }}>
+        <CircularProgress size={60} />
+      </Box>
     );
   } else if (posts.length === 0) {
-    content = <Empty description="No blog posts found" />;
+    content = <EmptyState title="No blog posts found" description="Try adjusting your search criteria" />;
   } else {
     content = (
       <>
-        <Row gutter={[24, 24]}>
+        <Grid container spacing={3}>
           {posts.map((post, index) => (
-            <Col xs={24} sm={12} lg={8} key={post.id}>
-              <Link to={`/blog/${post.slug}`}>
-                <PostCardStyled
-                  cover={
-                    post.featured_image_url ? (
-                      <CoverWrapperStyled>
-                        {index === 0 && (
-                          <FeaturedBadgeStyled color="gold">Featured</FeaturedBadgeStyled>
-                        )}
-                        <img alt={post.title} src={post.featured_image_url} />
-                      </CoverWrapperStyled>
-                    ) : (
-                      <NoImagePlaceholderStyled>
-                        <Text type="secondary">No Image</Text>
-                      </NoImagePlaceholderStyled>
-                    )
-                  }
-                >
-                  <Title level={4} ellipsis={{ rows: 2 }}>
+            <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={post.id}>
+              <Card
+                component={Link}
+                to={`/blog/${post.slug}`}
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  textDecoration: 'none',
+                  transition: 'transform 0.3s, box-shadow 0.3s',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: 8,
+                  },
+                }}
+              >
+                {post.featured_image_url ? (
+                  <Box sx={{ position: 'relative' }}>
+                    {index === 0 && (
+                      <Chip
+                        label="Featured"
+                        color="warning"
+                        size="small"
+                        sx={{ position: 'absolute', top: 16, right: 16, zIndex: 1 }}
+                      />
+                    )}
+                    <CardMedia
+                      component="img"
+                      height="200"
+                      image={post.featured_image_url}
+                      alt={post.title}
+                      sx={{ objectFit: 'cover' }}
+                    />
+                  </Box>
+                ) : (
+                  <Box
+                    sx={{
+                      height: 200,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: 'grey.100',
+                    }}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      No Image
+                    </Typography>
+                  </Box>
+                )}
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Typography
+                    variant="h6"
+                    gutterBottom
+                    sx={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                    }}
+                  >
                     {post.title}
-                  </Title>
-                  <Paragraph ellipsis={{ rows: 3 }} type="secondary">
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      mb: 2,
+                    }}
+                  >
                     {post.excerpt || post.content.substring(0, 150) + '...'}
-                  </Paragraph>
+                  </Typography>
 
-                  <PostMetaStyled>
-                    <Text>
-                      <Avatar size="small" src={post.avatar_url} icon={<UserOutlined />} />
-                      <Text css={{ marginLeft: 8 }}>
+                  <Stack direction="row" spacing={2} flexWrap="wrap" sx={{ fontSize: 12, color: 'text.secondary' }}>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Avatar
+                        src={post.avatar_url}
+                        sx={{ width: 20, height: 20 }}
+                      >
+                        <PersonIcon sx={{ fontSize: 14 }} />
+                      </Avatar>
+                      <Typography variant="caption">
                         {post.first_name} {post.last_name}
-                      </Text>
-                    </Text>
-                    <Text>
-                      <CalendarOutlined /> {formatDate(post.published_at || post.created_at)}
-                    </Text>
-                    <Text>
-                      <EyeOutlined /> {post.view_count} views
-                    </Text>
-                  </PostMetaStyled>
-                </PostCardStyled>
-              </Link>
-            </Col>
+                      </Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={0.5} alignItems="center">
+                      <CalendarTodayIcon sx={{ fontSize: 14 }} />
+                      <Typography variant="caption">
+                        {formatDate(post.published_at || post.created_at)}
+                      </Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={0.5} alignItems="center">
+                      <VisibilityIcon sx={{ fontSize: 14 }} />
+                      <Typography variant="caption">{post.view_count} views</Typography>
+                    </Stack>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
           ))}
-        </Row>
+        </Grid>
 
-        <PaginationContainerStyled>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
           <Pagination
-            current={page}
-            total={total}
-            pageSize={limit}
-            onChange={setPage}
-            showSizeChanger={false}
-            showTotal={(total) => `Total ${total} posts`}
+            count={Math.ceil(total / limit)}
+            page={page}
+            onChange={(_, value) => setPage(value)}
+            color="primary"
+            size="large"
           />
-        </PaginationContainerStyled>
+        </Box>
       </>
     );
   }
 
   return (
     <AppLayout>
-      <ContainerStyled>
-        <HeroSectionStyled>
-          <Title level={1} css={{ color: 'white', marginBottom: 16 }}>
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        {/* Hero Section */}
+        <Box
+          sx={{
+            textAlign: 'center',
+            py: 8,
+            px: 3,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            borderRadius: 3,
+            mb: 5,
+          }}
+        >
+          <Typography variant="h2" gutterBottom>
             Art Blog
-          </Title>
-          <Paragraph
-            css={{
-              color: 'rgba(255,255,255,0.9)',
-              fontSize: 18,
-              maxWidth: 600,
-              margin: '0 auto',
-            }}
-          >
-            Discover inspiring stories, art techniques, and insights from our vibrant community of
-            artists
-          </Paragraph>
-        </HeroSectionStyled>
+          </Typography>
+          <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.9)', maxWidth: 600, mx: 'auto' }}>
+            Discover inspiring stories, art techniques, and insights from our vibrant community of artists
+          </Typography>
+        </Box>
 
-        <SearchContainerStyled>
-          <Search
+        {/* Search */}
+        <Box sx={{ maxWidth: 600, mx: 'auto', mb: 4 }}>
+          <TextField
+            fullWidth
             placeholder="Search blog posts..."
-            allowClear
-            enterButton={<SearchOutlined />}
-            size="large"
-            onSearch={handleSearch}
+            value={search}
+            onChange={(e) => handleSearch(e.target.value)}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              },
+            }}
+            size="medium"
           />
-        </SearchContainerStyled>
+        </Box>
 
         {content}
-      </ContainerStyled>
+      </Container>
     </AppLayout>
   );
 };

@@ -1,6 +1,6 @@
 import { FC } from 'react';
 
-import { Input } from 'antd';
+import { TextField as MuiTextField } from '@mui/material';
 
 import { TextFieldDefinition, TextFieldValue } from '@/types/fields';
 
@@ -13,10 +13,10 @@ interface TextFieldProps {
 
 export const TextField: FC<TextFieldProps> = ({ field, fieldValue, onChange, disabled }) => {
   return (
-    <Input
+    <MuiTextField
       placeholder={field.placeholder}
       defaultValue={field.defaultValue}
-      value={field.fieldValue?.value}
+      value={field.fieldValue?.value || ''}
       onChange={(e) =>
         onChange({
           id: fieldValue?.id || 0,
@@ -30,7 +30,10 @@ export const TextField: FC<TextFieldProps> = ({ field, fieldValue, onChange, dis
         })
       }
       disabled={disabled}
-      maxLength={field.validation?.maxLength}
+      slotProps={{ htmlInput: { maxLength: field.validation?.maxLength } }}
+      label={field.label}
+      helperText={field.helpText}
+      fullWidth
     />
   );
 };

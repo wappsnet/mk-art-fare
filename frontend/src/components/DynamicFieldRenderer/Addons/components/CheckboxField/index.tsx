@@ -1,6 +1,13 @@
 import { FC } from 'react';
 
-import { Checkbox } from 'antd';
+import {
+  FormControl,
+  FormLabel,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
+  FormHelperText,
+} from '@mui/material';
 
 import { CheckboxFieldDefinition, CheckboxFieldValue } from '@/types/fields';
 
@@ -17,24 +24,43 @@ export const CheckboxField: FC<CheckboxFieldProps> = ({
   onChange,
   disabled,
 }) => {
+  const selectedValues = field.fieldValue?.value || [];
+
+  const handleChange = (optionValue: string, checked: boolean) => {
+    const newValues = checked
+      ? [...selectedValues, optionValue]
+      : selectedValues.filter((v) => v !== optionValue);
+
+    onChange({
+      id: fieldValue?.id || 0,
+      field_definition_id: field.id,
+      name: field.name,
+      label: field.label,
+      created_at: fieldValue?.created_at,
+      updated_at: fieldValue?.updated_at,
+      type: field.type,
+      value: newValues,
+    });
+  };
+
   return (
-    <Checkbox.Group
-      options={field.options}
-      defaultValue={field.defaultValue}
-      value={field.fieldValue?.value}
-      onChange={(value) => {
-        onChange({
-          id: fieldValue?.id || 0,
-          field_definition_id: field.id,
-          name: field.name,
-          label: field.label,
-          created_at: fieldValue?.created_at,
-          updated_at: fieldValue?.updated_at,
-          type: field.type,
-          value,
-        });
-      }}
-      disabled={disabled}
-    />
+    <FormControl component="fieldset" fullWidth disabled={disabled}>
+      <FormLabel component="legend">{field.label}</FormLabel>
+      <FormGroup>
+        {field.options?.map((option) => (
+          <FormControlLabel
+            key={option.value}
+            control={
+              <Checkbox
+                checked={selectedValues.includes(option.value)}
+                onChange={(e) => handleChange(option.value, e.target.checked)}
+              />
+            }
+            label={option.label}
+          />
+        ))}
+      </FormGroup>
+      {field.helpText && <FormHelperText>{field.helpText}</FormHelperText>}
+    </FormControl>
   );
 };

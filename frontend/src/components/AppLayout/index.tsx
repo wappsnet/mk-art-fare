@@ -1,22 +1,21 @@
-import { ReactNode } from 'react';
+import { FC, ReactNode } from 'react';
+
+import { Box } from '@mui/material';
 
 import AppFooter from '@/components/AppFooter';
 import AppHeader from '@/components/AppHeader';
-
-import { ContentStyled, LayoutStyled } from './styles.ts';
-
 
 interface LayoutProps {
   children: ReactNode;
 }
 
-export const AppLayout = ({ children }: LayoutProps) => {
+const AppLayout: FC<LayoutProps> = ({ children }) => {
   return (
-    <LayoutStyled theme="light">
+    <Box display="flex" flexDirection="column" minHeight="100vh">
       <AppHeader />
-      <ContentStyled>{children}</ContentStyled>
+      <Box component="main">{children}</Box>
       <AppFooter />
-    </LayoutStyled>
+    </Box>
   );
 };
 

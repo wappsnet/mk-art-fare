@@ -1,66 +1,92 @@
 import { FC } from 'react';
 
-import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-import { Form, Input, Button, Row, Col, Flex, Space } from 'antd';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { TextField, Button, Grid, Stack, IconButton, Typography } from '@mui/material';
+import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 
-const OptionsListField: FC = () => (
-  <Space direction="vertical" style={{ width: '100%' }}>
-    <Form.Item label="Options" required>
-      <Form.List
-        name="options"
-        rules={[
-          {
-            validator: async (_, options) => {
-              if (!options || options.length < 1) {
-                throw new Error('Please add at least one option');
-              }
-            },
-          },
-        ]}
+import { FieldFormValues } from '@/types/fields';
+
+const OptionsListField: FC = () => {
+  const { control, formState } = useFormContext<FieldFormValues>();
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'options',
+  });
+
+  const optionsError = formState.errors.options;
+
+  return (
+    <Stack spacing={2}>
+      <Typography variant="subtitle2">
+        Options <span style={{ color: '#d32f2f' }}>*</span>
+      </Typography>
+
+      {fields.map((field, index) => (
+        <Grid container spacing={2} key={field.id} alignItems="center">
+          <Grid size={{ xs: 12, sm: 5 }}>
+            <Controller
+              name={`options.${index}.label`}
+              control={control}
+              rules={{ required: 'Label is required' }}
+              render={({ field: inputField, fieldState }) => (
+                <TextField
+                  {...inputField}
+                  placeholder="Option Label (e.g., Small)"
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  size="small"
+                  fullWidth
+                />
+              )}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 5 }}>
+            <Controller
+              name={`options.${index}.value`}
+              control={control}
+              rules={{ required: 'Value is required' }}
+              render={({ field: inputField, fieldState }) => (
+                <TextField
+                  {...inputField}
+                  placeholder="Option Value (e.g., small)"
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  size="small"
+                  fullWidth
+                />
+              )}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 2 }}>
+            <IconButton color="error" onClick={() => remove(index)}>
+              <DeleteIcon />
+            </IconButton>
+          </Grid>
+        </Grid>
+      ))}
+
+      <Button
+        variant="outlined"
+        startIcon={<AddIcon />}
+        onClick={() => append({ label: '', value: '' })}
+        fullWidth
       >
-        {(fields, { add, remove }, { errors }) => (
-          <Flex vertical flex="1">
-            {fields.map((field) => (
-              <Row key={field.key} gutter={8}>
-                <Col flex="1">
-                  <Form.Item
-                    {...field}
-                    name={[field.name, 'label']}
-                    rules={[{ required: true, message: 'Label is required' }]}
-                  >
-                    <Input placeholder="Option Label (e.g., Small)" />
-                  </Form.Item>
-                </Col>
-                <Col flex="1">
-                  <Form.Item
-                    {...field}
-                    name={[field.name, 'value']}
-                    rules={[{ required: true, message: 'Value is required' }]}
-                  >
-                    <Input placeholder="Option Value (e.g., small)" />
-                  </Form.Item>
-                </Col>
-                <Col>
-                  <Button
-                    type="text"
-                    danger
-                    icon={<DeleteOutlined />}
-                    onClick={() => remove(field.name)}
-                  />
-                </Col>
-              </Row>
-            ))}
-            <Form.Item>
-              <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                Add Option
-              </Button>
-            </Form.Item>
-            <Form.ErrorList errors={errors} />
-          </Flex>
-        )}
-      </Form.List>
-    </Form.Item>
-  </Space>
-);
+        Add Option
+      </Button>
+
+      {optionsError && typeof optionsError.message === 'string' && (
+        <Typography variant="caption" color="error">
+          {optionsError.message}
+        </Typography>
+      )}
+      {fields.length === 0 && (
+        <Typography variant="caption" color="error">
+          Please add at least one option
+        </Typography>
+      )}
+    </Stack>
+  );
+};
 
 export default OptionsListField;

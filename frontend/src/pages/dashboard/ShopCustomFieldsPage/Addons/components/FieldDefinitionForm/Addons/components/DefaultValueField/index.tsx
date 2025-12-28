@@ -1,116 +1,249 @@
 import { FC } from 'react';
 
-import { Form, Input, Switch, Radio, Checkbox, ColorPicker, FormInstance } from 'antd';
-
-import { FieldType, FieldOption } from '@/types/fields';
-
 import {
-  FullWidthInputNumber,
-  FullWidthDatePicker,
-  FullWidthTimePicker,
-  FullWidthSelect,
-} from './styles';
+  TextField,
+  Switch,
+  FormControlLabel,
+  RadioGroup,
+  Radio,
+  FormGroup,
+  Checkbox,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+} from '@mui/material';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 
-const { TextArea } = Input;
+import { FieldType, FieldFormValues } from '@/types/fields';
 
 interface DefaultValueFieldProps {
   selectedFieldType: FieldType;
-  form: FormInstance;
 }
 
-const DefaultValueField: FC<DefaultValueFieldProps> = ({ selectedFieldType, form }) => {
-  // Get options from form for fields that need them
-  const options = Form.useWatch<FieldOption[]>('options', form) || [];
-  // Filter out incomplete options (those being edited)
+const DefaultValueField: FC<DefaultValueFieldProps> = ({ selectedFieldType }) => {
+  const { control } = useFormContext<FieldFormValues>();
+
+  // Watch options to get valid options for select/radio/checkbox
+  const options = useWatch({ control, name: 'options' }) || [];
   const validOptions = options.filter((opt) => opt?.label && opt?.value);
 
   switch (selectedFieldType) {
     case FieldType.NUMBER:
       return (
-        <Form.Item name="default_value" label="Default Value">
-          <FullWidthInputNumber placeholder="Default number value" />
-        </Form.Item>
+        <Controller
+          name="default_value"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Default Value"
+              type="number"
+              placeholder="Default number value"
+              fullWidth
+            />
+          )}
+        />
       );
+
     case FieldType.TOGGLE:
       return (
-        <Form.Item name="default_value" label="Default Value" valuePropName="checked">
-          <Switch />
-        </Form.Item>
+        <Controller
+          name="default_value"
+          control={control}
+          render={({ field }) => (
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={!!field.value}
+                  onChange={(e) => field.onChange(e.target.checked)}
+                />
+              }
+              label="Default Value"
+            />
+          )}
+        />
       );
+
     case FieldType.TEXT:
       return (
-        <Form.Item name="default_value" label="Default Value">
-          <Input placeholder="Default value" />
-        </Form.Item>
+        <Controller
+          name="default_value"
+          control={control}
+          render={({ field }) => (
+            <TextField {...field} label="Default Value" placeholder="Default value" fullWidth />
+          )}
+        />
       );
+
     case FieldType.DATE:
       return (
-        <Form.Item name="default_value" label="Default Value">
-          <FullWidthDatePicker placeholder="Select default date" />
-        </Form.Item>
+        <Controller
+          name="default_value"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Default Value"
+              type="date"
+              placeholder="Select default date"
+              fullWidth
+            />
+          )}
+        />
       );
+
     case FieldType.TIME:
       return (
-        <Form.Item name="default_value" label="Default Value">
-          <FullWidthTimePicker placeholder="Select default time" />
-        </Form.Item>
+        <Controller
+          name="default_value"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Default Value"
+              type="time"
+              placeholder="Select default time"
+              fullWidth
+            />
+          )}
+        />
       );
+
     case FieldType.COLOR:
       return (
-        <Form.Item name="default_value" label="Default Value">
-          <ColorPicker showText />
-        </Form.Item>
+        <Controller
+          name="default_value"
+          control={control}
+          render={({ field }) => (
+            <TextField {...field} label="Default Value" type="color" fullWidth />
+          )}
+        />
       );
+
     case FieldType.SELECT:
       return (
-        <Form.Item name="default_value" label="Default Value">
-          <FullWidthSelect
-            placeholder="Select default value"
-            options={validOptions.map((opt) => ({
-              label: opt.label,
-              value: opt.value,
-            }))}
-            disabled={!validOptions.length}
-          />
-        </Form.Item>
+        <Controller
+          name="default_value"
+          control={control}
+          render={({ field }) => (
+            <FormControl fullWidth disabled={!validOptions.length}>
+              <InputLabel>Default Value</InputLabel>
+              <Select {...field} label="Default Value" value={field.value || ''}>
+                {validOptions.map((opt) => (
+                  <MenuItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+        />
       );
+
     case FieldType.RADIO:
       return (
-        <Form.Item name="default_value" label="Default Value">
-          <Radio.Group disabled={!validOptions.length}>
-            {validOptions.map((opt) => (
-              <Radio key={opt.value} value={opt.value}>
-                {opt.label}
-              </Radio>
-            ))}
-          </Radio.Group>
-        </Form.Item>
+        <Controller
+          name="default_value"
+          control={control}
+          render={({ field }) => (
+            <FormControl component="fieldset" disabled={!validOptions.length}>
+              <InputLabel shrink>Default Value</InputLabel>
+              <RadioGroup {...field} value={field.value || ''} sx={{ mt: 3 }}>
+                {validOptions.map((opt) => (
+                  <FormControlLabel
+                    key={opt.value}
+                    value={opt.value}
+                    control={<Radio />}
+                    label={opt.label}
+                  />
+                ))}
+              </RadioGroup>
+            </FormControl>
+          )}
+        />
       );
+
     case FieldType.CHECKBOX:
       return (
-        <Form.Item name="default_value" label="Default Values">
-          <Checkbox.Group
-            options={validOptions.map((opt) => ({
-              label: opt.label,
-              value: opt.value,
-            }))}
-            disabled={!validOptions.length}
-          />
-        </Form.Item>
+        <Controller
+          name="default_value"
+          control={control}
+          render={({ field }) => {
+            const currentValues = Array.isArray(field.value) ? (field.value as string[]) : [];
+
+            const handleChangeField = (opt: string) => {
+              if (opt) {
+                field.onChange([...currentValues, opt]);
+              } else {
+                field.onChange(currentValues.filter((v) => v !== opt));
+              }
+            };
+
+            return (
+              <FormControl component="fieldset" disabled={!validOptions.length}>
+                <InputLabel shrink>Default Values</InputLabel>
+                <FormGroup sx={{ mt: 3 }}>
+                  {validOptions.map((opt) => (
+                    <FormControlLabel
+                      key={opt.value}
+                      control={
+                        <Checkbox
+                          value={opt.value}
+                          checked={currentValues.includes(opt.value)}
+                          onChange={(e) => {
+                            handleChangeField(e.target.value);
+                          }}
+                        />
+                      }
+                      label={opt.label}
+                    />
+                  ))}
+                </FormGroup>
+              </FormControl>
+            );
+          }}
+        />
       );
+
     case FieldType.RICHTEXT:
       return (
-        <Form.Item name="default_value" label="Default Value">
-          <TextArea rows={3} placeholder="Default rich text content" />
-        </Form.Item>
+        <Controller
+          name="default_value"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Default Value"
+              multiline
+              rows={3}
+              placeholder="Default rich text content"
+              fullWidth
+            />
+          )}
+        />
       );
+
     case FieldType.IMAGE:
     case FieldType.FILE:
       return (
-        <Form.Item name="default_value" label="Default Value (JSON)" help="Enter as JSON array">
-          <TextArea rows={2} placeholder='[{"url": "...", "name": "..."}]' />
-        </Form.Item>
+        <Controller
+          name="default_value"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Default Value (JSON)"
+              multiline
+              rows={2}
+              placeholder='[{"url": "...", "name": "..."}]'
+              helperText="Enter as JSON array"
+              fullWidth
+            />
+          )}
+        />
       );
+
     default:
       return null;
   }

@@ -1,9 +1,9 @@
-import { CrownOutlined } from '@ant-design/icons';
-import { Typography, Button, Space, Tag, Card } from 'antd';
+import { FC } from 'react';
+
+import StarIcon from '@mui/icons-material/Star';
+import { Typography, Button, Stack, Chip, Card, CardContent, Box } from '@mui/material';
 
 import type { UserSubscription, UsageStats } from '@/types/subscription';
-
-const { Title, Text, Paragraph } = Typography;
 
 interface CurrentPlanBannerProps {
   subscription: UserSubscription | undefined;
@@ -15,7 +15,7 @@ interface CurrentPlanBannerProps {
   isDowngrading: boolean;
 }
 
-const CurrentPlanBanner = ({
+const CurrentPlanBanner: FC<CurrentPlanBannerProps> = ({
   subscription,
   usage,
   currentPlan,
@@ -23,57 +23,65 @@ const CurrentPlanBanner = ({
   onDowngrade,
   isUpgrading,
   isDowngrading,
-}: CurrentPlanBannerProps) => {
+}) => {
   return (
-    <Card
-      title={
-        <Space>
-          <Title level={3}>Current Plan</Title>
-          <Tag color={currentPlan === 'pro' ? 'gold' : 'default'}>
-            {subscription?.plan_name || 'Basic'}
-          </Tag>
-        </Space>
-      }
-    >
-      <Space direction="vertical" size={16}>
-        {usage && (
-          <Space direction="vertical" size={8}>
-            <Text>
-              <strong>Usage:</strong>
-            </Text>
-            <Text>
-              Shops: {usage.organizations.current} /{' '}
-              {usage.organizations.unlimited ? 'Unlimited' : usage.organizations.max}
-            </Text>
-            <Text>
-              Products: {usage.products.current} /{' '}
-              {usage.products.unlimited ? 'Unlimited' : usage.products.max}
-            </Text>
-          </Space>
-        )}
+    <Card>
+      <CardContent>
+        <Stack spacing={2}>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Typography variant="h5">Current Plan</Typography>
+            <Chip
+              label={subscription?.plan_name || 'Basic'}
+              color={currentPlan === 'pro' ? 'primary' : 'default'}
+            />
+          </Stack>
 
-        <Paragraph>
-          {currentPlan === 'basic'
-            ? 'You are on the free Basic plan. Upgrade to Pro for unlimited features!'
-            : 'You are on the Pro plan with full access to all features.'}
-        </Paragraph>
+          {usage && (
+            <Box>
+              <Typography variant="subtitle2" gutterBottom>
+                Usage:
+              </Typography>
+              <Typography variant="body2">
+                Shops: {usage.organizations.current} /{' '}
+                {usage.organizations.unlimited ? 'Unlimited' : usage.organizations.max}
+              </Typography>
+              <Typography variant="body2">
+                Products: {usage.products.current} /{' '}
+                {usage.products.unlimited ? 'Unlimited' : usage.products.max}
+              </Typography>
+            </Box>
+          )}
 
-        {currentPlan === 'basic' ? (
-          <Button
-            type="primary"
-            size="large"
-            icon={<CrownOutlined />}
-            onClick={onUpgrade}
-            loading={isUpgrading}
-          >
-            Upgrade to Pro
-          </Button>
-        ) : (
-          <Button size="large" onClick={onDowngrade} loading={isDowngrading}>
-            Downgrade to Basic
-          </Button>
-        )}
-      </Space>
+          <Typography variant="body1">
+            {currentPlan === 'basic'
+              ? 'You are on the free Basic plan. Upgrade to Pro for unlimited features!'
+              : 'You are on the Pro plan with full access to all features.'}
+          </Typography>
+
+          {currentPlan === 'basic' ? (
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={<StarIcon />}
+              onClick={onUpgrade}
+              disabled={isUpgrading}
+              sx={{ alignSelf: 'flex-start' }}
+            >
+              Upgrade to Pro
+            </Button>
+          ) : (
+            <Button
+              variant="outlined"
+              size="large"
+              onClick={onDowngrade}
+              disabled={isDowngrading}
+              sx={{ alignSelf: 'flex-start' }}
+            >
+              Downgrade to Basic
+            </Button>
+          )}
+        </Stack>
+      </CardContent>
     </Card>
   );
 };

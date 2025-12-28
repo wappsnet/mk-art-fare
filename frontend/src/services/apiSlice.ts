@@ -15,6 +15,8 @@ import {
   OrganizationTheme,
   ProductImage,
   AnalyticsData,
+  Page,
+  PageFormData,
 } from '@/types/common';
 import {
   FieldGroup,
@@ -108,6 +110,7 @@ export const api = createApi({
     'Category',
     'FieldGroup',
     'Subscription',
+    'Page',
   ],
   // eslint-disable-next-line max-lines-per-function
   endpoints: (builder) => ({
@@ -783,6 +786,46 @@ export const api = createApi({
       query: () => '/subscriptions/history',
       providesTags: ['Subscription'],
     }),
+
+    // Page endpoints
+    getPages: builder.query<ApiResponse<Page[]>, void>({
+      query: () => '/admin/pages',
+      providesTags: ['Page'],
+    }),
+    getPage: builder.query<ApiResponse<Page>, number>({
+      query: (id) => `/admin/pages/${id}`,
+      providesTags: (_result, _error, id) => [{ type: 'Page', id }],
+    }),
+    getPageBySlug: builder.query<ApiResponse<Page>, string>({
+      query: (slug) => `/pages/${slug}`,
+      providesTags: (_result, _error, slug) => [{ type: 'Page', id: slug }],
+    }),
+    updatePage: builder.mutation<ApiResponse<Page>, { id: number; data: PageFormData }>({
+      query: ({ id, data }) => ({
+        url: `/admin/pages/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: (_result, _error, { id }) => [{ type: 'Page', id }, 'Page'],
+    }),
+    createPage: builder.mutation<
+      ApiResponse<Page>,
+      { slug: string; title: string; content: Record<string, unknown>; meta_description?: string; is_published?: boolean }
+    >({
+      query: (data) => ({
+        url: '/admin/pages',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Page'],
+    }),
+    deletePage: builder.mutation<ApiResponse<null>, number>({
+      query: (id) => ({
+        url: `/admin/pages/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Page'],
+    }),
   }),
 });
 
@@ -864,4 +907,10 @@ export const {
   useUpgradeSubscriptionMutation,
   useDowngradeSubscriptionMutation,
   useGetSubscriptionHistoryQuery,
+  useGetPagesQuery,
+  useGetPageQuery,
+  useGetPageBySlugQuery,
+  useUpdatePageMutation,
+  useCreatePageMutation,
+  useDeletePageMutation,
 } = api;

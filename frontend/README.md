@@ -122,13 +122,13 @@ ComponentName/
 4. **Styled Components**: Only for layout/structure, not style overrides
 
 **DO:**
-```typescript
+```tsx
 <Button type="primary" icon={<Icon />}>Click</Button>
 <Text strong style={{ fontSize: 16, color: '#1890ff' }}>Price</Text>
 ```
 
 **DON'T:**
-```typescript
+```tsx
 <button className="ant-btn ant-btn-primary">Click</button>
 export const CustomText = styled(Text)`
   &.ant-typography { color: red; }
@@ -205,7 +205,7 @@ VITE_API_URL=http://localhost:5001/api
 
 ## Performance
 
-- Route-based code splitting with React.lazy()
+- Route-based code splitting with lazy()
 - Memoization with useMemo/useCallback where needed
 - Image optimization (lazy loading, responsive images)
 - Bundle size monitoring with Vite build analyzer

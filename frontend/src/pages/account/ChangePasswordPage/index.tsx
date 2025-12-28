@@ -1,10 +1,12 @@
-import { LockOutlined } from '@ant-design/icons';
-import { Form, Input, Button, message } from 'antd';
+import { FC } from 'react';
+
+import LockIcon from '@mui/icons-material/Lock';
+import { Card, CardContent, TextField, Button, Stack, Alert, InputAdornment } from '@mui/material';
+import { useForm, Controller } from 'react-hook-form';
 
 import { useChangePasswordMutation } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
-
-import { PasswordContainerStyled, AlertStyled, FullWidthSpaceStyled, FormContainerStyled } from './styles';
+import { message } from '@/utils/notification';
 
 interface ChangePasswordFormValues {
   current_password: string;
@@ -12,86 +14,143 @@ interface ChangePasswordFormValues {
   confirm_password: string;
 }
 
-const ChangePasswordPage = () => {
-  const [form] = Form.useForm<ChangePasswordFormValues>();
-  const [changePassword, { isLoading }] = useChangePasswordMutation();
+const ChangePasswordPage: FC = () => {
+  const { control, handleSubmit, watch, reset } = useForm<ChangePasswordFormValues>({
+    defaultValues: {
+      current_password: '',
+      new_password: '',
+      confirm_password: '',
+    },
+  });
 
-  const handleSubmit = async (values: ChangePasswordFormValues) => {
+  const [changePassword, { isLoading }] = useChangePasswordMutation();
+  const newPassword = watch('new_password');
+
+  const onSubmit = async (values: ChangePasswordFormValues) => {
     try {
       await changePassword({
         current_password: values.current_password,
         new_password: values.new_password,
       }).unwrap();
       message.success('Password changed successfully');
-      form.resetFields();
+      reset();
     } catch (error) {
       message.error(getErrorMessage(error) || 'Failed to change password');
     }
   };
 
   return (
-    <PasswordContainerStyled>
-      <AlertStyled
-        message="Password Requirements"
-        description="Your password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character."
-        type="info"
-        showIcon
-      />
+    <Card>
+      <CardContent>
+        <Stack spacing={3}>
+          <Alert severity="info">
+            <strong>Password Requirements</strong>
+            <br />
+            Your password must be at least 8 characters long and contain at least one uppercase
+            letter, one lowercase letter, one number, and one special character.
+          </Alert>
 
-      <FormContainerStyled>
-        <Form<ChangePasswordFormValues> form={form} layout="vertical" onFinish={handleSubmit}>
-        <FullWidthSpaceStyled direction="vertical" size="large">
-          <Form.Item
-            name="current_password"
-            label="Current Password"
-            rules={[{ required: true, message: 'Please enter your current password' }]}
-          >
-            <Input.Password prefix={<LockOutlined />} placeholder="Enter current password" />
-          </Form.Item>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Stack spacing={3}>
+              <Controller
+                name="current_password"
+                control={control}
+                rules={{ required: 'Please enter your current password' }}
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    type="password"
+                    label="Current Password"
+                    placeholder="Enter current password"
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <LockIcon />
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                    fullWidth
+                  />
+                )}
+              />
 
-          <Form.Item
-            name="new_password"
-            label="New Password"
-            rules={[
-              { required: true, message: 'Please enter a new password' },
-              { min: 8, message: 'Password must be at least 8 characters' },
-              {
-                pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-                message: 'Password must meet requirements',
-              },
-            ]}
-          >
-            <Input.Password prefix={<LockOutlined />} placeholder="Enter new password" />
-          </Form.Item>
+              <Controller
+                name="new_password"
+                control={control}
+                rules={{
+                  required: 'Please enter a new password',
+                  minLength: {
+                    value: 8,
+                    message: 'Password must be at least 8 characters',
+                  },
+                  pattern: {
+                    value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+                    message: 'Password must meet requirements',
+                  },
+                }}
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    type="password"
+                    label="New Password"
+                    placeholder="Enter new password"
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <LockIcon />
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                    fullWidth
+                  />
+                )}
+              />
 
-          <Form.Item
-            name="confirm_password"
-            label="Confirm New Password"
-            dependencies={['new_password']}
-            rules={[
-              { required: true, message: 'Please confirm your new password' },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (value && getFieldValue('new_password') !== value) {
-                    return Promise.reject(new Error('Passwords do not match'));
-                  }
-                  return Promise.resolve();
-                },
-              }),
-            ]}
-          >
-            <Input.Password prefix={<LockOutlined />} placeholder="Confirm new password" />
-          </Form.Item>
+              <Controller
+                name="confirm_password"
+                control={control}
+                rules={{
+                  required: 'Please confirm your new password',
+                  validate: (value) => value === newPassword || 'Passwords do not match',
+                }}
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    type="password"
+                    label="Confirm New Password"
+                    placeholder="Confirm new password"
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <LockIcon />
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                    fullWidth
+                  />
+                )}
+              />
 
-          <Form.Item>
-            <Button type="primary" htmlType="submit" loading={isLoading}>
-              Change Password
-            </Button>
-          </Form.Item>
-        </FullWidthSpaceStyled>
-        </Form>
-      </FormContainerStyled>
-    </PasswordContainerStyled>
+              <Button type="submit" variant="contained" disabled={isLoading}>
+                Change Password
+              </Button>
+            </Stack>
+          </form>
+        </Stack>
+      </CardContent>
+    </Card>
   );
 };
 

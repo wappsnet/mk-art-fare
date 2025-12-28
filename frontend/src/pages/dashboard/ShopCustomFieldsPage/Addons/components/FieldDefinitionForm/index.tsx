@@ -1,90 +1,170 @@
 import { FC, useEffect, useRef } from 'react';
 
-import { Form, Input, Select, Switch, Divider, FormInstance } from 'antd';
+import {
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Switch,
+  FormControlLabel,
+  Divider,
+  Stack,
+} from '@mui/material';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 
 import { FieldType, FieldFormValues } from '@/types/fields';
 
 import DefaultValueField from './Addons/components/DefaultValueField';
 import OptionsListField from './Addons/components/OptionsListField';
-import { FullWidthInputNumber } from './styles';
-
-const { TextArea } = Input;
 
 interface FieldDefinitionFormProps {
-  form: FormInstance;
-  selectedFieldType?: FieldType;
   fieldTypeNeedsOptions: (fieldType?: FieldType) => boolean;
-  onFinish: (values: FieldFormValues) => void;
 }
 
-const FieldDefinitionForm: FC<FieldDefinitionFormProps> = ({
-  form,
-  selectedFieldType,
-  fieldTypeNeedsOptions,
-  onFinish,
-}) => {
+const FieldDefinitionForm: FC<FieldDefinitionFormProps> = ({ fieldTypeNeedsOptions }) => {
+  const { control, setValue } = useFormContext<FieldFormValues>();
+
+  const selectedFieldType = useWatch({ control, name: 'field_type' });
+  const needsOptions = fieldTypeNeedsOptions(selectedFieldType);
+  const previousFieldType = useRef<FieldType | undefined>(selectedFieldType);
+
   const fieldTypeOptions = Object.values(FieldType).map((type) => ({
     label: type.charAt(0).toUpperCase() + type.slice(1),
     value: type,
   }));
 
-  const needsOptions = fieldTypeNeedsOptions(selectedFieldType);
-  const previousFieldType = useRef<FieldType | undefined>(selectedFieldType);
-
   // Clear incompatible values when field type changes
   useEffect(() => {
     if (previousFieldType.current && previousFieldType.current !== selectedFieldType) {
       // Field type changed, clear default_value
-      form.setFieldValue('default_value', undefined);
+      setValue('default_value', undefined);
 
       // Clear options if new type doesn't need them
       if (!needsOptions) {
-        form.setFieldValue('options', undefined);
+        setValue('options', undefined);
       }
     }
     previousFieldType.current = selectedFieldType;
-  }, [selectedFieldType, needsOptions, form]);
+  }, [selectedFieldType, needsOptions, setValue]);
 
   return (
-    <Form form={form} layout="vertical" onFinish={onFinish}>
-      <Form.Item name="label" label="Field Label" rules={[{ required: true }]}>
-        <Input placeholder="e.g., Dimensions" />
-      </Form.Item>
-      <Form.Item
+    <Stack spacing={3}>
+      <Controller
+        name="label"
+        control={control}
+        rules={{ required: 'Field label is required' }}
+        render={({ field, fieldState }) => (
+          <TextField
+            {...field}
+            label="Field Label"
+            placeholder="e.g., Dimensions"
+            error={!!fieldState.error}
+            helperText={fieldState.error?.message}
+            fullWidth
+          />
+        )}
+      />
+
+      <Controller
         name="name"
-        label="Field Name (slug)"
-        rules={[{ required: true }]}
-        help="Unique identifier, lowercase, no spaces"
-      >
-        <Input placeholder="e.g., dimensions" />
-      </Form.Item>
-      <Form.Item name="field_type" label="Field Type" rules={[{ required: true }]}>
-        <Select placeholder="Select field type" options={fieldTypeOptions} />
-      </Form.Item>
+        control={control}
+        rules={{ required: 'Field name is required' }}
+        render={({ field, fieldState }) => (
+          <TextField
+            {...field}
+            label="Field Name (slug)"
+            placeholder="e.g., dimensions"
+            error={!!fieldState.error}
+            helperText={fieldState.error?.message || 'Unique identifier, lowercase, no spaces'}
+            fullWidth
+          />
+        )}
+      />
+
+      <Controller
+        name="field_type"
+        control={control}
+        rules={{ required: 'Field type is required' }}
+        render={({ field, fieldState }) => (
+          <FormControl fullWidth error={!!fieldState.error}>
+            <InputLabel>Field Type</InputLabel>
+            <Select {...field} label="Field Type" value={field.value || ''}>
+              {fieldTypeOptions.map((opt) => (
+                <MenuItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
+      />
 
       {needsOptions && <OptionsListField />}
 
-      <Form.Item name="placeholder" label="Placeholder">
-        <Input placeholder="Placeholder text" />
-      </Form.Item>
-      <Form.Item name="help_text" label="Help Text">
-        <TextArea rows={2} placeholder="Additional information for users" />
-      </Form.Item>
+      <Controller
+        name="placeholder"
+        control={control}
+        render={({ field }) => (
+          <TextField {...field} label="Placeholder" placeholder="Placeholder text" fullWidth />
+        )}
+      />
 
-      {selectedFieldType && <DefaultValueField selectedFieldType={selectedFieldType} form={form} />}
+      <Controller
+        name="help_text"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Help Text"
+            multiline
+            rows={2}
+            placeholder="Additional information for users"
+            fullWidth
+          />
+        )}
+      />
+
+      {selectedFieldType && <DefaultValueField selectedFieldType={selectedFieldType} />}
 
       <Divider>Advanced Options</Divider>
 
-      <Form.Item name="is_searchable" label="Searchable" valuePropName="checked">
-        <Switch />
-      </Form.Item>
-      <Form.Item name="is_filterable" label="Filterable" valuePropName="checked">
-        <Switch />
-      </Form.Item>
-      <Form.Item name="sort_order" label="Sort Order">
-        <FullWidthInputNumber min={0} />
-      </Form.Item>
-    </Form>
+      <Controller
+        name="is_searchable"
+        control={control}
+        render={({ field }) => (
+          <FormControlLabel
+            control={<Switch checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} />}
+            label="Searchable"
+          />
+        )}
+      />
+
+      <Controller
+        name="is_filterable"
+        control={control}
+        render={({ field }) => (
+          <FormControlLabel
+            control={<Switch checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} />}
+            label="Filterable"
+          />
+        )}
+      />
+
+      <Controller
+        name="sort_order"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Sort Order"
+            type="number"
+            slotProps={{ htmlInput: { min: 0 } }}
+            fullWidth
+          />
+        )}
+      />
+    </Stack>
   );
 };
 

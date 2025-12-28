@@ -1,6 +1,6 @@
 import { FC } from 'react';
 
-import { InputNumber } from 'antd';
+import { TextField } from '@mui/material';
 
 import { NumberFieldDefinition, NumberFieldValue } from '@/types/fields';
 
@@ -13,11 +13,13 @@ interface NumberFieldProps {
 
 export const NumberField: FC<NumberFieldProps> = ({ field, fieldValue, onChange, disabled }) => {
   return (
-    <InputNumber
+    <TextField
+      type="number"
       placeholder={field.placeholder}
       defaultValue={field.defaultValue}
-      value={field.fieldValue?.value}
-      onChange={(value) => {
+      value={field.fieldValue?.value ?? ''}
+      onChange={(e) => {
+        const value = e.target.value ? Number(e.target.value) : null;
         if (value !== null) {
           onChange({
             id: fieldValue?.id || 0,
@@ -32,9 +34,16 @@ export const NumberField: FC<NumberFieldProps> = ({ field, fieldValue, onChange,
         }
       }}
       disabled={disabled}
-      min={field.validation?.min}
-      max={field.validation?.max}
-      step={field.validation?.step}
+      slotProps={{
+        htmlInput: {
+          min: field.validation?.min,
+          max: field.validation?.max,
+          step: field.validation?.step,
+        },
+      }}
+      label={field.label}
+      helperText={field.helpText}
+      fullWidth
     />
   );
 };

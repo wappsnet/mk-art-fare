@@ -1,56 +1,105 @@
-import { useState } from 'react';
+import { FC, useState } from 'react';
 
-import { Card, Form, Input, Button, message } from 'antd';
+import { Card, CardContent, CardHeader, TextField, Button, Stack } from '@mui/material';
+import { useForm, Controller } from 'react-hook-form';
 
-export const ContactForm = () => {
-  const [form] = Form.useForm();
+import { message } from '@/utils/notification';
+
+interface ContactFormData {
+  name: string;
+  email: string;
+  message: string;
+}
+
+const ContactForm: FC = () => {
   const [loading, setLoading] = useState(false);
+  const { control, handleSubmit, reset } = useForm<ContactFormData>({
+    defaultValues: {
+      name: '',
+      email: '',
+      message: '',
+    },
+  });
 
-  const handleSubmit = async (values: { name: string; email: string; message: string }) => {
+  const onSubmit = async (values: ContactFormData) => {
     setLoading(true);
     console.info(values);
     await new Promise((resolve) => setTimeout(resolve, 1000));
     message.success('Your message has been sent! We will get back to you soon.');
-    form.resetFields();
+    reset();
     setLoading(false);
   };
 
   return (
-    <Card title="Send us a message">
-      <Form form={form} layout="vertical" onFinish={handleSubmit}>
-        <Form.Item
-          name="name"
-          label="Name"
-          rules={[{ required: true, message: 'Please enter your name' }]}
-        >
-          <Input placeholder="Your name" />
-        </Form.Item>
+    <Card>
+      <CardHeader title="Send us a message" />
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Stack spacing={3}>
+            <Controller
+              name="name"
+              control={control}
+              rules={{ required: 'Please enter your name' }}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  label="Name"
+                  placeholder="Your name"
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  fullWidth
+                />
+              )}
+            />
 
-        <Form.Item
-          name="email"
-          label="Email"
-          rules={[
-            { required: true, message: 'Please enter your email' },
-            { type: 'email', message: 'Please enter a valid email' },
-          ]}
-        >
-          <Input placeholder="your@email.com" />
-        </Form.Item>
+            <Controller
+              name="email"
+              control={control}
+              rules={{
+                required: 'Please enter your email',
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: 'Please enter a valid email',
+                },
+              }}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  label="Email"
+                  placeholder="your@email.com"
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  fullWidth
+                />
+              )}
+            />
 
-        <Form.Item
-          name="message"
-          label="Message"
-          rules={[{ required: true, message: 'Please enter your message' }]}
-        >
-          <Input.TextArea rows={6} placeholder="How can we help you?" />
-        </Form.Item>
+            <Controller
+              name="message"
+              control={control}
+              rules={{ required: 'Please enter your message' }}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  label="Message"
+                  placeholder="How can we help you?"
+                  multiline
+                  rows={6}
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  fullWidth
+                />
+              )}
+            />
 
-        <Form.Item>
-          <Button type="primary" htmlType="submit" loading={loading} size="large">
-            Send Message
-          </Button>
-        </Form.Item>
-      </Form>
+            <Button type="submit" variant="contained" size="large" disabled={loading}>
+              Send Message
+            </Button>
+          </Stack>
+        </form>
+      </CardContent>
     </Card>
   );
 };
+
+export default ContactForm;

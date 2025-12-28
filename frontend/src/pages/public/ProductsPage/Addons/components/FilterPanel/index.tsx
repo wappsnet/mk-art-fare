@@ -1,19 +1,19 @@
 import { FC } from 'react';
 
-import { SearchOutlined } from '@ant-design/icons';
-import { Button, Input, Select, Slider, Typography } from 'antd';
+import SearchIcon from '@mui/icons-material/Search';
+import {
+  Button,
+  TextField,
+  Typography,
+  Stack,
+  Box,
+  Autocomplete,
+  Slider,
+  InputAdornment,
+  IconButton,
+} from '@mui/material';
 
 import { Category } from '@/types/common.ts';
-
-import {
-  FilterSectionStyled,
-  FullWidthSpaceStyled,
-  PriceRangeText,
-  PriceSliderWrapperStyled,
-  SearchCompactStyled,
-} from './styles.ts';
-
-const { Title } = Typography;
 
 interface FilterPanelProps {
   categories: Category[];
@@ -38,66 +38,81 @@ const FilterPanel: FC<FilterPanelProps> = ({
   handlePriceChange,
   handleClearFilters,
 }) => (
-  <FullWidthSpaceStyled direction="vertical" size="large">
-    <FilterSectionStyled>
-      <Title level={5}>Search</Title>
-      <SearchCompactStyled>
-        <Input
-          placeholder="Search artworks..."
-          allowClear
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          onPressEnter={() => handleSearch(searchInput)}
-        />
-        <Button
-          type="primary"
-          icon={<SearchOutlined />}
-          onClick={() => handleSearch(searchInput)}
-        />
-      </SearchCompactStyled>
-    </FilterSectionStyled>
+  <Stack spacing={3}>
+    {/* Search Section */}
+    <Box sx={{ bgcolor: 'grey.50', borderRadius: 2, p: 1 }}>
+      <Typography variant="h6" gutterBottom>
+        Search
+      </Typography>
+      <TextField
+        fullWidth
+        placeholder="Search artworks..."
+        value={searchInput}
+        onChange={(e) => setSearchInput(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            handleSearch(searchInput);
+          }
+        }}
+        slotProps={{
+          input: {
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={() => handleSearch(searchInput)} edge="end">
+                  <SearchIcon />
+                </IconButton>
+              </InputAdornment>
+            ),
+          },
+        }}
+      />
+    </Box>
 
-    <FilterSectionStyled>
-      <Title level={5}>Categories</Title>
-      <Select
-        mode="multiple"
-        placeholder="Select categories"
-        allowClear
-        value={selectedCategories}
-        onChange={handleCategoryChange}
-        maxTagCount="responsive"
-        css={{ width: '100%' }}
-      >
-        {categories.map((cat) => (
-          <Select.Option key={cat.id} value={cat.slug}>
-            {cat.name}
-          </Select.Option>
-        ))}
-      </Select>
-    </FilterSectionStyled>
+    {/* Categories Section */}
+    <Box sx={{ bgcolor: 'grey.50', borderRadius: 2, p: 1 }}>
+      <Typography variant="h6" gutterBottom>
+        Categories
+      </Typography>
+      <Autocomplete
+        multiple
+        options={categories}
+        getOptionLabel={(option) => option.name}
+        value={categories.filter((cat) => selectedCategories.includes(cat.slug))}
+        onChange={(_, newValue) => {
+          handleCategoryChange(newValue.map((cat) => cat.slug));
+        }}
+        renderInput={(params) => (
+          <TextField {...params} placeholder="Select categories" />
+        )}
+        limitTags={2}
+      />
+    </Box>
 
-    <FilterSectionStyled>
-      <Title level={5}>Price Range</Title>
-      <PriceRangeText type="secondary">
+    {/* Price Range Section */}
+    <Box sx={{ bgcolor: 'grey.50', borderRadius: 2, p: 1 }}>
+      <Typography variant="h6" gutterBottom>
+        Price Range
+      </Typography>
+      <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
         ${priceRange[0]} - ${priceRange[1]}
-      </PriceRangeText>
-      <PriceSliderWrapperStyled>
+      </Typography>
+      <Box sx={{ px: 1, mt: 2 }}>
         <Slider
-          range
+          value={priceRange}
+          onChange={(_, newValue) => handlePriceChange(newValue)}
+          valueLabelDisplay="auto"
+          valueLabelFormat={(value) => `$${value}`}
           min={0}
           max={10000}
           step={100}
-          value={priceRange}
-          onChange={handlePriceChange}
-          tooltip={{ formatter: (value) => `$${value}` }}
         />
-      </PriceSliderWrapperStyled>
-    </FilterSectionStyled>
+      </Box>
+    </Box>
 
-    <Button block onClick={handleClearFilters}>
+    <Button variant="outlined" fullWidth onClick={handleClearFilters}>
       Clear All Filters
     </Button>
-  </FullWidthSpaceStyled>
+  </Stack>
 );
 
 export default FilterPanel;

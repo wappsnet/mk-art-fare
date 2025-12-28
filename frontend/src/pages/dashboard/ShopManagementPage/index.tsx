@@ -1,17 +1,24 @@
-import { useMemo } from 'react';
+import { FC, useMemo, SyntheticEvent } from 'react';
 
-import { ArrowLeftOutlined } from '@ant-design/icons';
-import { Card, Typography, Button, Tabs, Spin, Space } from 'antd';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import {
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Tabs,
+  Tab,
+  CircularProgress,
+  Stack,
+  Box,
+  Container,
+} from '@mui/material';
 import { useParams, useNavigate, Outlet, useLocation } from 'react-router';
 
 import AppLayout from '@/components/AppLayout';
 import { useGetOrganizationByIdQuery } from '@/services/apiSlice';
 
-import { ContainerStyled, HeaderStyled, OutletWrapperStyled } from './styles';
-
-const { Title } = Typography;
-
-const ShopManagementPage = () => {
+const ShopManagementPage: FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
@@ -20,34 +27,34 @@ const ShopManagementPage = () => {
   const { data: orgData, isLoading } = useGetOrganizationByIdQuery(orgId, { skip: !orgId });
   const organization = orgData?.data;
 
-  const handleTabChange = (path: string) => {
+  const handleTabChange = (_: SyntheticEvent, path: string) => {
     navigate(path);
   };
 
   const tabItems = useMemo(
     () => [
       {
-        key: `/dashboard/shop/${id}`,
+        value: `/dashboard/shop/${id}`,
         label: 'Settings',
       },
       {
-        key: `/dashboard/shop/${id}/products`,
+        value: `/dashboard/shop/${id}/products`,
         label: 'Products',
       },
       {
-        key: `/dashboard/shop/${id}/categories`,
+        value: `/dashboard/shop/${id}/categories`,
         label: 'Categories',
       },
       {
-        key: `/dashboard/shop/${id}/orders`,
+        value: `/dashboard/shop/${id}/orders`,
         label: 'Orders',
       },
       {
-        key: `/dashboard/shop/${id}/analytics`,
+        value: `/dashboard/shop/${id}/analytics`,
         label: 'Analytics',
       },
       {
-        key: `/dashboard/shop/${id}/custom-fields`,
+        value: `/dashboard/shop/${id}/custom-fields`,
         label: 'Custom Fields',
       },
     ],
@@ -57,9 +64,11 @@ const ShopManagementPage = () => {
   if (isLoading) {
     return (
       <AppLayout>
-        <ContainerStyled>
-          <Spin size="large" />
-        </ContainerStyled>
+        <Container maxWidth="lg" sx={{ py: 8 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 12 }}>
+            <CircularProgress size={60} />
+          </Box>
+        </Container>
       </AppLayout>
     );
   }
@@ -67,44 +76,46 @@ const ShopManagementPage = () => {
   if (organization === null || organization === undefined) {
     return (
       <AppLayout>
-        <ContainerStyled>
-          <Title level={3}>Organization not found</Title>
-        </ContainerStyled>
+        <Container maxWidth="lg" sx={{ py: 8 }}>
+          <Typography variant="h5">Organization not found</Typography>
+        </Container>
       </AppLayout>
     );
   }
 
   return (
     <AppLayout>
-      <ContainerStyled>
-        <HeaderStyled>
-          <Space direction="vertical" size="small">
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Stack spacing={3}>
+          <Box>
             <Button
-              icon={<ArrowLeftOutlined />}
+              startIcon={<ArrowBackIcon />}
               onClick={() => navigate('/dashboard')}
-              css={{ marginBottom: 16 }}
+              sx={{ mb: 2 }}
             >
               Back to Dashboard
             </Button>
-            <Title level={2} css={{ margin: 0 }}>
-              Manage {organization.name}
-            </Title>
-          </Space>
-        </HeaderStyled>
+            <Typography variant="h3">Manage {organization.name}</Typography>
+          </Box>
 
-        <Card>
-          <Tabs
-            defaultActiveKey={tabItems[0].key}
-            activeKey={location.pathname}
-            onChange={handleTabChange}
-            items={tabItems}
-          />
+          <Card>
+            <Tabs
+              variant="scrollable"
+              scrollButtons={true}
+              value={location.pathname}
+              onChange={handleTabChange}
+            >
+              {tabItems.map((item) => (
+                <Tab key={item.value} label={item.label} value={item.value} />
+              ))}
+            </Tabs>
 
-          <OutletWrapperStyled>
-            <Outlet />
-          </OutletWrapperStyled>
-        </Card>
-      </ContainerStyled>
+            <CardContent>
+              <Outlet />
+            </CardContent>
+          </Card>
+        </Stack>
+      </Container>
     </AppLayout>
   );
 };

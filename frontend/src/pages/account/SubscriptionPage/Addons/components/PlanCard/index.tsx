@@ -1,9 +1,7 @@
-import { CheckOutlined } from '@ant-design/icons';
-import { Typography, Space, Tag } from 'antd';
+import { FC, ReactNode } from 'react';
 
-import { PlanCardStyled, FeatureListStyled, FeatureItemStyled, PriceStyled } from './styles';
-
-const { Title, Text } = Typography;
+import CheckIcon from '@mui/icons-material/Check';
+import { Typography, Stack, Chip, Card, CardContent, Box, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
 
 interface PlanCardProps {
   plan: {
@@ -11,42 +9,61 @@ interface PlanCardProps {
     name: string;
     price: string;
     period: string;
-    icon: React.ReactNode;
+    icon: ReactNode;
     description: string;
     features: string[];
   };
   isCurrentPlan: boolean;
 }
 
-const PlanCard = ({ plan, isCurrentPlan }: PlanCardProps) => {
+const PlanCard: FC<PlanCardProps> = ({ plan, isCurrentPlan }) => {
   return (
-    <PlanCardStyled active={isCurrentPlan}>
-      <Space direction="vertical" size={16}>
-        <Space align="start" size={16}>
-          <div style={{ fontSize: 32 }}>{plan.icon}</div>
-          <Space direction="vertical" size={4}>
-            <Space>
-              <Title level={4}>{plan.name}</Title>
-              {isCurrentPlan && <Tag color="blue">Current Plan</Tag>}
-            </Space>
-            <Text type="secondary">{plan.description}</Text>
-            <PriceStyled>
-              <Text className="amount">{plan.price}</Text>
-              <Text className="period">/{plan.period}</Text>
-            </PriceStyled>
-          </Space>
-        </Space>
+    <Card
+      variant={isCurrentPlan ? 'elevation' : 'outlined'}
+      sx={{
+        ...(isCurrentPlan && {
+          borderColor: 'primary.main',
+          borderWidth: 2,
+          borderStyle: 'solid',
+        }),
+      }}
+    >
+      <CardContent>
+        <Stack spacing={2}>
+          <Stack direction="row" spacing={2} alignItems="flex-start">
+            <Box sx={{ fontSize: 40 }}>{plan.icon}</Box>
+            <Stack spacing={0.5} sx={{ flex: 1 }}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Typography variant="h5">{plan.name}</Typography>
+                {isCurrentPlan && <Chip label="Current Plan" color="primary" size="small" />}
+              </Stack>
+              <Typography variant="body2" color="text.secondary">
+                {plan.description}
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5, mt: 1 }}>
+                <Typography variant="h4" fontWeight="bold">
+                  {plan.price}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  /{plan.period}
+                </Typography>
+              </Box>
+            </Stack>
+          </Stack>
 
-        <FeatureListStyled>
-          {plan.features.map((feature) => (
-            <FeatureItemStyled key={feature}>
-              <CheckOutlined />
-              <Text>{feature}</Text>
-            </FeatureItemStyled>
-          ))}
-        </FeatureListStyled>
-      </Space>
-    </PlanCardStyled>
+          <List dense disablePadding>
+            {plan.features.map((feature) => (
+              <ListItem key={feature} disableGutters>
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <CheckIcon color="primary" fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary={feature} />
+              </ListItem>
+            ))}
+          </List>
+        </Stack>
+      </CardContent>
+    </Card>
   );
 };
 

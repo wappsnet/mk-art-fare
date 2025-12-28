@@ -1,34 +1,34 @@
-import { useEffect } from 'react';
+import { FC, useEffect } from 'react';
 
-import { MailOutlined, LockOutlined, GoogleOutlined } from '@ant-design/icons';
-import { Input, Button, Typography, Divider, Form, message } from 'antd';
+import EmailIcon from '@mui/icons-material/Email';
+import GoogleIcon from '@mui/icons-material/Google';
+import LockIcon from '@mui/icons-material/Lock';
+import { Typography, Button, Divider, Stack, TextField, InputAdornment, Link as MuiLink } from '@mui/material';
+import { useForm, Controller } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router';
 
 import AppAuthLayout from '@/components/AppAuthLayout';
 import { useAppSelector } from '@/hooks/useRedux';
 import { useLoginMutation } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors.ts';
-
-import {
-  FullWidthSpaceStyled,
-  HeaderSectionStyled,
-  FormActionsRowStyled,
-  GoogleButtonStyled,
-  FooterSectionStyled,
-} from './styles';
-
-const { Title, Text } = Typography;
+import { message } from '@/utils/notification';
 
 interface LoginFormValues {
   email: string;
   password: string;
 }
 
-const LoginPage = () => {
-  const [loginForm] = Form.useForm<LoginFormValues>();
+const LoginPage: FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const [login, { isLoading }] = useLoginMutation();
+
+  const { control, handleSubmit } = useForm<LoginFormValues>({
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -36,7 +36,7 @@ const LoginPage = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const onFinish = async (values: LoginFormValues) => {
+  const onSubmit = async (values: LoginFormValues) => {
     try {
       const result = await login({ email: values.email, password: values.password }).unwrap();
       if (result.success) {
@@ -54,68 +54,107 @@ const LoginPage = () => {
 
   return (
     <AppAuthLayout>
-      <FullWidthSpaceStyled direction="vertical" size="large">
-        <HeaderSectionStyled>
-          <Title level={2}>Welcome Back</Title>
-          <Text type="secondary">Sign in to your Art Fare account</Text>
-        </HeaderSectionStyled>
+      <Stack spacing={3}>
+        {/* Header */}
+        <Stack spacing={1} textAlign="center">
+          <Typography variant="h4">Welcome Back</Typography>
+          <Typography variant="body1" color="text.secondary">
+            Sign in to your Art Fare account
+          </Typography>
+        </Stack>
 
-        <GoogleButtonStyled icon={<GoogleOutlined />} size="large" onClick={handleGoogleLogin}>
+        {/* Google Login */}
+        <Button
+          variant="outlined"
+          size="large"
+          startIcon={<GoogleIcon />}
+          onClick={handleGoogleLogin}
+          fullWidth
+        >
           Continue with Google
-        </GoogleButtonStyled>
+        </Button>
 
         <Divider>Or sign in with email</Divider>
 
-        <Form<LoginFormValues>
-          form={loginForm}
-          name="login"
-          layout="vertical"
-          onFinish={onFinish}
-          autoComplete="off"
-        >
-          <Form.Item
-            name="email"
-            rules={[
-              { required: true, message: 'Please input your email!' },
-              { type: 'email', message: 'Please enter a valid email!' },
-            ]}
-          >
-            <Input name="email" prefix={<MailOutlined />} placeholder="Email" size="large" />
-          </Form.Item>
-
-          <Form.Item
-            name="password"
-            rules={[{ required: true, message: 'Please input your password!' }]}
-          >
-            <Input.Password
-              name="password"
-              prefix={<LockOutlined />}
-              placeholder="Password"
-              size="large"
+        {/* Login Form */}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Stack spacing={3}>
+            <Controller
+              name="email"
+              control={control}
+              rules={{
+                required: 'Please input your email!',
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: 'Please enter a valid email!',
+                },
+              }}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  label="Email"
+                  placeholder="Email"
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <EmailIcon />
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                  fullWidth
+                />
+              )}
             />
-          </Form.Item>
 
-          <Form.Item>
-            <FormActionsRowStyled>
-              <Link to="/forgot-password">
-                <Text type="secondary">Forgot password?</Text>
-              </Link>
-            </FormActionsRowStyled>
-          </Form.Item>
+            <Controller
+              name="password"
+              control={control}
+              rules={{ required: 'Please input your password!' }}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  type="password"
+                  label="Password"
+                  placeholder="Password"
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <LockIcon />
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                  fullWidth
+                />
+              )}
+            />
 
-          <Form.Item>
-            <Button type="primary" htmlType="submit" size="large" block loading={isLoading}>
+            <MuiLink component={Link} to="/forgot-password" underline="hover" sx={{ alignSelf: 'flex-end' }}>
+              <Typography variant="body2" color="text.secondary">
+                Forgot password?
+              </Typography>
+            </MuiLink>
+
+            <Button type="submit" variant="contained" size="large" disabled={isLoading} fullWidth>
               Sign In
             </Button>
-          </Form.Item>
 
-          <FooterSectionStyled>
-            <Text type="secondary">
-              Don't have an account? <Link to="/register">Sign up</Link>
-            </Text>
-          </FooterSectionStyled>
-        </Form>
-      </FullWidthSpaceStyled>
+            <Typography variant="body2" color="text.secondary" textAlign="center">
+              Don't have an account?{' '}
+              <MuiLink component={Link} to="/register" underline="hover">
+                Sign up
+              </MuiLink>
+            </Typography>
+          </Stack>
+        </form>
+      </Stack>
     </AppAuthLayout>
   );
 };

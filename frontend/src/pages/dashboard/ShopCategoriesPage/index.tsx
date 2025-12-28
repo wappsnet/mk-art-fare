@@ -1,9 +1,26 @@
-import { useState } from 'react';
+import { FC, useState } from 'react';
 
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { Table, Button, Space, Modal, Form, Input, message, Tag, Typography } from 'antd';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import {
+  Button,
+  Stack,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Chip,
+  Typography,
+  Box,
+  IconButton,
+} from '@mui/material';
+import { useForm, Controller } from 'react-hook-form';
 import { useParams } from 'react-router';
 
+import AppDataTable, { Column } from '@/components/AppDataTable';
+import { useConfirm } from '@/components/ConfirmDialog';
 import {
   useGetOrganizationCategoriesQuery,
   useCreateCategoryMutation,
@@ -12,18 +29,27 @@ import {
 } from '@/services/apiSlice';
 import { Category } from '@/types/common';
 import { getErrorMessage } from '@/types/errors.ts';
+import { message } from '@/utils/notification';
 
-import { TopSpaceStyled } from './styles';
+interface CategoryFormValues {
+  name: string;
+  description?: string;
+}
 
-const { Text } = Typography;
-
-const ShopCategoriesPage = () => {
+const ShopCategoriesPage: FC = () => {
   const { id } = useParams<{ id: string }>();
   const orgId = Number.parseInt(id!);
 
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [categoryForm] = Form.useForm();
+  const { confirm } = useConfirm();
+
+  const { control, handleSubmit, reset, setValue } = useForm<CategoryFormValues>({
+    defaultValues: {
+      name: '',
+      description: '',
+    },
+  });
 
   const { data: categoriesData } = useGetOrganizationCategoriesQuery(orgId);
   const [createCategory, { isLoading: isCreating }] = useCreateCategoryMutation();
@@ -35,17 +61,15 @@ const ShopCategoriesPage = () => {
   const openCategoryModal = (category?: Category) => {
     setEditingCategory(category || null);
     if (category) {
-      categoryForm.setFieldsValue({
-        name: category.name,
-        description: category.description,
-      });
+      setValue('name', category.name);
+      setValue('description', category.description || '');
     } else {
-      categoryForm.resetFields();
+      reset();
     }
     setIsCategoryModalOpen(true);
   };
 
-  const handleCategorySubmit = async (values: Category) => {
+  const handleCategorySubmit = async (values: CategoryFormValues) => {
     try {
       if (editingCategory) {
         await updateCategory({ id: editingCategory.id, data: values }).unwrap();
@@ -55,7 +79,7 @@ const ShopCategoriesPage = () => {
         message.success('Category created successfully!');
       }
       setIsCategoryModalOpen(false);
-      categoryForm.resetFields();
+      reset();
     } catch (error) {
       message.error(
         getErrorMessage(error) || `Failed to ${editingCategory ? 'update' : 'create'} category`
@@ -72,108 +96,137 @@ const ShopCategoriesPage = () => {
     }
   };
 
-  const categoryColumns = [
+  const confirmDelete = (category: Category) => {
+    confirm({
+      title: 'Delete Category',
+      content: 'Are you sure you want to delete this category?',
+      onConfirm: () => handleDeleteCategory(category.id),
+    });
+  };
+
+  const columns: Column<Category>[] = [
     {
-      title: 'Name',
-      dataIndex: 'name',
-      key: 'name',
-      render: (name: string, record: Category) => (
-        <Space>
-          {name}
-          <Tag color={record.organization_id ? 'green' : 'blue'}>
-            {record.organization_id ? 'Custom' : 'Global'}
-          </Tag>
-        </Space>
+      id: 'name',
+      label: 'Name',
+      render: (category) => (
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Typography variant="body2">{category.name}</Typography>
+          <Chip
+            label={category.organization_id ? 'Custom' : 'Global'}
+            color={category.organization_id ? 'success' : 'primary'}
+            size="small"
+          />
+        </Stack>
       ),
     },
     {
-      title: 'Description',
-      dataIndex: 'description',
-      key: 'description',
+      id: 'description',
+      label: 'Description',
+      render: (category) => <Typography variant="body2">{category.description}</Typography>,
     },
     {
-      title: 'Actions',
-      key: 'actions',
-      render: (_: unknown, record: Category) => {
-        if (record.organization_id) {
-          return (
-            <Space>
-              <Button type="text" icon={<EditOutlined />} onClick={() => openCategoryModal(record)}>
-                Edit
-              </Button>
-              <Button
-                type="text"
-              danger
-              icon={<DeleteOutlined />}
-              onClick={() => {
-                Modal.confirm({
-                  title: 'Delete Category',
-                  content: 'Are you sure you want to delete this category?',
-                  onOk: () => handleDeleteCategory(record.id),
-                });
-              }}
-            >
-              Delete
-            </Button>
-          </Space>
-          );
-        }
-        return <Text type="secondary">Global category</Text>;
-      },
+      id: 'actions',
+      label: 'Actions',
+      render: (category) =>
+        category.organization_id ? (
+          <Stack direction="row" spacing={1}>
+            <IconButton size="small" color="primary" onClick={() => openCategoryModal(category)}>
+              <EditIcon fontSize="small" />
+            </IconButton>
+            <IconButton size="small" color="error" onClick={() => confirmDelete(category)}>
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Stack>
+        ) : (
+          <Typography variant="body2" color="text.secondary">
+            Global category
+          </Typography>
+        ),
     },
   ];
 
   return (
-    <Space direction="vertical" size="large" style={{ width: '100%' }}>
-      <TopSpaceStyled direction="vertical">
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => openCategoryModal()}>
+    <Stack spacing={3}>
+      <Box>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => openCategoryModal()}
+          sx={{ mb: 2 }}
+        >
           Create Custom Category
         </Button>
-        <Text type="secondary">
+        <Typography variant="body2" color="text.secondary">
           You can use global categories (blue tags) or create shop-specific categories (green tags)
-        </Text>
-      </TopSpaceStyled>
+        </Typography>
+      </Box>
 
-      <Table columns={categoryColumns} dataSource={allCategories} rowKey="id" pagination={false} />
+      <AppDataTable
+        columns={columns}
+        data={allCategories}
+        getRowKey={(category) => category.id}
+        emptyContent={<Typography color="text.secondary">No categories found</Typography>}
+      />
 
-      {/* Category Modal */}
-      <Modal
-        title={editingCategory ? 'Edit Category' : 'Create Category'}
+      {/* Category Dialog */}
+      <Dialog
         open={isCategoryModalOpen}
-        onCancel={() => {
+        onClose={() => {
           setIsCategoryModalOpen(false);
-          categoryForm.resetFields();
+          reset();
         }}
-        footer={[
-          <Button
-            key="cancel"
-            onClick={() => {
-              setIsCategoryModalOpen(false);
-              categoryForm.resetFields();
-            }}
-          >
-            Cancel
-          </Button>,
-          <Button
-            key="submit"
-            type="primary"
-            loading={isCreating || isUpdating}
-            onClick={() => categoryForm.submit()}
-          >
-            {editingCategory ? 'Update' : 'Create'}
-          </Button>,
-        ]}
+        maxWidth="sm"
+        fullWidth
       >
-        <Form form={categoryForm} layout="vertical" onFinish={handleCategorySubmit}>
-          <Form.Item name="name" label="Category Name" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="description" label="Description">
-            <Input.TextArea rows={3} />
-          </Form.Item>
-        </Form>
-      </Modal>
-    </Space>
+        <DialogTitle>{editingCategory ? 'Edit Category' : 'Create Category'}</DialogTitle>
+        <form onSubmit={handleSubmit(handleCategorySubmit)}>
+          <DialogContent>
+            <Stack spacing={3}>
+              <Controller
+                name="name"
+                control={control}
+                rules={{ required: 'Category name is required' }}
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    label="Category Name"
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    fullWidth
+                  />
+                )}
+              />
+              <Controller
+                name="description"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Description"
+                    multiline
+                    rows={3}
+                    fullWidth
+                  />
+                )}
+              />
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => {
+                setIsCategoryModalOpen(false);
+                reset();
+              }}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" variant="contained" disabled={isCreating || isUpdating}>
+              {editingCategory ? 'Update' : 'Create'}
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+    </Stack>
   );
 };
 

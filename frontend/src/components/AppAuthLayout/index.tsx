@@ -1,28 +1,45 @@
-import { ReactNode } from 'react';
+import { FC, ReactNode } from 'react';
 
-import { Flex, Image } from 'antd';
+import { Box, Card, Stack } from '@mui/material';
 import { Link } from 'react-router';
 
 import logo from '@/assets/base/logo.svg';
-
-import { CardStyled, ContainerStyled, LayoutStyled } from './styles.ts';
 
 interface LayoutProps {
   children: ReactNode;
 }
 
-export const AppAuthLayout = ({ children }: LayoutProps) => {
+const AppAuthLayout: FC<LayoutProps> = ({ children }) => {
   return (
-    <LayoutStyled theme="light">
-      <ContainerStyled>
-        <Flex justify="center" align="center">
-          <Link to="/">
-            <Image src={logo} preview={false} />
-          </Link>
-        </Flex>
-        <CardStyled>{children}</CardStyled>
-      </ContainerStyled>
-    </LayoutStyled>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+      }}
+    >
+      <Stack
+        spacing={1}
+        alignItems="center"
+        justifyContent="center"
+        sx={{ p: 1 }}
+      >
+        <Link to="/">
+          <img src={logo} alt="Logo" style={{ width: 150 }} />
+        </Link>
+        <Card
+          sx={{
+            width: '100%',
+            maxWidth: 450,
+            p: 3,
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
+          }}
+        >
+          {children}
+        </Card>
+      </Stack>
+    </Box>
   );
 };
 

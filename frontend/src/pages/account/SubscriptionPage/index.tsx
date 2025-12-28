@@ -1,7 +1,8 @@
-import { createElement } from 'react';
+import { FC, createElement } from 'react';
 
-import { Typography, Space, Modal, message, Spin, Alert } from 'antd';
+import { Typography, Stack, CircularProgress, Alert, Box } from '@mui/material';
 
+import { useConfirm } from '@/components/ConfirmDialog';
 import { subscriptionPlans } from '@/config/subscription.ts';
 import {
   useGetCurrentSubscriptionQuery,
@@ -9,40 +10,41 @@ import {
   useDowngradeSubscriptionMutation,
 } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
+import { message } from '@/utils/notification';
 
 import CurrentPlanBanner from './Addons/components/CurrentPlanBanner';
 import PlanCard from './Addons/components/PlanCard';
-import { ContainerStyled } from './styles';
 
-const { Title, Text, Paragraph } = Typography;
-
-const SubscriptionPage = () => {
+const SubscriptionPage: FC = () => {
   const { data: subscriptionData, isLoading, error } = useGetCurrentSubscriptionQuery();
   const [upgradeSubscription, { isLoading: isUpgrading }] = useUpgradeSubscriptionMutation();
   const [downgradeSubscription, { isLoading: isDowngrading }] = useDowngradeSubscriptionMutation();
+  const { confirm } = useConfirm();
 
   const subscription = subscriptionData?.data?.subscription;
   const usage = subscriptionData?.data?.usage;
   const currentPlan = subscription?.plan_slug || 'basic';
 
   const handleUpgrade = () => {
-    Modal.confirm({
+    confirm({
       title: 'Upgrade to Pro Plan',
       content: (
-        <Space direction="vertical">
-          <Paragraph>You are about to upgrade to the Pro plan. You will get:</Paragraph>
-          <Space direction="vertical" size={4}>
-            <Text>• Unlimited shops</Text>
-            <Text>• Unlimited products</Text>
-            <Text>• Advanced features</Text>
-            <Text>• Priority support</Text>
-          </Space>
-          <Paragraph type="secondary">
+        <Stack spacing={2}>
+          <Typography variant="body1">
+            You are about to upgrade to the Pro plan. You will get:
+          </Typography>
+          <Stack spacing={0.5}>
+            <Typography variant="body2">• Unlimited shops</Typography>
+            <Typography variant="body2">• Unlimited products</Typography>
+            <Typography variant="body2">• Advanced features</Typography>
+            <Typography variant="body2">• Priority support</Typography>
+          </Stack>
+          <Typography variant="body2" color="text.secondary">
             No payment required at this time. This is for demonstration purposes.
-          </Paragraph>
-        </Space>
+          </Typography>
+        </Stack>
       ),
-      onOk: async () => {
+      onConfirm: async () => {
         try {
           await upgradeSubscription().unwrap();
           message.success('Successfully upgraded to Pro plan!');
@@ -58,38 +60,41 @@ const SubscriptionPage = () => {
     const productCount = usage?.products?.current || 0;
     const exceedsLimits = orgCount > 1 || productCount > 10;
 
-    Modal.confirm({
+    confirm({
       title: 'Downgrade to Basic Plan',
       content: (
-        <Space direction="vertical">
-          <Paragraph>
+        <Stack spacing={2}>
+          <Typography variant="body1">
             You are about to downgrade to the Basic plan. You will be limited to:
-          </Paragraph>
-          <Space direction="vertical" size={4}>
-            <Text>• 1 shop only</Text>
-            <Text>• Up to 10 products</Text>
-            <Text>• Basic features only</Text>
-          </Space>
+          </Typography>
+          <Stack spacing={0.5}>
+            <Typography variant="body2">• 1 shop only</Typography>
+            <Typography variant="body2">• Up to 10 products</Typography>
+            <Typography variant="body2">• Basic features only</Typography>
+          </Stack>
           {exceedsLimits && (
-            <Alert
-              type="warning"
-              message="Cannot Downgrade"
-              description={
-                <Space direction="vertical">
-                  <Paragraph>You currently have:</Paragraph>
-                  <Space direction="vertical" size={4}>
-                    <Text>• {orgCount} shop(s) (Basic allows 1)</Text>
-                    <Text>• {productCount} product(s) (Basic allows 10)</Text>
-                  </Space>
-                  <Paragraph>Please delete extra shops or products before downgrading.</Paragraph>
-                </Space>
-              }
-            />
+            <Alert severity="warning">
+              <Typography variant="subtitle2" gutterBottom>
+                Cannot Downgrade
+              </Typography>
+              <Typography variant="body2" gutterBottom>
+                You currently have:
+              </Typography>
+              <Stack spacing={0.5}>
+                <Typography variant="body2">• {orgCount} shop(s) (Basic allows 1)</Typography>
+                <Typography variant="body2">
+                  • {productCount} product(s) (Basic allows 10)
+                </Typography>
+              </Stack>
+              <Typography variant="body2" sx={{ mt: 1 }}>
+                Please delete extra shops or products before downgrading.
+              </Typography>
+            </Alert>
           )}
-        </Space>
+        </Stack>
       ),
-      okButtonProps: { disabled: exceedsLimits },
-      onOk: async () => {
+      confirmButtonProps: { disabled: exceedsLimits },
+      onConfirm: async () => {
         try {
           await downgradeSubscription().unwrap();
           message.success('Successfully downgraded to Basic plan');
@@ -102,64 +107,67 @@ const SubscriptionPage = () => {
 
   if (isLoading) {
     return (
-      <ContainerStyled>
-        <Space direction="vertical" size={32} css={{ width: '100%', alignItems: 'center' }}>
-          <Spin size="large" />
-          <Text>Loading subscription information...</Text>
-        </Space>
-      </ContainerStyled>
+      <Box sx={{ textAlign: 'center', py: 12 }}>
+        <Stack spacing={3} alignItems="center">
+          <CircularProgress size={60} />
+          <Typography variant="body1">Loading subscription information...</Typography>
+        </Stack>
+      </Box>
     );
   }
 
   if (error) {
     return (
-      <ContainerStyled>
-        <Alert
-          type="error"
-          message="Error Loading Subscription"
-          description="Failed to load subscription information. Please try again later."
-        />
-      </ContainerStyled>
+      <Alert severity="error">
+        <Typography variant="subtitle1" gutterBottom>
+          Error Loading Subscription
+        </Typography>
+        <Typography variant="body2">
+          Failed to load subscription information. Please try again later.
+        </Typography>
+      </Alert>
     );
   }
 
   return (
-    <ContainerStyled>
-      <Space direction="vertical" size={32}>
-        <Space direction="vertical" size={8}>
-          <Title level={2}>Your Subscription</Title>
-          <Paragraph type="secondary">
-            Manage your subscription plan and billing information
-          </Paragraph>
-        </Space>
+    <Stack spacing={4}>
+      <Box>
+        <Typography variant="h4" gutterBottom>
+          Your Subscription
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Manage your subscription plan and billing information
+        </Typography>
+      </Box>
 
-        <CurrentPlanBanner
-          subscription={subscription}
-          usage={usage}
-          currentPlan={currentPlan}
-          onUpgrade={handleUpgrade}
-          onDowngrade={handleDowngrade}
-          isUpgrading={isUpgrading}
-          isDowngrading={isDowngrading}
-        />
+      <CurrentPlanBanner
+        subscription={subscription}
+        usage={usage}
+        currentPlan={currentPlan}
+        onUpgrade={handleUpgrade}
+        onDowngrade={handleDowngrade}
+        isUpgrading={isUpgrading}
+        isDowngrading={isDowngrading}
+      />
 
-        <Space direction="vertical" size={16}>
-          <Title level={3}>Available Plans</Title>
-          <Space direction="vertical" size={24}>
-            {subscriptionPlans.map((plan) => (
-              <PlanCard
-                key={plan.id}
-                plan={{
-                  ...plan,
-                  icon: createElement(plan.icon),
-                }}
-                isCurrentPlan={currentPlan === plan.id}
-              />
-            ))}
-          </Space>
-        </Space>
-      </Space>
-    </ContainerStyled>
+      <Box>
+        <Typography variant="h5" gutterBottom>
+          Available Plans
+        </Typography>
+        <Stack spacing={3} sx={{ mt: 2 }}>
+          {subscriptionPlans.map((plan) => (
+            <PlanCard
+              key={plan.id}
+              plan={{
+                ...plan,
+                icon: createElement(plan.icon),
+              }}
+              isCurrentPlan={currentPlan === plan.id}
+            />
+          ))}
+        </Stack>
+      </Box>
+    </Stack>
   );
 };
 

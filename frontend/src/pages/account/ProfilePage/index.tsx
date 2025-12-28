@@ -1,18 +1,14 @@
-import { useState } from 'react';
+import { ChangeEvent, FC, useState } from 'react';
 
-import { UserOutlined, UploadOutlined } from '@ant-design/icons';
-import { Form, Input, Button, message, Avatar, Upload } from 'antd';
+import PersonIcon from '@mui/icons-material/Person';
+import UploadIcon from '@mui/icons-material/Upload';
+import { Button, TextField, Avatar, Stack, Typography, Card, CardContent } from '@mui/material';
+import { useForm, Controller } from 'react-hook-form';
 
 import { useAppSelector } from '@/hooks/useRedux';
 import { useUpdateProfileMutation, useUploadAvatarMutation } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
-
-import {
-  ProfileContainerStyled,
-  AvatarSectionStyled,
-  UploadButtonStyled,
-  FullWidthSpaceStyled,
-} from './styles';
+import { message } from '@/utils/notification';
 
 interface ProfileFormValues {
   first_name: string;
@@ -22,14 +18,22 @@ interface ProfileFormValues {
   bio?: string;
 }
 
-const ProfilePage = () => {
+const ProfilePage: FC = () => {
   const { user } = useAppSelector((state) => state.auth);
-  const [form] = Form.useForm<ProfileFormValues>();
   const [updateProfile, { isLoading }] = useUpdateProfileMutation();
   const [uploadAvatar, { isLoading: isUploading }] = useUploadAvatarMutation();
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url);
 
-  const handleSubmit = async (values: ProfileFormValues) => {
+  const { control, handleSubmit } = useForm<ProfileFormValues>({
+    defaultValues: {
+      first_name: user?.first_name || '',
+      last_name: user?.last_name || '',
+      email: user?.email || '',
+      phone: user?.phone || '',
+    },
+  });
+
+  const onSubmit = async (values: ProfileFormValues) => {
     try {
       await updateProfile(values).unwrap();
       message.success('Profile updated successfully');
@@ -38,7 +42,10 @@ const ProfilePage = () => {
     }
   };
 
-  const handleAvatarUpload = async (file: File) => {
+  const handleAvatarUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
     try {
       const formData = new FormData();
       formData.append('avatar', file);
@@ -49,71 +56,110 @@ const ProfilePage = () => {
     } catch (error) {
       message.error(getErrorMessage(error) || 'Failed to upload avatar');
     }
-    return false; // Prevent default upload behavior
   };
 
   return (
-    <ProfileContainerStyled>
-      <AvatarSectionStyled>
-        <Avatar size={100} src={avatarUrl} icon={<UserOutlined />} />
-        <Upload accept="image/*" showUploadList={false} beforeUpload={handleAvatarUpload}>
-          <UploadButtonStyled icon={<UploadOutlined />} loading={isUploading}>
-            Change Avatar
-          </UploadButtonStyled>
-        </Upload>
-      </AvatarSectionStyled>
-
-      <Form<ProfileFormValues>
-        form={form}
-        layout="vertical"
-        initialValues={{
-          first_name: user?.first_name || '',
-          last_name: user?.last_name || '',
-          email: user?.email || '',
-          phone: user?.phone || '',
-        }}
-        onFinish={handleSubmit}
-      >
-        <FullWidthSpaceStyled direction="vertical" size="large">
-          <Form.Item
-            name="first_name"
-            label="First Name"
-            rules={[{ required: true, message: 'Please enter your first name' }]}
-          >
-            <Input placeholder="John" />
-          </Form.Item>
-
-          <Form.Item
-            name="last_name"
-            label="Last Name"
-            rules={[{ required: true, message: 'Please enter your last name' }]}
-          >
-            <Input placeholder="Doe" />
-          </Form.Item>
-
-          <Form.Item
-            name="email"
-            label="Email"
-            rules={[
-              { required: true, message: 'Please enter your email' },
-              { type: 'email', message: 'Please enter a valid email' },
-            ]}
-          >
-            <Input placeholder="john.doe@example.com" />
-          </Form.Item>
-
-          <Form.Item name="phone" label="Phone">
-            <Input placeholder="+1 (555) 123-4567" />
-          </Form.Item>
-
-          <Form.Item>
-            <Button type="primary" htmlType="submit" loading={isLoading}>
-              Save Changes
+    <Card>
+      <CardContent>
+        <Stack spacing={4}>
+          {/* Avatar Section */}
+          <Stack spacing={2} alignItems="center">
+            <Avatar src={avatarUrl} sx={{ width: 100, height: 100 }}>
+              <PersonIcon sx={{ fontSize: 50 }} />
+            </Avatar>
+            <Button
+              variant="outlined"
+              component="label"
+              startIcon={<UploadIcon />}
+              disabled={isUploading}
+            >
+              {'Change Avatar'}
+              <input type="file" hidden accept="image/*" onChange={handleAvatarUpload} />
             </Button>
-          </Form.Item>
-        </FullWidthSpaceStyled>
-      </Form>
-    </ProfileContainerStyled>
+          </Stack>
+
+          {/* Profile Form */}
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Stack spacing={3}>
+              <Typography variant="h6">Personal Information</Typography>
+
+              <Controller
+                name="first_name"
+                control={control}
+                rules={{ required: 'Please enter your first name' }}
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    label="First Name"
+                    placeholder="John"
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    fullWidth
+                  />
+                )}
+              />
+
+              <Controller
+                name="last_name"
+                control={control}
+                rules={{ required: 'Please enter your last name' }}
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    label="Last Name"
+                    placeholder="Doe"
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    fullWidth
+                  />
+                )}
+              />
+
+              <Controller
+                name="email"
+                control={control}
+                rules={{
+                  required: 'Please enter your email',
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: 'Please enter a valid email',
+                  },
+                }}
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    label="Email"
+                    placeholder="john.doe@example.com"
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    fullWidth
+                  />
+                )}
+              />
+
+              <Controller
+                name="phone"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    label="Phone"
+                    placeholder="+1 (555) 123-4567"
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    fullWidth
+                  />
+                )}
+              />
+
+              <Button type="submit" variant="contained" disabled={isLoading}>
+                Save Changes
+              </Button>
+            </Stack>
+          </form>
+        </Stack>
+      </CardContent>
+    </Card>
   );
 };
 

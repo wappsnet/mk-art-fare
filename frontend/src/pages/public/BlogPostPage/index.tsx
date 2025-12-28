@@ -1,37 +1,42 @@
-import { useState } from 'react';
+import { FC, useState } from 'react';
 
-import { Comment as AntComment } from '@ant-design/compatible';
-import { UserOutlined, CalendarOutlined, EyeOutlined } from '@ant-design/icons';
-import { Typography, Avatar, Divider, Button, Input, List, Form, message, Spin, Space } from 'antd';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import PersonIcon from '@mui/icons-material/Person';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import {
+  Container,
+  Typography,
+  Avatar,
+  Divider,
+  Button,
+  TextField,
+  Stack,
+  Box,
+  CircularProgress,
+  Breadcrumbs,
+  Link as MuiLink,
+  Paper,
+} from '@mui/material';
+import { useForm, Controller } from 'react-hook-form';
 import { useParams, Link } from 'react-router';
 
 import AppLayout from '@/components/AppLayout';
 import { useAppSelector } from '@/hooks/useRedux';
 import { useGetBlogPostQuery } from '@/services/apiSlice';
 import { withKeys } from '@/utils/arrayHelpers';
+import { message } from '@/utils/notification';
 
-import {
-  ContainerStyled,
-  ArticleHeaderStyled,
-  FeaturedImageStyled,
-  AuthorInfoStyled,
-  MetaInfoStyled,
-  ContentStyled,
-  CommentSectionStyled,
-  LoadingContainerStyled,
-  CommentFormStyled,
-  SignInPromptStyled,
-  BreadcrumbStyled,
-  SmallSecondaryTextStyled,
-} from './styles';
+interface CommentFormData {
+  content: string;
+}
 
-const { Title, Paragraph, Text } = Typography;
-const { TextArea } = Input;
-
-const BlogPostPage = () => {
+const BlogPostPage: FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const [submitting, setSubmitting] = useState(false);
-  const [form] = Form.useForm();
+  const { control, handleSubmit, reset } = useForm<CommentFormData>({
+    defaultValues: { content: '' },
+  });
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   const {
@@ -44,7 +49,7 @@ const BlogPostPage = () => {
 
   const post = postData?.data;
 
-  const handleSubmitComment = async (values: { content: string }) => {
+  const onSubmitComment = async (values: CommentFormData) => {
     if (post === null || post === undefined) return;
 
     setSubmitting(true);
@@ -60,7 +65,7 @@ const BlogPostPage = () => {
 
       if (response.ok) {
         message.success('Comment added successfully!');
-        form.resetFields();
+        reset();
         refetch();
       } else {
         message.error('Failed to add comment');
@@ -83,11 +88,11 @@ const BlogPostPage = () => {
   if (loading) {
     return (
       <AppLayout>
-        <ContainerStyled>
-          <LoadingContainerStyled>
-            <Spin size="large" />
-          </LoadingContainerStyled>
-        </ContainerStyled>
+        <Container maxWidth="md" sx={{ py: 8 }}>
+          <Box sx={{ textAlign: 'center', py: 12 }}>
+            <CircularProgress size={60} />
+          </Box>
+        </Container>
       </AppLayout>
     );
   }
@@ -95,109 +100,165 @@ const BlogPostPage = () => {
   if (post === null || post === undefined) {
     return (
       <AppLayout>
-        <ContainerStyled>
-          <Title level={3}>Blog post not found</Title>
-        </ContainerStyled>
+        <Container maxWidth="md" sx={{ py: 8 }}>
+          <Typography variant="h4">Blog post not found</Typography>
+        </Container>
       </AppLayout>
     );
   }
 
   return (
     <AppLayout>
-      <ContainerStyled>
-        <BreadcrumbStyled
-          items={[
-            { title: <Link to="/">Home</Link> },
-            { title: <Link to="/blog">Blog</Link> },
-            { title: post.title },
-          ]}
-        />
+      <Container maxWidth="md" sx={{ py: 8 }}>
+        {/* Breadcrumbs */}
+        <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} sx={{ mb: 3 }}>
+          <MuiLink component={Link} to="/" underline="hover" color="inherit">
+            Home
+          </MuiLink>
+          <MuiLink component={Link} to="/blog" underline="hover" color="inherit">
+            Blog
+          </MuiLink>
+          <Typography color="text.primary">{post.title}</Typography>
+        </Breadcrumbs>
 
+        {/* Featured Image */}
         {post.featured_image_url && (
-          <FeaturedImageStyled src={post.featured_image_url} alt={post.title} />
+          <Box
+            component="img"
+            src={post.featured_image_url}
+            alt={post.title}
+            sx={{
+              width: '100%',
+              height: 400,
+              objectFit: 'cover',
+              borderRadius: 2,
+              mb: 4,
+            }}
+          />
         )}
 
-        <ArticleHeaderStyled>
-          <Title level={1}>{post.title}</Title>
+        {/* Article Header */}
+        <Stack spacing={3} mb={4}>
+          <Typography variant="h3">{post.title}</Typography>
 
-          <AuthorInfoStyled>
-            <Avatar size={48} src={post.avatar_url} icon={<UserOutlined />} />
-            <Space direction="vertical" size={0}>
-              <Text strong>
+          {/* Author Info */}
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Avatar src={post.avatar_url} sx={{ width: 48, height: 48 }}>
+              <PersonIcon />
+            </Avatar>
+            <Stack spacing={0}>
+              <Typography variant="body1" fontWeight="bold">
                 {post.first_name} {post.last_name}
-              </Text>
-              <SmallSecondaryTextStyled type="secondary">Author</SmallSecondaryTextStyled>
-            </Space>
-          </AuthorInfoStyled>
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Author
+              </Typography>
+            </Stack>
+          </Stack>
 
-          <MetaInfoStyled>
-            <Text>
-              <CalendarOutlined /> {formatDate(post.published_at || post.created_at)}
-            </Text>
-            <Text>
-              <EyeOutlined /> {post.view_count} views
-            </Text>
-          </MetaInfoStyled>
-        </ArticleHeaderStyled>
+          {/* Meta Info */}
+          <Stack direction="row" spacing={3} sx={{ color: 'text.secondary' }}>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <CalendarTodayIcon fontSize="small" />
+              <Typography variant="body2">
+                {formatDate(post.published_at || post.created_at)}
+              </Typography>
+            </Stack>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <VisibilityIcon fontSize="small" />
+              <Typography variant="body2">{post.view_count} views</Typography>
+            </Stack>
+          </Stack>
+        </Stack>
 
-        <Divider />
+        <Divider sx={{ mb: 4 }} />
 
-        <ContentStyled>
+        {/* Content */}
+        <Box sx={{ mb: 4, fontSize: 16, lineHeight: 1.8, color: 'text.primary' }}>
           {withKeys(post.content.split('\n')).map((item) => (
-            <Paragraph key={item._key}>{item.value}</Paragraph>
+            <Typography key={item._key} sx={{ mb: 2 }}>
+              {item.value}
+            </Typography>
           ))}
-        </ContentStyled>
+        </Box>
 
-        <Divider />
+        <Divider sx={{ mb: 6 }} />
 
-        <CommentSectionStyled>
-          <Title level={3}>Comments ({post.comments?.length || 0})</Title>
+        {/* Comment Section */}
+        <Stack spacing={4}>
+          <Typography variant="h4">Comments ({post.comments?.length || 0})</Typography>
 
+          {/* Comment Form */}
           {isAuthenticated ? (
-            <CommentFormStyled>
-              <Form form={form} onFinish={handleSubmitComment}>
-                <Form.Item
-                  name="content"
-                  rules={[{ required: true, message: 'Please enter your comment' }]}
-                >
-                  <TextArea rows={4} placeholder="Write your comment..." />
-                </Form.Item>
-                <Form.Item>
-                  <Button type="primary" htmlType="submit" loading={submitting}>
-                    Post Comment
-                  </Button>
-                </Form.Item>
-              </Form>
-            </CommentFormStyled>
+            <Paper sx={{ p: 3 }}>
+              <form onSubmit={handleSubmit(onSubmitComment)}>
+                <Stack spacing={2}>
+                  <Controller
+                    name="content"
+                    control={control}
+                    rules={{ required: 'Please enter your comment' }}
+                    render={({ field, fieldState }) => (
+                      <TextField
+                        {...field}
+                        multiline
+                        rows={4}
+                        placeholder="Write your comment..."
+                        error={!!fieldState.error}
+                        helperText={fieldState.error?.message}
+                        fullWidth
+                      />
+                    )}
+                  />
+                  <Box>
+                    <Button type="submit" variant="contained" disabled={submitting}>
+                      Post Comment
+                    </Button>
+                  </Box>
+                </Stack>
+              </form>
+            </Paper>
           ) : (
-            <SignInPromptStyled>
-              <Paragraph type="secondary">
-                <Link to="/login">Sign in</Link> to post a comment
-              </Paragraph>
-            </SignInPromptStyled>
+            <Paper sx={{ p: 3, textAlign: 'center' }}>
+              <Typography variant="body1" color="text.secondary">
+                <MuiLink component={Link} to="/login">
+                  Sign in
+                </MuiLink>{' '}
+                to post a comment
+              </Typography>
+            </Paper>
           )}
 
+          {/* Comments List */}
           {post.comments && post.comments.length > 0 ? (
-            <List
-              dataSource={post.comments}
-              renderItem={(comment) => (
-                <AntComment
-                  author={`${comment.first_name} ${comment.last_name}`}
-                  avatar={<Avatar src={comment.avatar_url} icon={<UserOutlined />} />}
-                  content={<Paragraph>{comment.content}</Paragraph>}
-                  datetime={
-                    <SmallSecondaryTextStyled type="secondary">
-                      {formatDate(comment.created_at)}
-                    </SmallSecondaryTextStyled>
-                  }
-                />
-              )}
-            />
+            <Stack spacing={3}>
+              {post.comments.map((comment) => (
+                <Paper key={comment.id} sx={{ p: 3 }}>
+                  <Stack spacing={2}>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <Avatar src={comment.avatar_url}>
+                        <PersonIcon />
+                      </Avatar>
+                      <Stack spacing={0}>
+                        <Typography variant="body1" fontWeight="bold">
+                          {comment.first_name} {comment.last_name}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {formatDate(comment.created_at)}
+                        </Typography>
+                      </Stack>
+                    </Stack>
+                    <Typography variant="body1">{comment.content}</Typography>
+                  </Stack>
+                </Paper>
+              ))}
+            </Stack>
           ) : (
-            <Text type="secondary">No comments yet. Be the first to comment!</Text>
+            <Typography variant="body1" color="text.secondary">
+              No comments yet. Be the first to comment!
+            </Typography>
           )}
-        </CommentSectionStyled>
-      </ContainerStyled>
+        </Stack>
+      </Container>
     </AppLayout>
   );
 };

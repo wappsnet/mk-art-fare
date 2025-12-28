@@ -286,3 +286,21 @@ export interface OrganizationBannerData {
   id: number;
   file: File;
 }
+
+export interface Page {
+  id: number;
+  slug: string;
+  title: string;
+  content: Record<string, unknown>;
+  meta_description?: string;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PageFormData {
+  title: string;
+  content: Record<string, unknown>;
+  meta_description?: string;
+  is_published?: boolean;
+}

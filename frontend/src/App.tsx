@@ -1,7 +1,9 @@
-import { ConfigProvider } from 'antd';
+import { ThemeProvider } from '@mui/material/styles';
+import { SnackbarProvider } from 'notistack';
 import { Provider } from 'react-redux';
 
-import { theme } from './config/theme';
+import { ConfirmDialogProvider } from './components/ConfirmDialog';
+import { muiTheme } from './config/muiTheme';
 import { AppRouter } from './routes';
 import { useGetProfileQuery, useGetCartQuery } from './services/apiSlice';
 import { store } from './store';
@@ -22,9 +24,13 @@ function AppContent() {
 function App() {
   return (
     <Provider store={store}>
-      <ConfigProvider theme={theme}>
-        <AppContent />
-      </ConfigProvider>
+      <ThemeProvider theme={muiTheme}>
+        <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+          <ConfirmDialogProvider>
+            <AppContent />
+          </ConfirmDialogProvider>
+        </SnackbarProvider>
+      </ThemeProvider>
     </Provider>
   );
 }

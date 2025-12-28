@@ -1,6 +1,6 @@
 import { FC, useMemo } from 'react';
 
-import { Form } from 'antd';
+import { Box } from '@mui/material';
 
 import { FieldDefinition, FieldType, FieldValue } from '@/types/fields';
 
@@ -43,13 +43,5 @@ export const DynamicFieldRenderer: FC<DynamicFieldRendererProps> = ({
     }
   }, [disabled, field, onChange]);
 
-  return (
-    <Form.Item
-      label={field.label}
-      help={field.helpText}
-      rules={[{ required: field.required, message: `${field.label} is required` }]}
-    >
-      {content}
-    </Form.Item>
-  );
+  return <Box sx={{ mb: 2 }}>{content}</Box>;
 };

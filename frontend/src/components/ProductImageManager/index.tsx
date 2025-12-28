@@ -1,13 +1,11 @@
 import { useEffect, useState, FC } from 'react';
 
-import { Space, Typography } from 'antd';
+import { Stack, Typography } from '@mui/material';
 
 import { ProductImage } from '@/types/common';
 
 import { AddImageForm } from './Addons/components/AddImageForm';
 import { ProductImageGrid } from './Addons/components/ProductImageGrid';
-
-const { Title } = Typography;
 
 interface ProductImageManagerProps {
   productId: number;
@@ -44,16 +42,16 @@ export const ProductImageManager: FC<ProductImageManagerProps> = ({
   };
 
   return (
-    <Space direction="vertical" size="large">
-      <Space direction="vertical">
-        <Title level={4}>Add New Image</Title>
+    <Stack spacing={4}>
+      <Stack spacing={2}>
+        <Typography variant="h6">Add New Image</Typography>
         <AddImageForm productId={productId} onImageAdded={handleImageAdded} onUpdate={onUpdate} />
-      </Space>
+      </Stack>
 
-      <Space direction="vertical">
-        <Title level={4}>Current Images ({localImages.length})</Title>
+      <Stack spacing={2}>
+        <Typography variant="h6">Current Images ({localImages.length})</Typography>
         <ProductImageGrid productId={productId} images={localImages} onUpdate={onUpdate} />
-      </Space>
-    </Space>
+      </Stack>
+    </Stack>
   );
 };

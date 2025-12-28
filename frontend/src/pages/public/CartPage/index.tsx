@@ -1,20 +1,27 @@
-import { DeleteOutlined, ShoppingOutlined } from '@ant-design/icons';
+import { FC } from 'react';
+
+import DeleteIcon from '@mui/icons-material/Delete';
+import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import {
-  Col,
+  Container,
+  Grid,
   Typography,
-  InputNumber,
-  List,
-  Empty,
-  Divider,
-  Space,
-  message,
+  TextField,
   Button,
-  Descriptions,
-  Flex,
-} from 'antd';
+  Divider,
+  Stack,
+  Card,
+  CardContent,
+  Box,
+  Table,
+  TableBody,
+  TableRow,
+  TableCell,
+} from '@mui/material';
 import { Link, useNavigate } from 'react-router';
 
 import AppLayout from '@/components/AppLayout';
+import EmptyState from '@/components/EmptyState';
 import { useAppSelector } from '@/hooks/useRedux';
 import {
   useGetCartQuery,
@@ -22,27 +29,9 @@ import {
   useRemoveFromCartMutation,
   useClearCartMutation,
 } from '@/services/apiSlice';
+import { message } from '@/utils/notification';
 
-import {
-  ContainerStyled,
-  LoadingContainerStyled,
-  ContentRowStyled,
-  CartItemCardStyled,
-  ProductImageStyled,
-  ProductTitle,
-  SmallTextStyled,
-  PriceStyled,
-  TotalPriceStyled,
-  ClearCartButtonStyled,
-  SummaryCardStyled,
-  SummaryRowStyled,
-  CheckoutButtonStyled,
-  ContinueShoppingButtonStyled,
-} from './styles';
-
-const { Title, Text } = Typography;
-
-const CartPage = () => {
+const CartPage: FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
@@ -92,31 +81,25 @@ const CartPage = () => {
   if (loading) {
     return (
       <AppLayout>
-        <ContainerStyled>
-          <LoadingContainerStyled>
-            <Empty description="Loading cart..." />
-          </LoadingContainerStyled>
-        </ContainerStyled>
+        <Container maxWidth="lg" sx={{ py: 8, minHeight: 'calc(100vh - 64px - 200px)' }}>
+          <EmptyState title="Loading cart..." />
+        </Container>
       </AppLayout>
     );
   }
 
   const hasProducts = cart?.items && cart.items.length > 0;
 
-  if (cart && hasProducts) {
-    // Cart has products, continue to render below
-  } else {
+  if (!hasProducts) {
     return (
       <AppLayout>
-        <ContainerStyled>
-          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Your cart is empty">
-            <Link to="/products">
-              <Button type="primary" icon={<ShoppingOutlined />}>
-                Start Shopping
-              </Button>
-            </Link>
-          </Empty>
-        </ContainerStyled>
+        <Container maxWidth="lg" sx={{ py: 8, minHeight: 'calc(100vh - 64px - 200px)' }}>
+          <EmptyState title="Your cart is empty" description="Start adding products to your cart">
+            <Button component={Link} to="/products" variant="contained" startIcon={<ShoppingBagIcon />}>
+              Start Shopping
+            </Button>
+          </EmptyState>
+        </Container>
       </AppLayout>
     );
   }
@@ -125,117 +108,175 @@ const CartPage = () => {
   const tax = subtotal * 0.1;
   const shipping = 9.99;
   const total = subtotal + tax + shipping;
-
   const totalItems = cart.items.length;
 
   return (
     <AppLayout>
-      <ContainerStyled>
-        <Title level={2}>Shopping Cart</Title>
-        <Text type="secondary">{totalItems} items in your cart</Text>
+      <Container maxWidth="lg" sx={{ py: 8, minHeight: 'calc(100vh - 64px - 200px)' }}>
+        <Stack spacing={1} mb={3}>
+          <Typography variant="h3">Shopping Cart</Typography>
+          <Typography variant="body1" color="text.secondary">
+            {totalItems} items in your cart
+          </Typography>
+        </Stack>
 
-        <ContentRowStyled gutter={[24, 24]}>
-          <Col xs={24} lg={16}>
-            <Title level={4}>Products</Title>
-            <List
-              dataSource={cart.items}
-              renderItem={(item) => (
-                <CartItemCardStyled>
-                  <ContentRowStyled gutter={[16, 16]}>
-                    <Col xs={24} sm={24} md={14}>
-                      <Space size={16} align="center" wrap>
-                        <Flex justify="center" flex="auto" gap={8} wrap>
-                          <ProductImageStyled
+        <Grid container spacing={3}>
+          {/* Cart Items */}
+          <Grid size={{ xs: 12, lg: 8 }}>
+            <Stack spacing={2}>
+              <Typography variant="h5">Products</Typography>
+
+              {cart.items.map((item) => (
+                <Card key={item.product_id}>
+                  <CardContent>
+                    <Grid container spacing={2}>
+                      {/* Product Info */}
+                      <Grid size={{ xs: 12, md: 7 }}>
+                        <Stack direction="row" spacing={2} alignItems="center">
+                          <Box
+                            component="img"
                             src={item.image_url || 'https://via.placeholder.com/100'}
                             alt={item.name}
                             onError={(e) => {
                               e.currentTarget.src = 'https://via.placeholder.com/100';
                             }}
-                            width={150}
-                            height={150}
+                            width={100}
+                            height={100}
+                            sx={{ objectFit: 'cover', borderRadius: 1 }}
                           />
-                          <Space direction="vertical" size={4}>
-                            <Link to={`/products/${item.slug}`}>
-                              <ProductTitle level={5}>{item.name}</ProductTitle>
-                            </Link>
-                            <SmallTextStyled type="secondary">
+                          <Stack spacing={0.5}>
+                            <Typography
+                              component={Link}
+                              to={`/products/${item.slug}`}
+                              variant="h6"
+                              sx={{ textDecoration: 'none', color: 'inherit' }}
+                            >
+                              {item.name}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
                               by {item.organization_name}
-                            </SmallTextStyled>
-                            <PriceStyled strong>${item.price.toFixed(2)}</PriceStyled>
-                          </Space>
-                        </Flex>
-                      </Space>
-                    </Col>
-                    <Col xs={24} sm={24} md={10}>
-                      <Flex vertical gap={8}>
-                        <Descriptions column={1} size="middle" bordered layout="horizontal">
-                          <Descriptions.Item label={<Text type="secondary">Quantity</Text>}>
-                            <InputNumber
-                              min={1}
-                              value={item.quantity}
-                              onChange={(value) =>
-                                handleUpdateQuantity(item.product_id, value || 1)
-                              }
-                            />
-                          </Descriptions.Item>
-                          <Descriptions.Item label={<Text type="secondary">Total</Text>}>
-                            <TotalPriceStyled strong>
-                              ${(item.price * item.quantity).toFixed(2)}
-                            </TotalPriceStyled>
-                          </Descriptions.Item>
-                        </Descriptions>
-                        <Button
-                          type="primary"
-                          danger
-                          icon={<DeleteOutlined />}
-                          onClick={() => handleRemoveItem(item.product_id)}
-                          block
-                        >
-                          Remove
-                        </Button>
-                      </Flex>
-                    </Col>
-                  </ContentRowStyled>
-                </CartItemCardStyled>
-              )}
-            />
+                            </Typography>
+                            <Typography variant="body1" color="primary" fontWeight="bold">
+                              ${item.price.toFixed(2)}
+                            </Typography>
+                          </Stack>
+                        </Stack>
+                      </Grid>
 
-            <ClearCartButtonStyled danger onClick={handleClearCart}>
-              Clear Cart
-            </ClearCartButtonStyled>
-          </Col>
+                      {/* Quantity and Actions */}
+                      <Grid size={{ xs: 12, md: 5 }}>
+                        <Stack spacing={1}>
+                          <Table size="small">
+                            <TableBody>
+                              <TableRow>
+                                <TableCell>
+                                  <Typography variant="body2" color="text.secondary">
+                                    Quantity
+                                  </Typography>
+                                </TableCell>
+                                <TableCell align="right">
+                                  <TextField
+                                    type="number"
+                                    value={item.quantity}
+                                    onChange={(e) => {
+                                      const value = Number.parseInt(e.target.value);
+                                      if (value >= 1) {
+                                        handleUpdateQuantity(item.product_id, value);
+                                      }
+                                    }}
+                                    slotProps={{ htmlInput: { min: 1 } }}
+                                    size="small"
+                                    sx={{ width: 80 }}
+                                  />
+                                </TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell>
+                                  <Typography variant="body2" color="text.secondary">
+                                    Total
+                                  </Typography>
+                                </TableCell>
+                                <TableCell align="right">
+                                  <Typography variant="h6" fontWeight="bold">
+                                    ${(item.price * item.quantity).toFixed(2)}
+                                  </Typography>
+                                </TableCell>
+                              </TableRow>
+                            </TableBody>
+                          </Table>
+                          <Button
+                            variant="contained"
+                            color="error"
+                            startIcon={<DeleteIcon />}
+                            onClick={() => handleRemoveItem(item.product_id)}
+                            fullWidth
+                          >
+                            Remove
+                          </Button>
+                        </Stack>
+                      </Grid>
+                    </Grid>
+                  </CardContent>
+                </Card>
+              ))}
 
-          <Col xs={24} lg={8}>
-            <SummaryCardStyled title="Order Summary">
-              <SummaryRowStyled>
-                <Text>Subtotal:</Text>
-                <Text strong>${subtotal.toFixed(2)}</Text>
-              </SummaryRowStyled>
-              <SummaryRowStyled>
-                <Text>Tax (10%):</Text>
-                <Text strong>${tax.toFixed(2)}</Text>
-              </SummaryRowStyled>
-              <SummaryRowStyled>
-                <Text>Shipping:</Text>
-                <Text strong>${shipping.toFixed(2)}</Text>
-              </SummaryRowStyled>
-              <Divider />
-              <SummaryRowStyled>
-                <Title level={4}>Total:</Title>
-                <Title color="primary" level={4}>
-                  ${total.toFixed(2)}
-                </Title>
-              </SummaryRowStyled>
-              <CheckoutButtonStyled type="primary" size="large" block onClick={handleCheckout}>
-                Proceed to Checkout
-              </CheckoutButtonStyled>
-              <Link to="/products">
-                <ContinueShoppingButtonStyled block>Continue Shopping</ContinueShoppingButtonStyled>
-              </Link>
-            </SummaryCardStyled>
-          </Col>
-        </ContentRowStyled>
-      </ContainerStyled>
+              <Button variant="outlined" color="error" onClick={handleClearCart}>
+                Clear Cart
+              </Button>
+            </Stack>
+          </Grid>
+
+          {/* Order Summary */}
+          <Grid size={{ xs: 12, lg: 4 }}>
+            <Card sx={{ position: 'sticky', top: 80 }}>
+              <CardContent>
+                <Typography variant="h5" gutterBottom>
+                  Order Summary
+                </Typography>
+
+                <Stack spacing={1.5} mb={2}>
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography variant="body1">Subtotal:</Typography>
+                    <Typography variant="body1" fontWeight="bold">
+                      ${subtotal.toFixed(2)}
+                    </Typography>
+                  </Stack>
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography variant="body1">Tax (10%):</Typography>
+                    <Typography variant="body1" fontWeight="bold">
+                      ${tax.toFixed(2)}
+                    </Typography>
+                  </Stack>
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography variant="body1">Shipping:</Typography>
+                    <Typography variant="body1" fontWeight="bold">
+                      ${shipping.toFixed(2)}
+                    </Typography>
+                  </Stack>
+                </Stack>
+
+                <Divider />
+
+                <Stack direction="row" justifyContent="space-between" my={2}>
+                  <Typography variant="h5">Total:</Typography>
+                  <Typography variant="h5" color="primary">
+                    ${total.toFixed(2)}
+                  </Typography>
+                </Stack>
+
+                <Stack spacing={1.5}>
+                  <Button variant="contained" size="large" fullWidth onClick={handleCheckout}>
+                    Proceed to Checkout
+                  </Button>
+                  <Button component={Link} to="/products" variant="outlined" fullWidth>
+                    Continue Shopping
+                  </Button>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </Container>
     </AppLayout>
   );
 };

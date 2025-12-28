@@ -1,46 +1,30 @@
-import { ShoppingOutlined, BankOutlined, ReadOutlined } from '@ant-design/icons';
-import { Button, Row, Col, Typography, Space } from 'antd';
+import { FC } from 'react';
+
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
+import { Box, Container, Grid, Typography, Button, Card, CardContent, Stack } from '@mui/material';
 import { Link } from 'react-router';
 
 import AppLayout from '@/components/AppLayout';
 import { withKeys } from '@/utils/arrayHelpers';
 
-import {
-  HeroSectionStyled,
-  HeroTitleStyled,
-  HeroTextStyled,
-  BecomeArtistButtonStyled,
-  SectionStyled,
-  SectionHeaderStyled,
-  SectionDescriptionStyled,
-  FeatureCardStyled,
-  IconWrapperStyled,
-  StatsSectionStyled,
-  StatsTitleStyled,
-  StatNumberStyled,
-  StatLabelStyled,
-  CTASectionStyled,
-  CTADescriptionStyled,
-} from './styles';
-
-const { Title, Paragraph } = Typography;
-
-const HomePage = () => {
+const HomePage: FC = () => {
   const features = [
     {
-      icon: <ShoppingOutlined />,
+      icon: <ShoppingBagIcon sx={{ fontSize: 48 }} />,
       title: 'Browse Art',
       description:
         'Discover unique artworks from talented artists around the world. From paintings to sculptures, find your perfect piece.',
     },
     {
-      icon: <BankOutlined />,
+      icon: <AccountBalanceIcon sx={{ fontSize: 48 }} />,
       title: 'Artist Shops',
       description:
         'Artists can create custom shop pages with their branding, showcase their work, and connect with art lovers.',
     },
     {
-      icon: <ReadOutlined />,
+      icon: <MenuBookIcon sx={{ fontSize: 48 }} />,
       title: 'Community Blog',
       description:
         'Read inspiring stories, art techniques, and industry insights from our vibrant community of artists.',
@@ -55,75 +39,130 @@ const HomePage = () => {
 
   return (
     <AppLayout>
-      <HeroSectionStyled>
-        <HeroTitleStyled>Welcome to Art Fare</HeroTitleStyled>
-        <HeroTextStyled>
-          The premier e-commerce platform connecting artists with art lovers. Discover amazing
-          artworks, support talented artists, and join a vibrant community.
-        </HeroTextStyled>
-        <Space size="large">
-          <Link to="/products">
-            <Button type="primary" color="volcano" variant="solid" size="large" ghost>
+      {/* Hero Section */}
+      <Box
+        sx={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          py: { xs: 8, md: 12 },
+          textAlign: 'center',
+        }}
+      >
+        <Container maxWidth="md">
+          <Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: 600 }}>
+            Welcome to Art Fare
+          </Typography>
+          <Typography variant="h6" sx={{ mb: 4 }}>
+            The premier e-commerce platform connecting artists with art lovers. Discover amazing
+            artworks, support talented artists, and join a vibrant community.
+          </Typography>
+          <Stack direction="row" spacing={2} justifyContent="center">
+            <Button
+              component={Link}
+              to="/products"
+              variant="outlined"
+              size="large"
+              sx={{ color: 'white', borderColor: 'white' }}
+            >
               Explore Art
             </Button>
-          </Link>
-          <Link to="/register">
-            <BecomeArtistButtonStyled size="large">Become an Artist</BecomeArtistButtonStyled>
-          </Link>
-        </Space>
-      </HeroSectionStyled>
+            <Button
+              component={Link}
+              to="/register"
+              variant="contained"
+              size="large"
+              sx={{
+                bgcolor: 'white',
+                color: 'primary.main',
+                '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' },
+              }}
+            >
+              Become an Artist
+            </Button>
+          </Stack>
+        </Container>
+      </Box>
 
-      <SectionStyled>
-        <SectionHeaderStyled>
-          <Title level={2}>Why Choose Art Fare?</Title>
-          <SectionDescriptionStyled type="secondary">
+      {/* Features Section */}
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Box textAlign="center" mb={6}>
+          <Typography variant="h3" gutterBottom>
+            Why Choose Art Fare?
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
             Everything you need to buy, sell, and celebrate art
-          </SectionDescriptionStyled>
-        </SectionHeaderStyled>
+          </Typography>
+        </Box>
 
-        <Row gutter={[32, 32]}>
+        <Grid container spacing={4}>
           {withKeys(features).map((feature) => (
-            <Col xs={24} sm={12} lg={8} key={feature._key}>
-              <FeatureCardStyled>
-                <IconWrapperStyled>{feature.value.icon}</IconWrapperStyled>
-                <Title level={4}>{feature.value.title}</Title>
-                <Paragraph type="secondary">{feature.value.description}</Paragraph>
-              </FeatureCardStyled>
-            </Col>
+            <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={feature._key}>
+              <Card
+                sx={{
+                  height: '100%',
+                  textAlign: 'center',
+                  transition: 'transform 0.3s, box-shadow 0.3s',
+                  '&:hover': {
+                    transform: 'translateY(-8px)',
+                    boxShadow: 6,
+                  },
+                }}
+              >
+                <CardContent>
+                  <Box color="primary.main" mb={2}>
+                    {feature.value.icon}
+                  </Box>
+                  <Typography variant="h5" gutterBottom>
+                    {feature.value.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {feature.value.description}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
           ))}
-        </Row>
-      </SectionStyled>
+        </Grid>
+      </Container>
 
-      <StatsSectionStyled>
-        <StatsTitleStyled level={2}>Our Growing Community</StatsTitleStyled>
-        <Row gutter={[32, 32]}>
-          {withKeys(stats).map((stat) => (
-            <Col xs={12} sm={12} md={8} key={stat._key}>
-              <StatNumberStyled>{stat.value.number}</StatNumberStyled>
-              <StatLabelStyled>{stat.value.label}</StatLabelStyled>
-            </Col>
-          ))}
-        </Row>
-      </StatsSectionStyled>
+      {/* Stats Section */}
+      <Box bgcolor="grey.100" py={8} textAlign="center">
+        <Container maxWidth="lg">
+          <Typography variant="h3" gutterBottom mb={6}>
+            Our Growing Community
+          </Typography>
+          <Grid container spacing={4}>
+            {withKeys(stats).map((stat) => (
+              <Grid size={{ xs: 12, sm: 4 }} key={stat._key}>
+                <Typography variant="h2" color="primary.main" gutterBottom>
+                  {stat.value.number}
+                </Typography>
+                <Typography variant="h6" color="text.secondary">
+                  {stat.value.label}
+                </Typography>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
 
-      <SectionStyled>
-        <CTASectionStyled>
-          <Title level={2}>Ready to Get Started?</Title>
-          <CTADescriptionStyled type="secondary">
-            Join thousands of artists and art lovers on Art Fare today
-          </CTADescriptionStyled>
-          <Space size="large">
-            <Link to="/register">
-              <Button type="primary" size="large">
-                Sign Up Now
-              </Button>
-            </Link>
-            <Link to="/products">
-              <Button size="large">Browse Gallery</Button>
-            </Link>
-          </Space>
-        </CTASectionStyled>
-      </SectionStyled>
+      {/* CTA Section */}
+      <Container maxWidth="md" sx={{ py: 8, textAlign: 'center' }}>
+        <Typography variant="h3" gutterBottom>
+          Ready to Get Started?
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+          Join thousands of artists and art lovers on Art Fare today
+        </Typography>
+        <Stack direction="row" spacing={2} justifyContent="center" mt={4}>
+          <Button component={Link} to="/register" variant="contained" size="large">
+            Sign Up Now
+          </Button>
+          <Button component={Link} to="/products" variant="outlined" size="large">
+            Browse Gallery
+          </Button>
+        </Stack>
+      </Container>
     </AppLayout>
   );
 };

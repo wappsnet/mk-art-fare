@@ -1,23 +1,31 @@
-import { useState } from 'react';
+import { FC, useState } from 'react';
 
-import { MailOutlined } from '@ant-design/icons';
-import { Form, Input, Button, Typography, message } from 'antd';
+import EmailIcon from '@mui/icons-material/Email';
+import { Typography, Button, Stack, TextField, InputAdornment, Link as MuiLink } from '@mui/material';
+import { useForm, Controller } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router';
 
 import AppAuthLayout from '@/components/AppAuthLayout';
 import { useForgotPasswordMutation } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
+import { message } from '@/utils/notification';
 
-import { CenteredContentStyled, FullWidthSpaceStyled } from './styles';
+interface ForgotPasswordFormValues {
+  email: string;
+}
 
-const { Title, Text } = Typography;
-
-const ForgotPasswordPage = () => {
+const ForgotPasswordPage: FC = () => {
   const navigate = useNavigate();
   const [submitted, setSubmitted] = useState(false);
   const [forgotPassword, { isLoading }] = useForgotPasswordMutation();
 
-  const handleSubmit = async (values: { email: string }) => {
+  const { control, handleSubmit } = useForm<ForgotPasswordFormValues>({
+    defaultValues: {
+      email: '',
+    },
+  });
+
+  const onSubmit = async (values: ForgotPasswordFormValues) => {
     try {
       const result = await forgotPassword({ email: values.email }).unwrap();
       setSubmitted(true);
@@ -29,51 +37,73 @@ const ForgotPasswordPage = () => {
 
   return (
     <AppAuthLayout>
-      <FullWidthSpaceStyled direction="vertical" size={24}>
-        <CenteredContentStyled>
-          <Title level={2}>Forgot Password</Title>
+      <Stack spacing={3}>
+        {/* Header */}
+        <Stack spacing={1} textAlign="center">
+          <Typography variant="h4">Forgot Password</Typography>
           {submitted ? (
-            <Text type="success">Check your email for password reset instructions.</Text>
+            <Typography variant="body1" color="success.main">
+              Check your email for password reset instructions.
+            </Typography>
           ) : (
-            <Text type="secondary">
+            <Typography variant="body1" color="text.secondary">
               Enter your email address and we'll send you instructions to reset your password.
-            </Text>
+            </Typography>
           )}
-        </CenteredContentStyled>
+        </Stack>
 
         {submitted ? (
-          <CenteredContentStyled>
-            <Button type="primary" onClick={() => navigate('/login')} size="large">
-              Back to Login
-            </Button>
-          </CenteredContentStyled>
+          <Button variant="contained" onClick={() => navigate('/login')} size="large" fullWidth>
+            Back to Login
+          </Button>
         ) : (
-          <Form layout="vertical" onFinish={handleSubmit}>
-            <Form.Item
-              name="email"
-              label="Email"
-              rules={[
-                { required: true, message: 'Please enter your email' },
-                { type: 'email', message: 'Please enter a valid email' },
-              ]}
-            >
-              <Input prefix={<MailOutlined />} placeholder="your.email@example.com" size="large" />
-            </Form.Item>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Stack spacing={3}>
+              <Controller
+                name="email"
+                control={control}
+                rules={{
+                  required: 'Please enter your email',
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: 'Please enter a valid email',
+                  },
+                }}
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    label="Email"
+                    placeholder="your.email@example.com"
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <EmailIcon />
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                    fullWidth
+                  />
+                )}
+              />
 
-            <Form.Item>
-              <Button type="primary" htmlType="submit" loading={isLoading} block size="large">
+              <Button type="submit" variant="contained" size="large" disabled={isLoading} fullWidth>
                 Send Reset Instructions
               </Button>
-            </Form.Item>
 
-            <CenteredContentStyled>
-              <Text>
-                Remember your password? <Link to="/login">Back to Login</Link>
-              </Text>
-            </CenteredContentStyled>
-          </Form>
+              <Typography variant="body2" textAlign="center">
+                Remember your password?{' '}
+                <MuiLink component={Link} to="/login" underline="hover">
+                  Back to Login
+                </MuiLink>
+              </Typography>
+            </Stack>
+          </form>
         )}
-      </FullWidthSpaceStyled>
+      </Stack>
     </AppAuthLayout>
   );
 };

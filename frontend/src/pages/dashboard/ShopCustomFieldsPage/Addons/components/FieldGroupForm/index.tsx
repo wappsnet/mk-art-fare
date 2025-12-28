@@ -1,24 +1,48 @@
 import { FC } from 'react';
 
-import { Form, Input, FormInstance } from 'antd';
+import { TextField, Stack } from '@mui/material';
+import { Controller, useFormContext } from 'react-hook-form';
 
-const { TextArea } = Input;
-
-interface FieldGroupFormProps {
-  form: FormInstance;
-  onFinish: (values: { name: string; description?: string }) => void;
+interface FieldGroupFormValues {
+  name: string;
+  description?: string;
 }
 
-const FieldGroupForm: FC<FieldGroupFormProps> = ({ form, onFinish }) => {
+const FieldGroupForm: FC = () => {
+  const { control } = useFormContext<FieldGroupFormValues>();
+
   return (
-    <Form form={form} layout="vertical" onFinish={onFinish}>
-      <Form.Item name="name" label="Group Name" rules={[{ required: true }]}>
-        <Input placeholder="e.g., Product Specifications" />
-      </Form.Item>
-      <Form.Item name="description" label="Description">
-        <TextArea rows={3} placeholder="Describe what this field group is for" />
-      </Form.Item>
-    </Form>
+    <Stack spacing={3}>
+      <Controller
+        name="name"
+        control={control}
+        rules={{ required: 'Group name is required' }}
+        render={({ field, fieldState }) => (
+          <TextField
+            {...field}
+            label="Group Name"
+            placeholder="e.g., Product Specifications"
+            error={!!fieldState.error}
+            helperText={fieldState.error?.message}
+            fullWidth
+          />
+        )}
+      />
+      <Controller
+        name="description"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Description"
+            placeholder="Describe what this field group is for"
+            multiline
+            rows={3}
+            fullWidth
+          />
+        )}
+      />
+    </Stack>
   );
 };
 

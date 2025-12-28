@@ -1,17 +1,18 @@
-import { useEffect } from 'react';
+import { FC, useEffect } from 'react';
 
-import { MailOutlined, LockOutlined, UserOutlined, GoogleOutlined } from '@ant-design/icons';
-import { Form, Input, Button, Typography, Divider, Space, message } from 'antd';
+import EmailIcon from '@mui/icons-material/Email';
+import GoogleIcon from '@mui/icons-material/Google';
+import LockIcon from '@mui/icons-material/Lock';
+import PersonIcon from '@mui/icons-material/Person';
+import { Typography, Button, Divider, Stack, TextField, InputAdornment, Link as MuiLink } from '@mui/material';
+import { useForm, Controller } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router';
 
 import AppAuthLayout from '@/components/AppAuthLayout';
 import { useAppSelector } from '@/hooks/useRedux';
 import { useRegisterMutation } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
-
-import { GoogleButtonStyled, CenterTextStyled } from './styles';
-
-const { Title, Text } = Typography;
+import { message } from '@/utils/notification';
 
 interface RegisterFormValues {
   email: string;
@@ -21,11 +22,22 @@ interface RegisterFormValues {
   confirmPassword: string;
 }
 
-const RegisterPage = () => {
-  const [registerForm] = Form.useForm<RegisterFormValues>();
+const RegisterPage: FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const [register, { isLoading }] = useRegisterMutation();
+
+  const { control, handleSubmit, watch } = useForm<RegisterFormValues>({
+    defaultValues: {
+      email: '',
+      first_name: '',
+      last_name: '',
+      password: '',
+      confirmPassword: '',
+    },
+  });
+
+  const password = watch('password');
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -33,7 +45,7 @@ const RegisterPage = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const onFinish = async (values: RegisterFormValues) => {
+  const onSubmit = async (values: RegisterFormValues) => {
     try {
       const result = await register({
         email: values.email,
@@ -56,95 +68,189 @@ const RegisterPage = () => {
 
   return (
     <AppAuthLayout>
-      <Space
-        direction="vertical"
-        size="large"
-        css={{ width: '100%' }} /* width needed for Space */
-      >
-        <CenterTextStyled>
-          <Title level={2}>Create Account</Title>
-          <Text type="secondary">Join Art Fare and start your journey</Text>
-        </CenterTextStyled>
+      <Stack spacing={3}>
+        {/* Header */}
+        <Stack spacing={1} textAlign="center">
+          <Typography variant="h4">Create Account</Typography>
+          <Typography variant="body1" color="text.secondary">
+            Join Art Fare and start your journey
+          </Typography>
+        </Stack>
 
-        <GoogleButtonStyled icon={<GoogleOutlined />} size="large" onClick={handleGoogleLogin}>
+        {/* Google Login */}
+        <Button
+          variant="outlined"
+          size="large"
+          startIcon={<GoogleIcon />}
+          onClick={handleGoogleLogin}
+          fullWidth
+        >
           Continue with Google
-        </GoogleButtonStyled>
+        </Button>
 
         <Divider>Or register with email</Divider>
 
-        <Form<RegisterFormValues>
-          form={registerForm}
-          name="register"
-          layout="vertical"
-          onFinish={onFinish}
-          autoComplete="off"
-        >
-          <Form.Item
-            name="email"
-            label="Email"
-            rules={[
-              { required: true, message: 'Please input your email!' },
-              { type: 'email', message: 'Please enter a valid email!' },
-            ]}
-          >
-            <Input prefix={<MailOutlined />} placeholder="your@email.com" size="large" />
-          </Form.Item>
-
-          <Form.Item name="first_name" label="First Name">
-            <Input prefix={<UserOutlined />} placeholder="John" size="large" />
-          </Form.Item>
-
-          <Form.Item name="last_name" label="Last Name">
-            <Input prefix={<UserOutlined />} placeholder="Doe" size="large" />
-          </Form.Item>
-
-          <Form.Item
-            name="password"
-            label="Password"
-            rules={[
-              { required: true, message: 'Please input your password!' },
-              { min: 8, message: 'Password must be at least 8 characters!' },
-              {
-                pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-                message: 'Password must contain uppercase, lowercase, and number!',
-              },
-            ]}
-          >
-            <Input.Password prefix={<LockOutlined />} placeholder="••••••••" size="large" />
-          </Form.Item>
-
-          <Form.Item
-            name="confirmPassword"
-            label="Confirm Password"
-            dependencies={['password']}
-            rules={[
-              { required: true, message: 'Please confirm your password!' },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (value && getFieldValue('password') !== value) {
-                    return Promise.reject(new Error('Passwords do not match!'));
-                  }
-                  return Promise.resolve();
+        {/* Register Form */}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Stack spacing={2}>
+            <Controller
+              name="email"
+              control={control}
+              rules={{
+                required: 'Please input your email!',
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: 'Please enter a valid email!',
                 },
-              }),
-            ]}
-          >
-            <Input.Password prefix={<LockOutlined />} placeholder="••••••••" size="large" />
-          </Form.Item>
+              }}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  label="Email"
+                  placeholder="your@email.com"
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <EmailIcon />
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                  fullWidth
+                />
+              )}
+            />
 
-          <Form.Item>
-            <Button type="primary" htmlType="submit" size="large" block loading={isLoading}>
+            <Controller
+              name="first_name"
+              control={control}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  label="First Name"
+                  placeholder="John"
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PersonIcon />
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                  fullWidth
+                />
+              )}
+            />
+
+            <Controller
+              name="last_name"
+              control={control}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  label="Last Name"
+                  placeholder="Doe"
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PersonIcon />
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                  fullWidth
+                />
+              )}
+            />
+
+            <Controller
+              name="password"
+              control={control}
+              rules={{
+                required: 'Please input your password!',
+                minLength: {
+                  value: 8,
+                  message: 'Password must be at least 8 characters!',
+                },
+                pattern: {
+                  value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+                  message: 'Password must contain uppercase, lowercase, and number!',
+                },
+              }}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  type="password"
+                  label="Password"
+                  placeholder="••••••••"
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <LockIcon />
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                  fullWidth
+                />
+              )}
+            />
+
+            <Controller
+              name="confirmPassword"
+              control={control}
+              rules={{
+                required: 'Please confirm your password!',
+                validate: (value) =>
+                  value === password || 'Passwords do not match!',
+              }}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  type="password"
+                  label="Confirm Password"
+                  placeholder="••••••••"
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <LockIcon />
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                  fullWidth
+                />
+              )}
+            />
+
+            <Button type="submit" variant="contained" size="large" disabled={isLoading} fullWidth>
               Create Account
             </Button>
-          </Form.Item>
 
-          <CenterTextStyled>
-            <Text type="secondary">
-              Already have an account? <Link to="/login">Sign in</Link>
-            </Text>
-          </CenterTextStyled>
-        </Form>
-      </Space>
+            <Typography variant="body2" color="text.secondary" textAlign="center">
+              Already have an account?{' '}
+              <MuiLink component={Link} to="/login" underline="hover">
+                Sign in
+              </MuiLink>
+            </Typography>
+          </Stack>
+        </form>
+      </Stack>
     </AppAuthLayout>
   );
 };

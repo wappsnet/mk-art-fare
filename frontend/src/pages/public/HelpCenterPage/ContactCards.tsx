@@ -1,40 +1,48 @@
-import { MailOutlined, PhoneOutlined, EnvironmentOutlined } from '@ant-design/icons';
-import { Typography, Row, Col } from 'antd';
+import { FC } from 'react';
 
-import { ContactCardStyled, IconWrapperStyled } from './styles';
+import EmailIcon from '@mui/icons-material/Email';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import PhoneIcon from '@mui/icons-material/Phone';
+import { Grid, Card, CardContent, Typography, Stack, Box } from '@mui/material';
 
-const { Title, Text } = Typography;
+const ContactCards: FC = () => {
+  const contactInfo = [
+    {
+      icon: <EmailIcon sx={{ fontSize: 40 }} />,
+      title: 'Email Us',
+      text: 'support@artfare.com',
+    },
+    {
+      icon: <PhoneIcon sx={{ fontSize: 40 }} />,
+      title: 'Call Us',
+      text: '+1 (555) 123-4567',
+    },
+    {
+      icon: <LocationOnIcon sx={{ fontSize: 40 }} />,
+      title: 'Visit Us',
+      text: '123 Art Street, NY 10001',
+    },
+  ];
 
-export const ContactCards = () => {
   return (
-    <Row gutter={[24, 24]}>
-      <Col xs={24} sm={8}>
-        <ContactCardStyled>
-          <IconWrapperStyled>
-            <MailOutlined />
-          </IconWrapperStyled>
-          <Title level={4}>Email Us</Title>
-          <Text>support@artfare.com</Text>
-        </ContactCardStyled>
-      </Col>
-      <Col xs={24} sm={8}>
-        <ContactCardStyled>
-          <IconWrapperStyled>
-            <PhoneOutlined />
-          </IconWrapperStyled>
-          <Title level={4}>Call Us</Title>
-          <Text>+1 (555) 123-4567</Text>
-        </ContactCardStyled>
-      </Col>
-      <Col xs={24} sm={8}>
-        <ContactCardStyled>
-          <IconWrapperStyled>
-            <EnvironmentOutlined />
-          </IconWrapperStyled>
-          <Title level={4}>Visit Us</Title>
-          <Text>123 Art Street, NY 10001</Text>
-        </ContactCardStyled>
-      </Col>
-    </Row>
+    <Grid container spacing={3}>
+      {contactInfo.map((item) => (
+        <Grid size={{ xs: 12, sm: 4 }} key={item.title}>
+          <Card sx={{ height: '100%', textAlign: 'center' }}>
+            <CardContent>
+              <Stack spacing={2} alignItems="center">
+                <Box color="primary.main">{item.icon}</Box>
+                <Typography variant="h5">{item.title}</Typography>
+                <Typography variant="body1" color="text.secondary">
+                  {item.text}
+                </Typography>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
   );
 };
+
+export default ContactCards;

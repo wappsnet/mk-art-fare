@@ -1,27 +1,28 @@
-import { Result, Button } from 'antd';
+import { FC } from 'react';
+
+import { Container, Stack, Typography, Button } from '@mui/material';
 import { useNavigate } from 'react-router';
 
 import AppLayout from '@/components/AppLayout';
 
-import { ErrorPageContainerStyled } from './styles';
-
-const ForbiddenPage = () => {
+const ForbiddenPage: FC = () => {
   const navigate = useNavigate();
 
   return (
     <AppLayout>
-      <ErrorPageContainerStyled>
-        <Result
-          status="403"
-          title="403"
-          subTitle="Sorry, you are not authorized to access this page."
-          extra={
-            <Button type="primary" onClick={() => navigate('/')}>
-              Back Home
-            </Button>
-          }
-        />
-      </ErrorPageContainerStyled>
+      <Container maxWidth="sm">
+        <Stack spacing={3} alignItems="center" textAlign="center" py={12}>
+          <Typography variant="h1" color="error">
+            403
+          </Typography>
+          <Typography variant="h5">
+            Sorry, you are not authorized to access this page.
+          </Typography>
+          <Button variant="contained" size="large" onClick={() => navigate('/')}>
+            Back Home
+          </Button>
+        </Stack>
+      </Container>
     </AppLayout>
   );
 };

@@ -1,4 +1,5 @@
-import { CrownOutlined, StarOutlined } from '@ant-design/icons';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
 
 export const subscriptionPlans = [
   {
@@ -6,7 +7,7 @@ export const subscriptionPlans = [
     name: 'Basic',
     price: 'Free',
     period: 'forever',
-    icon: StarOutlined,
+    icon: StarBorderIcon,
     description: 'Perfect for getting started',
     features: [
       '1 shop',
@@ -22,7 +23,7 @@ export const subscriptionPlans = [
     name: 'Pro',
     price: '$29',
     period: 'per month',
-    icon: CrownOutlined,
+    icon: StarIcon,
     description: 'For serious artists and businesses',
     features: [
       'Unlimited shops',

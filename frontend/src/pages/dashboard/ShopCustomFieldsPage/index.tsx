@@ -1,9 +1,11 @@
-import { useState, useMemo } from 'react';
+import { FC, useState, useMemo } from 'react';
 
-import { PlusOutlined } from '@ant-design/icons';
-import { Card, Button, Space, Typography, Drawer, Form, message } from 'antd';
+import AddIcon from '@mui/icons-material/Add';
+import { Button, Stack, Typography, Card, CardContent, Box } from '@mui/material';
+import { useForm, FormProvider } from 'react-hook-form';
 import { useParams } from 'react-router';
 
+import AppDrawer from '@/components/AppDrawer';
 import {
   useGetFieldGroupsQuery,
   useCreateFieldGroupMutation,
@@ -14,13 +16,11 @@ import {
 } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
 import { FieldGroup, FieldDefinition, FieldType, FieldFormValues } from '@/types/fields';
+import { message } from '@/utils/notification';
 
 import FieldDefinitionForm from './Addons/components/FieldDefinitionForm';
 import FieldGroupCard from './Addons/components/FieldGroupCard';
 import FieldGroupForm from './Addons/components/FieldGroupForm';
-import { TopSpaceStyled } from './styles';
-
-const { Title, Text } = Typography;
 
 const getFieldTypeColor = (type: FieldType): string => {
   switch (type) {
@@ -67,7 +67,6 @@ const fieldTypeNeedsOptions = (fieldType?: FieldType): boolean => {
 };
 
 const extractFieldFormValues = (field: FieldDefinition): Partial<FieldFormValues> => {
-  // With proper JSON types, we can use values directly without conversion
   const formValues: Partial<FieldFormValues> = {
     name: field.name,
     label: field.label,
@@ -80,7 +79,6 @@ const extractFieldFormValues = (field: FieldDefinition): Partial<FieldFormValues
     default_value: field.defaultValue,
   };
 
-  // Only add options for field types that support them
   switch (field.type) {
     case FieldType.SELECT:
     case FieldType.RADIO:
@@ -92,7 +90,7 @@ const extractFieldFormValues = (field: FieldDefinition): Partial<FieldFormValues
   return formValues;
 };
 
-const ShopCustomFieldsPage = () => {
+const ShopCustomFieldsPage: FC = () => {
   const { id } = useParams<{ id: string }>();
   const orgId = Number.parseInt(id!);
 
@@ -101,8 +99,25 @@ const ShopCustomFieldsPage = () => {
   const [editingGroup, setEditingGroup] = useState<FieldGroup | null>(null);
   const [editingField, setEditingField] = useState<FieldDefinition | null>(null);
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
-  const [groupForm] = Form.useForm();
-  const [fieldForm] = Form.useForm();
+
+  const groupFormMethods = useForm<{ name: string; description?: string }>({
+    defaultValues: { name: '', description: '' },
+  });
+
+  const fieldFormMethods = useForm<FieldFormValues>({
+    defaultValues: {
+      name: '',
+      label: '',
+      field_type: undefined,
+      placeholder: '',
+      help_text: '',
+      is_searchable: false,
+      is_filterable: false,
+      sort_order: 0,
+      default_value: undefined,
+      options: [],
+    },
+  });
 
   const { data: fieldGroupsData } = useGetFieldGroupsQuery({
     organizationId: orgId,
@@ -122,12 +137,12 @@ const ShopCustomFieldsPage = () => {
   const openGroupDrawer = (group?: FieldGroup) => {
     setEditingGroup(group || null);
     if (group) {
-      groupForm.setFieldsValue({
+      groupFormMethods.reset({
         name: group.name,
         description: group.description,
       });
     } else {
-      groupForm.resetFields();
+      groupFormMethods.reset({ name: '', description: '' });
     }
     setIsGroupDrawerOpen(true);
   };
@@ -138,12 +153,20 @@ const ShopCustomFieldsPage = () => {
 
     if (field) {
       const formValues = extractFieldFormValues(field);
-      fieldForm.setFieldsValue(formValues);
+      fieldFormMethods.reset(formValues as FieldFormValues);
     } else {
-      fieldForm.resetFields();
-      fieldForm.setFieldValue('is_searchable', false);
-      fieldForm.setFieldValue('is_filterable', false);
-      fieldForm.setFieldValue('sort_order', 0);
+      fieldFormMethods.reset({
+        name: '',
+        label: '',
+        field_type: undefined,
+        placeholder: '',
+        help_text: '',
+        is_searchable: false,
+        is_filterable: false,
+        sort_order: 0,
+        default_value: undefined,
+        options: [],
+      });
     }
     setIsFieldDrawerOpen(true);
   };
@@ -165,7 +188,7 @@ const ShopCustomFieldsPage = () => {
       }
       setIsGroupDrawerOpen(false);
       setEditingGroup(null);
-      groupForm.resetFields();
+      groupFormMethods.reset();
     } catch (error) {
       message.error(
         getErrorMessage(error) || `Failed to ${editingGroup ? 'update' : 'create'} field group`
@@ -179,7 +202,6 @@ const ShopCustomFieldsPage = () => {
     }
 
     try {
-      // Convert default_value based on field type before sending to backend
       const fieldData = {
         name: values.name,
         label: values.label,
@@ -212,7 +234,7 @@ const ShopCustomFieldsPage = () => {
       setIsFieldDrawerOpen(false);
       setEditingField(null);
       setSelectedGroupId(null);
-      fieldForm.resetFields();
+      fieldFormMethods.reset();
     } catch (error) {
       message.error(
         getErrorMessage(error) || `Failed to ${editingField ? 'update' : 'create'} field definition`
@@ -229,19 +251,24 @@ const ShopCustomFieldsPage = () => {
     }
   };
 
-  const selectedFieldType = Form.useWatch('field_type', fieldForm);
-
   return (
-    <Space direction="vertical" size="large" style={{ width: '100%' }}>
-      <TopSpaceStyled>
-        <Title level={2}>Custom Fields</Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => openGroupDrawer()}>
+    <Stack spacing={3}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box>
+          <Typography variant="h4" gutterBottom>
+            Custom Fields
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Create field groups to add custom fields to your products
+          </Typography>
+        </Box>
+        <Button variant="contained" startIcon={<AddIcon />} onClick={() => openGroupDrawer()}>
           Add Field Group
         </Button>
-      </TopSpaceStyled>
+      </Box>
 
       {fieldGroups.length > 0 ? (
-        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+        <Stack spacing={3}>
           {fieldGroups.map((group) => (
             <FieldGroupCard
               key={group.id}
@@ -253,91 +280,96 @@ const ShopCustomFieldsPage = () => {
               getFieldTypeColor={getFieldTypeColor}
             />
           ))}
-        </Space>
+        </Stack>
       ) : (
         <Card>
-          <Text type="secondary">
-            No field groups yet. Create your first field group to start adding custom fields to your
-            products!
-          </Text>
+          <CardContent>
+            <Typography color="text.secondary">
+              No field groups yet. Create your first field group to start adding custom fields to
+              your products!
+            </Typography>
+          </CardContent>
         </Card>
       )}
 
       {/* Field Group Drawer */}
-      <Drawer
-        title={editingGroup ? 'Edit Field Group' : 'Create Field Group'}
+      <AppDrawer
         open={isGroupDrawerOpen}
         onClose={() => {
           setIsGroupDrawerOpen(false);
           setEditingGroup(null);
-          groupForm.resetFields();
+          groupFormMethods.reset();
         }}
+        title={editingGroup ? 'Edit Field Group' : 'Create Field Group'}
         width={500}
         footer={
-          <Space>
+          <Stack direction="row" spacing={2} justifyContent="flex-end">
             <Button
               onClick={() => {
                 setIsGroupDrawerOpen(false);
                 setEditingGroup(null);
-                groupForm.resetFields();
+                groupFormMethods.reset();
               }}
             >
               Cancel
             </Button>
             <Button
-              type="primary"
-              onClick={() => groupForm.submit()}
-              loading={isCreatingGroup || isUpdatingGroup}
+              onClick={groupFormMethods.handleSubmit(handleGroupSubmit)}
+              variant="contained"
+              disabled={isCreatingGroup || isUpdatingGroup}
             >
               {editingGroup ? 'Update' : 'Create'}
             </Button>
-          </Space>
+          </Stack>
         }
       >
-        <FieldGroupForm form={groupForm} onFinish={handleGroupSubmit} />
-      </Drawer>
+        <FormProvider {...groupFormMethods}>
+          <Stack spacing={3}>
+            <FieldGroupForm />
+          </Stack>
+        </FormProvider>
+      </AppDrawer>
 
       {/* Field Definition Drawer */}
-      <Drawer
-        title={editingField ? 'Edit Field Definition' : 'Create Field Definition'}
+      <AppDrawer
         open={isFieldDrawerOpen}
         onClose={() => {
           setIsFieldDrawerOpen(false);
           setEditingField(null);
           setSelectedGroupId(null);
-          fieldForm.resetFields();
+          fieldFormMethods.reset();
         }}
+        title={editingField ? 'Edit Field Definition' : 'Create Field Definition'}
         width={600}
         footer={
-          <Space>
+          <Stack direction="row" spacing={2} justifyContent="flex-end">
             <Button
               onClick={() => {
                 setIsFieldDrawerOpen(false);
                 setEditingField(null);
                 setSelectedGroupId(null);
-                fieldForm.resetFields();
+                fieldFormMethods.reset();
               }}
             >
               Cancel
             </Button>
             <Button
-              type="primary"
-              onClick={() => fieldForm.submit()}
-              loading={isCreatingField || isUpdatingField}
+              onClick={fieldFormMethods.handleSubmit(handleFieldSubmit)}
+              variant="contained"
+              disabled={isCreatingField || isUpdatingField}
             >
               {editingField ? 'Update' : 'Create'}
             </Button>
-          </Space>
+          </Stack>
         }
       >
-        <FieldDefinitionForm
-          form={fieldForm}
-          selectedFieldType={selectedFieldType}
-          fieldTypeNeedsOptions={fieldTypeNeedsOptions}
-          onFinish={handleFieldSubmit}
-        />
-      </Drawer>
-    </Space>
+        <FormProvider {...fieldFormMethods}>
+          <Stack spacing={3}>
+            <FieldDefinitionForm fieldTypeNeedsOptions={fieldTypeNeedsOptions} />
+          </Stack>
+        </FormProvider>
+      </AppDrawer>
+    </Stack>
   );
 };
 

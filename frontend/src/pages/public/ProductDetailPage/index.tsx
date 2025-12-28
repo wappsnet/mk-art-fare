@@ -1,41 +1,49 @@
-import { useState } from 'react';
+import { FC, useState } from 'react';
 
-import { ShoppingCartOutlined, ShopOutlined } from '@ant-design/icons';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import StorefrontIcon from '@mui/icons-material/Storefront';
 import {
-  Row,
-  Col,
+  Container,
+  Grid,
   Typography,
   Button,
-  InputNumber,
   Divider,
-  Tag,
-  Spin,
-  message,
-  Breadcrumb,
-  Image,
-} from 'antd';
+  Chip,
+  CircularProgress,
+  Breadcrumbs,
+  Link as MuiLink,
+  Box,
+  Stack,
+  TextField,
+} from '@mui/material';
 import { useParams, Link } from 'react-router';
 
 import AppLayout from '@/components/AppLayout';
 import { useGetProductQuery, useAddToCartMutation } from '@/services/apiSlice';
+import { message } from '@/utils/notification';
 
-import {
-  ContainerStyled,
-  ImageGalleryStyled,
-  MainImageContainerStyled,
-  ThumbnailsContainerStyled,
-  ThumbnailStyled,
-  PriceSectionStyled,
-  PriceStyled,
-  ComparePriceStyled,
-  LoadingContainerStyled,
-  QuantityContainerStyled,
-} from './styles';
+import ProductImageGallery from './Addons/components/ProductImageGallery';
 
-const { Title, Paragraph, Text } = Typography;
+const LoadingState: FC = () => (
+  <AppLayout>
+    <Container maxWidth="lg" sx={{ py: 8 }}>
+      <Box sx={{ textAlign: 'center', py: 12 }}>
+        <CircularProgress size={60} />
+      </Box>
+    </Container>
+  </AppLayout>
+);
 
-// eslint-disable-next-line complexity
-const ProductDetailPage = () => {
+const NotFoundState: FC = () => (
+  <AppLayout>
+    <Container maxWidth="lg" sx={{ py: 8 }}>
+      <Typography variant="h4">Product not found</Typography>
+    </Container>
+  </AppLayout>
+);
+
+const ProductDetailPage: FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -48,156 +56,152 @@ const ProductDetailPage = () => {
   const product = productData?.data;
 
   const handleAddToCart = async () => {
-    if (product) {
-      try {
-        await addToCart({ productId: product.id, quantity }).unwrap();
-        message.success('Added to cart!');
-      } catch {
-        message.error('Failed to add to cart');
-      }
+    if (!product) return;
+
+    try {
+      await addToCart({ productId: product.id, quantity }).unwrap();
+      message.success('Added to cart!');
+    } catch {
+      message.error('Failed to add to cart');
     }
   };
 
-  if (loading) {
-    return (
-      <AppLayout>
-        <ContainerStyled>
-          <LoadingContainerStyled>
-            <Spin size="large" />
-          </LoadingContainerStyled>
-        </ContainerStyled>
-      </AppLayout>
-    );
-  }
+  if (loading) return <LoadingState />;
+  if (!product) return <NotFoundState />;
 
-  if (product) {
-    const images = product.images || [];
-    const currentImage = images[selectedImageIndex];
+  const images = product.images || [];
+  const hasDiscount = product.compare_at_price && product.compare_at_price > product.price;
+  const isInStock = product.stock_quantity > 0;
 
-    return (
-      <AppLayout>
-        <ContainerStyled>
-          <Breadcrumb
-            items={[
-              { title: <Link to="/">Home</Link> },
-              { title: <Link to="/products">Products</Link> },
-              { title: product.name },
-            ]}
-            css={{ marginBottom: 24 }}
-          />
+  return (
+    <AppLayout>
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        {/* Breadcrumbs */}
+        <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} sx={{ mb: 3 }}>
+          <MuiLink component={Link} to="/" underline="hover" color="inherit">
+            Home
+          </MuiLink>
+          <MuiLink component={Link} to="/products" underline="hover" color="inherit">
+            Products
+          </MuiLink>
+          <Typography color="text.primary">{product.name}</Typography>
+        </Breadcrumbs>
 
-          <Row gutter={[48, 48]}>
-            <Col xs={24} md={12}>
-              {images.length > 0 ? (
-                <ImageGalleryStyled>
-                  <MainImageContainerStyled>
-                    <Image
-                      src={currentImage?.url}
-                      alt={currentImage?.alt_text || product.name}
-                      preview={{
-                        src: currentImage?.url,
-                      }}
-                    />
-                  </MainImageContainerStyled>
+        <Grid container spacing={6}>
+          {/* Image Gallery */}
+          <Grid size={{ xs: 12, md: 6 }}>
+            <ProductImageGallery
+              images={images}
+              selectedIndex={selectedImageIndex}
+              onSelectImage={setSelectedImageIndex}
+              productName={product.name}
+            />
+          </Grid>
 
-                  {images.length > 1 && (
-                    <ThumbnailsContainerStyled>
-                      {images.map((img, index) => (
-                        <ThumbnailStyled
-                          key={img.id}
-                          active={index === selectedImageIndex}
-                          onClick={() => setSelectedImageIndex(index)}
-                        >
-                          <img src={img.url} alt={img.alt_text || `${product.name} ${index + 1}`} />
-                        </ThumbnailStyled>
-                      ))}
-                    </ThumbnailsContainerStyled>
-                  )}
-                </ImageGalleryStyled>
-              ) : (
-                <MainImageContainerStyled>
-                  <Text type="secondary">No Image Available</Text>
-                </MainImageContainerStyled>
-              )}
-            </Col>
+          {/* Product Details */}
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Stack spacing={3}>
+              {/* Shop Link */}
+              <Button
+                component={Link}
+                to={`/shop/${product.organization_slug}`}
+                startIcon={<StorefrontIcon />}
+                sx={{ alignSelf: 'flex-start', p: 0 }}
+                variant="text"
+              >
+                {product.organization_name || 'Unknown Artist'}
+              </Button>
 
-            <Col xs={24} md={12}>
-              <Link to={`/shop/${product.organization_slug}`}>
-                <Button type="link" icon={<ShopOutlined />} css={{ padding: 0, marginBottom: 8 }}>
-                  {product.organization_name || 'Unknown Artist'}
-                </Button>
-              </Link>
+              {/* Product Name */}
+              <Typography variant="h3">{product.name}</Typography>
 
-              <Title level={2}>{product.name}</Title>
-
+              {/* SKU */}
               {product.sku && (
-                <Text type="secondary" css={{ display: 'block', marginBottom: 16 }}>
+                <Typography variant="body2" color="text.secondary">
                   SKU: {product.sku}
-                </Text>
+                </Typography>
               )}
 
-              <PriceSectionStyled>
-                <PriceStyled>
-                  ${product.price.toFixed(2)}
-                  {product.compare_at_price && product.compare_at_price > product.price && (
-                    <ComparePriceStyled>${product.compare_at_price.toFixed(2)}</ComparePriceStyled>
-                  )}
-                </PriceStyled>
-                {product.stock_quantity > 0 ? (
-                  <Tag color="success" css={{ marginTop: 12 }}>
-                    {product.stock_quantity} in stock
-                  </Tag>
-                ) : (
-                  <Tag color="error" css={{ marginTop: 12 }}>
-                    Out of stock
-                  </Tag>
-                )}
-              </PriceSectionStyled>
+              {/* Price Section */}
+              <Box sx={{ bgcolor: 'grey.50', borderRadius: 2, p: 2 }}>
+                <Stack spacing={1.5}>
+                  <Box>
+                    <Typography variant="h3" color="primary" component="span" fontWeight="bold">
+                      ${product.price.toFixed(2)}
+                    </Typography>
+                    {hasDiscount && (
+                      <Typography
+                        variant="h5"
+                        component="span"
+                        color="text.secondary"
+                        sx={{ textDecoration: 'line-through', ml: 2 }}
+                      >
+                        ${product.compare_at_price!.toFixed(2)}
+                      </Typography>
+                    )}
+                  </Box>
+                  <Chip
+                    label={isInStock ? `${product.stock_quantity} in stock` : 'Out of stock'}
+                    color={isInStock ? 'success' : 'error'}
+                    size="small"
+                  />
+                </Stack>
+              </Box>
 
               <Divider />
 
+              {/* Description */}
               {product.description && (
                 <>
-                  <Title level={5}>Description</Title>
-                  <Paragraph>{product.description}</Paragraph>
+                  <Box>
+                    <Typography variant="h6" gutterBottom>
+                      Description
+                    </Typography>
+                    <Typography variant="body1">{product.description}</Typography>
+                  </Box>
                   <Divider />
                 </>
               )}
 
-              <QuantityContainerStyled>
-                <Text strong>Quantity:</Text>
-                <InputNumber
-                  min={1}
-                  max={product.stock_quantity}
+              {/* Quantity Selector */}
+              <Box>
+                <Typography variant="body1" fontWeight="bold" gutterBottom>
+                  Quantity:
+                </Typography>
+                <TextField
+                  type="number"
                   value={quantity}
-                  onChange={(value) => setQuantity(value || 1)}
-                  css={{ marginLeft: 16 }}
+                  onChange={(e) => {
+                    const value = Number.parseInt(e.target.value);
+                    if (value >= 1 && value <= product.stock_quantity) {
+                      setQuantity(value);
+                    }
+                  }}
+                  slotProps={{
+                    htmlInput: {
+                      min: 1,
+                      max: product.stock_quantity,
+                    },
+                  }}
+                  sx={{ width: 120 }}
                 />
-              </QuantityContainerStyled>
+              </Box>
 
+              {/* Add to Cart Button */}
               <Button
-                type="primary"
+                variant="contained"
                 size="large"
-                icon={<ShoppingCartOutlined />}
+                startIcon={<ShoppingCartIcon />}
                 onClick={handleAddToCart}
-                disabled={product.stock_quantity === 0}
-                loading={adding}
-                block
+                disabled={!isInStock || adding}
+                fullWidth
               >
-                {product.stock_quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+                {isInStock ? 'Add to Cart' : 'Out of Stock'}
               </Button>
-            </Col>
-          </Row>
-        </ContainerStyled>
-      </AppLayout>
-    );
-  }
-
-  return (
-    <AppLayout>
-      <ContainerStyled>
-        <Title level={3}>Product not found</Title>
-      </ContainerStyled>
+            </Stack>
+          </Grid>
+        </Grid>
+      </Container>
     </AppLayout>
   );
 };

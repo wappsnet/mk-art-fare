@@ -1,20 +1,31 @@
-import { useState, useEffect, useMemo } from 'react';
+import { FC, useState, useEffect, useMemo } from 'react';
 
-import { CreditCardOutlined, EnvironmentOutlined, ShoppingOutlined } from '@ant-design/icons';
+import CreditCardIcon from '@mui/icons-material/CreditCard';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import {
-  Row,
-  Col,
+  Container,
+  Grid,
   Typography,
-  Form,
-  Input,
+  TextField,
   Button,
   Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
   Divider,
-  message,
   Select,
-  Space,
-  Modal,
-} from 'antd';
+  MenuItem,
+  Stack,
+  Card,
+  CardContent,
+  Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from '@mui/material';
+import { useForm, Controller } from 'react-hook-form';
 import { useNavigate } from 'react-router';
 
 import AppLayout from '@/components/AppLayout';
@@ -28,37 +39,34 @@ import {
 } from '@/services/apiSlice';
 import { CreateAddressInput } from '@/types/common';
 import { getErrorMessage } from '@/types/errors';
-
-import {
-  ContainerStyled,
-  PageTitleStyled,
-  SectionCardStyled,
-  SummaryCardStyled,
-  CartItemStyled,
-  FullWidthRadioGroupStyled,
-  FullWidthSpaceStyled,
-  PaymentNoticeStyled,
-  CartItemsContainerStyled,
-  PriceRowStyled,
-  TotalRowStyled,
-  TotalLabelStyled,
-  TotalAmountStyled,
-  TermsTextStyled,
-} from './styles';
-
-const { Text, Paragraph } = Typography;
+import { message } from '@/utils/notification';
 
 interface CheckoutFormValues extends CreateAddressInput {
   notes?: string;
 }
 
-const CheckoutPage = () => {
+const CheckoutPage: FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
-  const [form] = Form.useForm();
+  const { control, handleSubmit } = useForm<CheckoutFormValues>({
+    defaultValues: {
+      address_line1: '',
+      address_line2: '',
+      city: '',
+      state: '',
+      postal_code: '',
+      country: 'USA',
+      notes: '',
+    },
+  });
+
   const [selectedAddress, setSelectedAddress] = useState<number | null>(null);
   const [useNewAddress, setUseNewAddress] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('credit_card');
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [orderDetails, setOrderDetails] = useState<{ orderNumber: string; total: number } | null>(
+    null
+  );
 
   const { data: cartData } = useGetCartQuery();
   const { data: addressesData } = useGetUserAddressesQuery();
@@ -125,22 +133,12 @@ const CheckoutPage = () => {
           // Clear cart
           await clearCart('').unwrap();
 
-          // Show success modal
-          Modal.success({
-            title: 'Order Placed Successfully!',
-            content: (
-              <Space direction="vertical">
-                <Paragraph>
-                  Order Number: <Text strong>{orderResponse.data.order_number}</Text>
-                </Paragraph>
-                <Paragraph>
-                  Total: <Text strong>${orderResponse.data.total.toFixed(2)}</Text>
-                </Paragraph>
-                <Paragraph>We'll send you an email confirmation shortly.</Paragraph>
-              </Space>
-            ),
-            onOk: () => navigate('/dashboard'),
+          // Show success dialog
+          setOrderDetails({
+            orderNumber: orderResponse.data.order_number,
+            total: orderResponse.data.total,
           });
+          setSuccessDialogOpen(true);
         }
         return;
       }
@@ -150,6 +148,11 @@ const CheckoutPage = () => {
     }
   };
 
+  const handleSuccessDialogClose = () => {
+    setSuccessDialogOpen(false);
+    navigate('/dashboard');
+  };
+
   const subtotal = total;
   const shipping = 10; // Flat rate for now
   const tax = subtotal * 0.08; // 8% tax
@@ -157,239 +160,343 @@ const CheckoutPage = () => {
 
   return (
     <AppLayout>
-      <ContainerStyled>
-        <PageTitleStyled level={2}>
-          <ShoppingOutlined /> Checkout
-        </PageTitleStyled>
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Typography variant="h3" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <ShoppingCartIcon fontSize="large" /> Checkout
+        </Typography>
 
-        <Form form={form} layout="vertical" onFinish={handlePlaceOrder}>
-          <Row gutter={[48, 24]}>
-            <Col xs={24} lg={14}>
+        <form onSubmit={handleSubmit(handlePlaceOrder)}>
+          <Grid container spacing={6}>
+            <Grid size={{ xs: 12, lg: 7 }}>
               {/* Shipping Address Section */}
-              <SectionCardStyled
-                title={
-                  <>
-                    <EnvironmentOutlined /> Shipping Address
-                  </>
-                }
-              >
-                {addresses.length > 0 && !useNewAddress && (
-                  <>
-                    <FullWidthRadioGroupStyled>
-                      <Radio.Group
-                        value={selectedAddress}
-                        onChange={(e) => setSelectedAddress(e.target.value)}
-                      >
-                        <FullWidthSpaceStyled>
-                          <Space direction="vertical" css={{ width: '100%' }}>
-                            {addresses.map((address) => (
-                              <Radio key={address.id} value={address.id}>
-                                <Space direction="vertical" size={0}>
-                                  <Text strong>{address.address_line1}</Text>
-                                  {address.address_line2 && <Text>, {address.address_line2}</Text>}
-                                  <Text type="secondary">
+              <Card sx={{ mb: 3 }}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <LocationOnIcon /> Shipping Address
+                  </Typography>
+
+                  {addresses.length > 0 && !useNewAddress && (
+                    <Stack spacing={2}>
+                      <FormControl>
+                        <RadioGroup
+                          value={selectedAddress}
+                          onChange={(e) => setSelectedAddress(Number(e.target.value))}
+                        >
+                          {addresses.map((address) => (
+                            <FormControlLabel
+                              key={address.id}
+                              value={address.id}
+                              control={<Radio />}
+                              label={
+                                <Box>
+                                  <Typography variant="body1" fontWeight="bold">
+                                    {address.address_line1}
+                                  </Typography>
+                                  {address.address_line2 && (
+                                    <Typography variant="body2">{address.address_line2}</Typography>
+                                  )}
+                                  <Typography variant="body2" color="text.secondary">
                                     {address.city}, {address.state} {address.postal_code}
-                                  </Text>
-                                </Space>
-                              </Radio>
-                            ))}
-                          </Space>
-                        </FullWidthSpaceStyled>
-                      </Radio.Group>
-                    </FullWidthRadioGroupStyled>
-                    <Button
-                      type="link"
-                      onClick={() => setUseNewAddress(true)}
-                      css={{ marginTop: 16, padding: 0 }}
-                    >
-                      + Add New Address
-                    </Button>
-                  </>
-                )}
-
-                {(addresses.length === 0 || useNewAddress) && (
-                  <>
-                    {addresses.length > 0 && (
+                                  </Typography>
+                                </Box>
+                              }
+                            />
+                          ))}
+                        </RadioGroup>
+                      </FormControl>
                       <Button
-                        type="link"
-                        onClick={() => setUseNewAddress(false)}
-                        css={{ marginBottom: 16, padding: 0 }}
+                        variant="text"
+                        onClick={() => setUseNewAddress(true)}
+                        sx={{ alignSelf: 'flex-start' }}
                       >
-                        ← Use Saved Address
+                        + Add New Address
                       </Button>
-                    )}
+                    </Stack>
+                  )}
 
-                    <Row gutter={16}>
-                      <Col span={24}>
-                        <Form.Item
-                          name="address_line1"
-                          label="Address Line 1"
-                          rules={[{ required: true, message: 'Please enter your address' }]}
+                  {(addresses.length === 0 || useNewAddress) && (
+                    <Stack spacing={2}>
+                      {addresses.length > 0 && (
+                        <Button
+                          variant="text"
+                          onClick={() => setUseNewAddress(false)}
+                          sx={{ alignSelf: 'flex-start' }}
                         >
-                          <Input placeholder="123 Main St" />
-                        </Form.Item>
-                      </Col>
-                      <Col span={24}>
-                        <Form.Item name="address_line2" label="Address Line 2 (Optional)">
-                          <Input placeholder="Apt, Suite, Building" />
-                        </Form.Item>
-                      </Col>
-                      <Col span={12}>
-                        <Form.Item
-                          name="city"
-                          label="City"
-                          rules={[{ required: true, message: 'Please enter city' }]}
-                        >
-                          <Input placeholder="New York" />
-                        </Form.Item>
-                      </Col>
-                      <Col span={6}>
-                        <Form.Item
-                          name="state"
-                          label="State"
-                          rules={[{ required: true, message: 'Please enter state' }]}
-                        >
-                          <Input placeholder="NY" />
-                        </Form.Item>
-                      </Col>
-                      <Col span={6}>
-                        <Form.Item
-                          name="postal_code"
-                          label="ZIP Code"
-                          rules={[{ required: true, message: 'Please enter ZIP code' }]}
-                        >
-                          <Input placeholder="10001" />
-                        </Form.Item>
-                      </Col>
-                      <Col span={12}>
-                        <Form.Item name="country" label="Country" initialValue="USA">
-                          <Select>
-                            <Select.Option value="USA">United States</Select.Option>
-                            <Select.Option value="Canada">Canada</Select.Option>
-                            <Select.Option value="Mexico">Mexico</Select.Option>
-                          </Select>
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                  </>
-                )}
-              </SectionCardStyled>
+                          ← Use Saved Address
+                        </Button>
+                      )}
+
+                      <Controller
+                        name="address_line1"
+                        control={control}
+                        rules={{ required: 'Please enter your address' }}
+                        render={({ field, fieldState }) => (
+                          <TextField
+                            {...field}
+                            label="Address Line 1"
+                            placeholder="123 Main St"
+                            error={!!fieldState.error}
+                            helperText={fieldState.error?.message}
+                            fullWidth
+                          />
+                        )}
+                      />
+
+                      <Controller
+                        name="address_line2"
+                        control={control}
+                        render={({ field }) => (
+                          <TextField
+                            {...field}
+                            label="Address Line 2 (Optional)"
+                            placeholder="Apt, Suite, Building"
+                            fullWidth
+                          />
+                        )}
+                      />
+
+                      <Grid container spacing={2}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
+                          <Controller
+                            name="city"
+                            control={control}
+                            rules={{ required: 'Please enter city' }}
+                            render={({ field, fieldState }) => (
+                              <TextField
+                                {...field}
+                                label="City"
+                                placeholder="New York"
+                                error={!!fieldState.error}
+                                helperText={fieldState.error?.message}
+                                fullWidth
+                              />
+                            )}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 6, sm: 3 }}>
+                          <Controller
+                            name="state"
+                            control={control}
+                            rules={{ required: 'Please enter state' }}
+                            render={({ field, fieldState }) => (
+                              <TextField
+                                {...field}
+                                label="State"
+                                placeholder="NY"
+                                error={!!fieldState.error}
+                                helperText={fieldState.error?.message}
+                                fullWidth
+                              />
+                            )}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 6, sm: 3 }}>
+                          <Controller
+                            name="postal_code"
+                            control={control}
+                            rules={{ required: 'Please enter ZIP code' }}
+                            render={({ field, fieldState }) => (
+                              <TextField
+                                {...field}
+                                label="ZIP Code"
+                                placeholder="10001"
+                                error={!!fieldState.error}
+                                helperText={fieldState.error?.message}
+                                fullWidth
+                              />
+                            )}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 6 }}>
+                          <Controller
+                            name="country"
+                            control={control}
+                            render={({ field }) => (
+                              <FormControl fullWidth>
+                                <Select {...field} label="Country">
+                                  <MenuItem value="USA">United States</MenuItem>
+                                  <MenuItem value="Canada">Canada</MenuItem>
+                                  <MenuItem value="Mexico">Mexico</MenuItem>
+                                </Select>
+                              </FormControl>
+                            )}
+                          />
+                        </Grid>
+                      </Grid>
+                    </Stack>
+                  )}
+                </CardContent>
+              </Card>
 
               {/* Payment Method Section */}
-              <SectionCardStyled
-                title={
-                  <>
-                    <CreditCardOutlined /> Payment Method
-                  </>
-                }
-              >
-                <FullWidthRadioGroupStyled>
-                  <Radio.Group
-                    value={paymentMethod}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                  >
-                    <FullWidthSpaceStyled>
-                      <Space direction="vertical" css={{ width: '100%' }}>
-                        <Radio value="credit_card">
-                          <Space>
-                            <CreditCardOutlined />
-                            <Text>Credit / Debit Card</Text>
-                          </Space>
-                        </Radio>
-                        <Radio value="paypal">
-                          <Space>
-                            <Text>PayPal</Text>
-                          </Space>
-                        </Radio>
-                        <Radio value="cash_on_delivery">
-                          <Space>
-                            <Text>Cash on Delivery</Text>
-                          </Space>
-                        </Radio>
-                      </Space>
-                    </FullWidthSpaceStyled>
-                  </Radio.Group>
-                </FullWidthRadioGroupStyled>
+              <Card sx={{ mb: 3 }}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CreditCardIcon /> Payment Method
+                  </Typography>
 
-                {paymentMethod === 'credit_card' && (
-                  <PaymentNoticeStyled>
-                    <Text type="secondary">
-                      Payment processing will be integrated with Stripe or PayPal in production. For
-                      now, orders will be created with pending payment status.
-                    </Text>
-                  </PaymentNoticeStyled>
-                )}
-              </SectionCardStyled>
+                  <FormControl>
+                    <RadioGroup
+                      value={paymentMethod}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                    >
+                      <FormControlLabel
+                        value="credit_card"
+                        control={<Radio />}
+                        label={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <CreditCardIcon fontSize="small" />
+                            <Typography>Credit / Debit Card</Typography>
+                          </Box>
+                        }
+                      />
+                      <FormControlLabel
+                        value="paypal"
+                        control={<Radio />}
+                        label="PayPal"
+                      />
+                      <FormControlLabel
+                        value="cash_on_delivery"
+                        control={<Radio />}
+                        label="Cash on Delivery"
+                      />
+                    </RadioGroup>
+                  </FormControl>
+
+                  {paymentMethod === 'credit_card' && (
+                    <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Payment processing will be integrated with Stripe or PayPal in production. For
+                        now, orders will be created with pending payment status.
+                      </Typography>
+                    </Box>
+                  )}
+                </CardContent>
+              </Card>
 
               {/* Order Notes */}
-              <SectionCardStyled title="Order Notes (Optional)">
-                <Form.Item name="notes">
-                  <Input.TextArea
-                    rows={4}
-                    placeholder="Add any special instructions for your order..."
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Order Notes (Optional)
+                  </Typography>
+                  <Controller
+                    name="notes"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        multiline
+                        rows={4}
+                        placeholder="Add any special instructions for your order..."
+                        fullWidth
+                      />
+                    )}
                   />
-                </Form.Item>
-              </SectionCardStyled>
-            </Col>
+                </CardContent>
+              </Card>
+            </Grid>
 
             {/* Order Summary */}
-            <Col xs={24} lg={10}>
-              <SummaryCardStyled title="Order Summary">
-                <CartItemsContainerStyled>
-                  {items.map((item) => (
-                    <CartItemStyled key={item.product_id}>
-                      <Space direction="vertical" size={0}>
-                        <Text strong>{item.name}</Text>
-                        <Text type="secondary">Quantity: {item.quantity}</Text>
-                      </Space>
-                      <Text>${(item.price * item.quantity).toFixed(2)}</Text>
-                    </CartItemStyled>
-                  ))}
-                </CartItemsContainerStyled>
+            <Grid size={{ xs: 12, lg: 5 }}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Order Summary
+                  </Typography>
 
-                <Divider />
+                  <Stack spacing={2} sx={{ mb: 2 }}>
+                    {items.map((item) => (
+                      <Box
+                        key={item.product_id}
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                        }}
+                      >
+                        <Box>
+                          <Typography variant="body1" fontWeight="bold">
+                            {item.name}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Quantity: {item.quantity}
+                          </Typography>
+                        </Box>
+                        <Typography variant="body1">
+                          ${(item.price * item.quantity).toFixed(2)}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Stack>
 
-                <Space direction="vertical" css={{ width: '100%' }}>
-                  <PriceRowStyled>
-                    <Text>Subtotal:</Text>
-                    <Text>${subtotal.toFixed(2)}</Text>
-                  </PriceRowStyled>
-                  <PriceRowStyled>
-                    <Text>Shipping:</Text>
-                    <Text>${shipping.toFixed(2)}</Text>
-                  </PriceRowStyled>
-                  <PriceRowStyled>
-                    <Text>Tax (8%):</Text>
-                    <Text>${tax.toFixed(2)}</Text>
-                  </PriceRowStyled>
-                </Space>
+                  <Divider sx={{ my: 2 }} />
 
-                <Divider />
+                  <Stack spacing={1}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography>Subtotal:</Typography>
+                      <Typography>${subtotal.toFixed(2)}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography>Shipping:</Typography>
+                      <Typography>${shipping.toFixed(2)}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography>Tax (8%):</Typography>
+                      <Typography>${tax.toFixed(2)}</Typography>
+                    </Box>
+                  </Stack>
 
-                <TotalRowStyled>
-                  <TotalLabelStyled level={4}>Total:</TotalLabelStyled>
-                  <TotalAmountStyled level={4}>${orderTotal.toFixed(2)}</TotalAmountStyled>
-                </TotalRowStyled>
+                  <Divider sx={{ my: 2 }} />
 
-                <Button
-                  type="primary"
-                  size="large"
-                  block
-                  htmlType="submit"
-                  loading={orderLoading}
-                  icon={<ShoppingOutlined />}
-                >
-                  Place Order
-                </Button>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+                    <Typography variant="h6">Total:</Typography>
+                    <Typography variant="h6" color="primary" fontWeight="bold">
+                      ${orderTotal.toFixed(2)}
+                    </Typography>
+                  </Box>
 
-                <TermsTextStyled type="secondary">
-                  By placing this order, you agree to our terms and conditions.
-                </TermsTextStyled>
-              </SummaryCardStyled>
-            </Col>
-          </Row>
-        </Form>
-      </ContainerStyled>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    size="large"
+                    fullWidth
+                    disabled={orderLoading}
+                    startIcon={<ShoppingCartIcon />}
+                  >
+                    Place Order
+                  </Button>
+
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2, textAlign: 'center' }}>
+                    By placing this order, you agree to our terms and conditions.
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </form>
+      </Container>
+
+      {/* Success Dialog */}
+      <Dialog open={successDialogOpen} onClose={handleSuccessDialogClose}>
+        <DialogTitle>Order Placed Successfully!</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2}>
+            <Typography>
+              Order Number: <strong>{orderDetails?.orderNumber}</strong>
+            </Typography>
+            <Typography>
+              Total: <strong>${orderDetails?.total.toFixed(2)}</strong>
+            </Typography>
+            <Typography>We'll send you an email confirmation shortly.</Typography>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleSuccessDialogClose} variant="contained">
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </AppLayout>
   );
 };

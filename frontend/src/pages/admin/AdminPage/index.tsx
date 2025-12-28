@@ -1,30 +1,40 @@
-import { useState } from 'react';
+import { FC, useState, ReactNode } from 'react';
 
+import ArticleIcon from '@mui/icons-material/Article';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import DescriptionIcon from '@mui/icons-material/Description';
+import GroupIcon from '@mui/icons-material/Group';
+import PersonIcon from '@mui/icons-material/Person';
+import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
+import StorefrontIcon from '@mui/icons-material/Storefront';
 import {
-  UserOutlined,
-  ShopOutlined,
-  ShoppingOutlined,
-  DollarOutlined,
-  TeamOutlined,
-  FileTextOutlined,
-} from '@ant-design/icons';
-import {
-  Row,
-  Col,
+  Grid,
   Card,
-  Statistic,
+  CardContent,
   Typography,
   Table,
-  Tag,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
   Button,
-  Space,
+  Stack,
   Tabs,
-  message,
-  Modal,
-  Form,
+  Tab,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   Select,
-} from 'antd';
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Box,
+} from '@mui/material';
 import dayjs from 'dayjs';
+import { useForm, Controller } from 'react-hook-form';
 import { useNavigate } from 'react-router';
 
 import AppLayout from '@/components/AppLayout';
@@ -34,29 +44,32 @@ import {
   useGetOrganizationsQuery,
   useGetBlogPostsQuery,
 } from '@/services/apiSlice';
-import { Organization, UserRole } from '@/types/common';
+import { UserRole } from '@/types/common';
 import { getErrorMessage } from '@/types/errors';
+import { message } from '@/utils/notification';
 
-import { ContainerStyled, StatCardStyled, HeaderStyled } from './styles';
+interface TabPanelProps {
+  children?: ReactNode;
+  index: number;
+  value: number;
+}
 
-const { Title, Text } = Typography;
+const TabPanel = (props: TabPanelProps) => {
+  const { children, value, index, ...other } = props;
+  return (
+    <div role="tabpanel" hidden={value !== index} {...other}>
+      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
+    </div>
+  );
+};
 
 interface User {
   id: number;
   email: string;
-  first_name: string;
-  last_name: string;
+  first_name?: string;
+  last_name?: string;
   role: UserRole;
   is_active: boolean;
-  created_at: string;
-}
-
-interface BlogPost {
-  id: number;
-  title: string;
-  slug: string;
-  status: string;
-  view_count: number;
   created_at: string;
 }
 
@@ -69,11 +82,18 @@ interface PlatformStats {
   totalBlogPosts: number;
 }
 
-const AdminPage = () => {
+interface UserUpdateValues {
+  role: UserRole;
+  is_active: boolean;
+}
+
+const AdminPage: FC = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState(0);
   const [editUserModal, setEditUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [form] = Form.useForm();
+
+  const { control, handleSubmit, reset } = useForm<UserUpdateValues>();
 
   const { data: usersData, isLoading: usersLoading } = useGetUsersQuery();
   const { data: orgsData, isLoading: orgsLoading } = useGetOrganizationsQuery();
@@ -96,14 +116,14 @@ const AdminPage = () => {
 
   const handleEditUser = (user: User) => {
     setSelectedUser(user);
-    form.setFieldsValue({
+    reset({
       role: user.role,
-      is_active: user.is_active ? 'active' : 'inactive',
+      is_active: user.is_active,
     });
     setEditUserModal(true);
   };
 
-  const handleUpdateUser = async (values: User) => {
+  const handleUpdateUser = async (values: UserUpdateValues) => {
     if (selectedUser) {
       try {
         await updateUser({
@@ -116,326 +136,535 @@ const AdminPage = () => {
 
         message.success('User updated successfully');
         setEditUserModal(false);
-        form.resetFields();
+        reset();
       } catch (error) {
         message.error(getErrorMessage(error) || 'Failed to update user');
       }
     }
   };
 
-  const userColumns = [
-    {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
-      width: 80,
-    },
-    {
-      title: 'Name',
-      key: 'name',
-      render: (record: User) => (
-        <Space direction="vertical" size={0}>
-          <Text strong>
-            {record.first_name} {record.last_name}
-          </Text>
-          <Text type="secondary" css={{ fontSize: 12 }}>
-            {record.email}
-          </Text>
-        </Space>
-      ),
-    },
-    {
-      title: 'Role',
-      dataIndex: 'role',
-      key: 'role',
-      render: (role: string) => {
-        const colorMap: Record<string, string> = {
-          admin: 'red',
-          artist: 'blue',
-          customer: 'green',
-        };
-        return <Tag color={colorMap[role]}>{role.toUpperCase()}</Tag>;
-      },
-    },
-    {
-      title: 'Status',
-      dataIndex: 'is_active',
-      key: 'is_active',
-      render: (isActive: boolean) => (
-        <Tag color={isActive ? 'success' : 'error'}>{isActive ? 'Active' : 'Inactive'}</Tag>
-      ),
-    },
-    {
-      title: 'Joined',
-      dataIndex: 'created_at',
-      key: 'created_at',
-      render: (date: string) => dayjs(date).format('MMM DD, YYYY'),
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      render: (record: User) => (
-        <Space>
-          <Button size="small" onClick={() => handleEditUser(record)}>
-            Edit
-          </Button>
-        </Space>
-      ),
-    },
-  ];
-
-  const organizationColumns = [
-    {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
-      width: 80,
-    },
-    {
-      title: 'Shop Name',
-      dataIndex: 'name',
-      key: 'name',
-      render: (name: string, record: Organization) => (
-        <Space direction="vertical" size={0}>
-          <Text strong>{name}</Text>
-          <Text type="secondary" css={{ fontSize: 12 }}>
-            /{record.slug}
-          </Text>
-        </Space>
-      ),
-    },
-    {
-      title: 'Created',
-      dataIndex: 'created_at',
-      key: 'created_at',
-      render: (date: string) => dayjs(date).format('MMM DD, YYYY'),
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      render: (record: Organization) => (
-        <Space>
-          <Button size="small" onClick={() => navigate(`/shop/${record.slug}`)}>
-            View
-          </Button>
-        </Space>
-      ),
-    },
-  ];
-
-  const blogColumns = [
-    {
-      title: 'Title',
-      dataIndex: 'title',
-      key: 'title',
-      render: (title: string, record: BlogPost) => (
-        <Space direction="vertical" size={0}>
-          <Text strong>{title}</Text>
-          <Text type="secondary" css={{ fontSize: 12 }}>
-            /{record.slug}
-          </Text>
-        </Space>
-      ),
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: string) => (
-        <Tag color={status === 'published' ? 'success' : 'warning'}>{status.toUpperCase()}</Tag>
-      ),
-    },
-    {
-      title: 'Views',
-      dataIndex: 'view_count',
-      key: 'view_count',
-    },
-    {
-      title: 'Created',
-      dataIndex: 'created_at',
-      key: 'created_at',
-      render: (date: string) => dayjs(date).format('MMM DD, YYYY'),
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      render: (record: BlogPost) => (
-        <Space>
-          <Button size="small" onClick={() => navigate(`/blog/${record.slug}`)}>
-            View
-          </Button>
-        </Space>
-      ),
-    },
-  ];
-
-  const tabItems = [
-    {
-      key: 'overview',
-      label: 'Overview',
-      children: (
-        <Row gutter={[24, 24]}>
-          <Col xs={24} sm={12} lg={8}>
-            <StatCardStyled>
-              <Statistic
-                title="Total Users"
-                value={stats.totalUsers}
-                prefix={<TeamOutlined />}
-                valueStyle={{ color: '#3f8600' }}
-              />
-            </StatCardStyled>
-          </Col>
-          <Col xs={24} sm={12} lg={8}>
-            <StatCardStyled>
-              <Statistic
-                title="Total Shops"
-                value={stats.totalOrganizations}
-                prefix={<ShopOutlined />}
-                valueStyle={{ color: '#1890ff' }}
-              />
-            </StatCardStyled>
-          </Col>
-          <Col xs={24} sm={12} lg={8}>
-            <StatCardStyled>
-              <Statistic
-                title="Total Orders"
-                value={stats.totalOrders}
-                prefix={<ShoppingOutlined />}
-                valueStyle={{ color: '#cf1322' }}
-              />
-            </StatCardStyled>
-          </Col>
-          <Col xs={24} sm={12} lg={8}>
-            <StatCardStyled>
-              <Statistic
-                title="Total Revenue"
-                value={stats.totalRevenue}
-                prefix={<DollarOutlined />}
-                precision={2}
-                valueStyle={{ color: '#faad14' }}
-              />
-            </StatCardStyled>
-          </Col>
-          <Col xs={24} sm={12} lg={8}>
-            <StatCardStyled>
-              <Statistic
-                title="Blog Posts"
-                value={stats.totalBlogPosts}
-                prefix={<FileTextOutlined />}
-                valueStyle={{ color: '#722ed1' }}
-              />
-            </StatCardStyled>
-          </Col>
-        </Row>
-      ),
-    },
-    {
-      key: 'users',
-      label: `Users (${users.length})`,
-      children: (
-        <Card>
-          <Table
-            dataSource={users}
-            columns={userColumns}
-            rowKey="id"
-            loading={loading}
-            pagination={{ pageSize: 10 }}
-          />
-        </Card>
-      ),
-    },
-    {
-      key: 'organizations',
-      label: `Shops (${organizations.length})`,
-      children: (
-        <Card>
-          <Table
-            dataSource={organizations}
-            columns={organizationColumns}
-            rowKey="id"
-            loading={loading}
-            pagination={{ pageSize: 10 }}
-          />
-        </Card>
-      ),
-    },
-    {
-      key: 'blog',
-      label: `Blog Posts (${blogPosts.length})`,
-      children: (
-        <Card>
-          <Table
-            dataSource={blogPosts}
-            columns={blogColumns}
-            rowKey="id"
-            loading={loading}
-            pagination={{ pageSize: 10 }}
-          />
-        </Card>
-      ),
-    },
-  ];
+  const getRoleColor = (role: string): 'error' | 'primary' | 'success' => {
+    const colorMap: Record<string, 'error' | 'primary' | 'success'> = {
+      admin: 'error',
+      artist: 'primary',
+      customer: 'success',
+    };
+    return colorMap[role] || 'default';
+  };
 
   return (
     <AppLayout>
-      <ContainerStyled>
-        <HeaderStyled>
-          <Title level={2}>
-            <UserOutlined /> Admin Dashboard
-          </Title>
-          <Text type="secondary">Platform management and analytics</Text>
-        </HeaderStyled>
-
-        <Tabs items={tabItems} />
-
-        <Modal
-          title="Edit User"
-          open={editUserModal}
-          onCancel={() => {
-            setEditUserModal(false);
-            form.resetFields();
-          }}
-          footer={[
-            <Button
-              key="cancel"
-              onClick={() => {
-                setEditUserModal(false);
-                form.resetFields();
-              }}
+      <Box sx={{ py: 4, px: 3 }}>
+        <Stack spacing={4}>
+          <Box>
+            <Typography
+              variant="h4"
+              gutterBottom
+              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
             >
-              Cancel
-            </Button>,
-            <Button key="submit" type="primary" onClick={() => form.submit()}>
-              Update User
-            </Button>,
-          ]}
-        >
-          <Form form={form} layout="vertical" onFinish={handleUpdateUser}>
-            <Form.Item
-              name="role"
-              label="Role"
-              rules={[{ required: true, message: 'Please select a role' }]}
-            >
-              <Select>
-                <Select.Option value="customer">Customer</Select.Option>
-                <Select.Option value="artist">Artist</Select.Option>
-                <Select.Option value="admin">Admin</Select.Option>
-              </Select>
-            </Form.Item>
+              <PersonIcon /> Admin Dashboard
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Platform management and analytics
+            </Typography>
+          </Box>
 
-            <Form.Item
-              name="is_active"
-              label="Status"
-              rules={[{ required: true, message: 'Please select a status' }]}
-            >
-              <Select>
-                <Select.Option value="active">Active</Select.Option>
-                <Select.Option value="inactive">Inactive</Select.Option>
-              </Select>
-            </Form.Item>
-          </Form>
-        </Modal>
-      </ContainerStyled>
+          <Tabs
+            variant="scrollable"
+            scrollButtons="auto"
+            value={activeTab}
+            onChange={(_, newValue) => setActiveTab(newValue)}
+          >
+            <Tab label="Overview" />
+            <Tab label={`Users (${users.length})`} />
+            <Tab label={`Shops (${organizations.length})`} />
+            <Tab label={`Blog Posts (${blogPosts.length})`} />
+          </Tabs>
+
+          <TabPanel value={activeTab} index={0}>
+            <Grid container spacing={3}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <Card>
+                  <CardContent>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <GroupIcon sx={{ fontSize: 40, color: 'success.main' }} />
+                      <Box>
+                        <Typography variant="h4">{stats.totalUsers}</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Total Users
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <Card>
+                  <CardContent>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <StorefrontIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+                      <Box>
+                        <Typography variant="h4">{stats.totalOrganizations}</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Total Shops
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <Card>
+                  <CardContent>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <ShoppingBagIcon sx={{ fontSize: 40, color: 'error.main' }} />
+                      <Box>
+                        <Typography variant="h4">{stats.totalOrders}</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Total Orders
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <Card>
+                  <CardContent>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <AttachMoneyIcon sx={{ fontSize: 40, color: 'warning.main' }} />
+                      <Box>
+                        <Typography variant="h4">${stats.totalRevenue.toFixed(2)}</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Total Revenue
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <Card>
+                  <CardContent>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <ArticleIcon sx={{ fontSize: 40, color: 'secondary.main' }} />
+                      <Box>
+                        <Typography variant="h4">{stats.totalBlogPosts}</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Blog Posts
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+
+            {/* Quick Actions */}
+            <Box sx={{ mt: 4 }}>
+              <Typography variant="h5" gutterBottom>
+                Quick Actions
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Card
+                    sx={{
+                      cursor: 'pointer',
+                      '&:hover': { bgcolor: 'action.hover' },
+                    }}
+                    onClick={() => navigate('/admin/organizations')}
+                  >
+                    <CardContent>
+                      <Stack spacing={1} alignItems="center">
+                        <StorefrontIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+                        <Typography variant="h6">Shop Moderation</Typography>
+                        <Typography variant="body2" color="text.secondary" align="center">
+                          Approve or decline shops
+                        </Typography>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Card
+                    sx={{
+                      cursor: 'pointer',
+                      '&:hover': { bgcolor: 'action.hover' },
+                    }}
+                    onClick={() => navigate('/admin/products')}
+                  >
+                    <CardContent>
+                      <Stack spacing={1} alignItems="center">
+                        <ShoppingBagIcon sx={{ fontSize: 40, color: 'error.main' }} />
+                        <Typography variant="h6">Product Moderation</Typography>
+                        <Typography variant="body2" color="text.secondary" align="center">
+                          Review product listings
+                        </Typography>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Card
+                    sx={{
+                      cursor: 'pointer',
+                      '&:hover': { bgcolor: 'action.hover' },
+                    }}
+                    onClick={() => navigate('/admin/orders')}
+                  >
+                    <CardContent>
+                      <Stack spacing={1} alignItems="center">
+                        <AttachMoneyIcon sx={{ fontSize: 40, color: 'warning.main' }} />
+                        <Typography variant="h6">All Orders</Typography>
+                        <Typography variant="body2" color="text.secondary" align="center">
+                          View platform orders
+                        </Typography>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <Card
+                    sx={{
+                      cursor: 'pointer',
+                      '&:hover': { bgcolor: 'action.hover' },
+                    }}
+                    onClick={() => navigate('/admin/pages')}
+                  >
+                    <CardContent>
+                      <Stack spacing={1} alignItems="center">
+                        <DescriptionIcon sx={{ fontSize: 40, color: 'info.main' }} />
+                        <Typography variant="h6">Page Management</Typography>
+                        <Typography variant="body2" color="text.secondary" align="center">
+                          Edit static page content
+                        </Typography>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              </Grid>
+            </Box>
+          </TabPanel>
+
+          <TabPanel value={activeTab} index={1}>
+            <Card>
+              <CardContent>
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>
+                          <Typography variant="subtitle2" fontWeight="bold">
+                            ID
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="subtitle2" fontWeight="bold">
+                            Name
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="subtitle2" fontWeight="bold">
+                            Role
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="subtitle2" fontWeight="bold">
+                            Status
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="subtitle2" fontWeight="bold">
+                            Joined
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="subtitle2" fontWeight="bold">
+                            Actions
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {loading ? (
+                        <TableRow>
+                          <TableCell colSpan={6} align="center">
+                            <Typography>Loading...</Typography>
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        users.map((user) => (
+                          <TableRow key={user.id} hover>
+                            <TableCell>
+                              <Typography variant="body2">{user.id}</Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Box>
+                                <Typography variant="body2" fontWeight="bold">
+                                  {user.first_name} {user.last_name}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  {user.email}
+                                </Typography>
+                              </Box>
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={user.role.toUpperCase()}
+                                color={getRoleColor(user.role)}
+                                size="small"
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={user.is_active ? 'Active' : 'Inactive'}
+                                color={user.is_active ? 'success' : 'error'}
+                                size="small"
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2">
+                                {dayjs(user.created_at).format('MMM DD, YYYY')}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Button size="small" onClick={() => handleEditUser(user)}>
+                                Edit
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </CardContent>
+            </Card>
+          </TabPanel>
+
+          <TabPanel value={activeTab} index={2}>
+            <Card>
+              <CardContent>
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>
+                          <Typography variant="subtitle2" fontWeight="bold">
+                            ID
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="subtitle2" fontWeight="bold">
+                            Shop Name
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="subtitle2" fontWeight="bold">
+                            Created
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="subtitle2" fontWeight="bold">
+                            Actions
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {loading ? (
+                        <TableRow>
+                          <TableCell colSpan={4} align="center">
+                            <Typography>Loading...</Typography>
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        organizations.map((org) => (
+                          <TableRow key={org.id} hover>
+                            <TableCell>
+                              <Typography variant="body2">{org.id}</Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Box>
+                                <Typography variant="body2" fontWeight="bold">
+                                  {org.name}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  /{org.slug}
+                                </Typography>
+                              </Box>
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2">
+                                {dayjs(org.created_at).format('MMM DD, YYYY')}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Button size="small" onClick={() => navigate(`/shop/${org.slug}`)}>
+                                View
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </CardContent>
+            </Card>
+          </TabPanel>
+
+          <TabPanel value={activeTab} index={3}>
+            <Card>
+              <CardContent>
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>
+                          <Typography variant="subtitle2" fontWeight="bold">
+                            Title
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="subtitle2" fontWeight="bold">
+                            Status
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="subtitle2" fontWeight="bold">
+                            Views
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="subtitle2" fontWeight="bold">
+                            Created
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="subtitle2" fontWeight="bold">
+                            Actions
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {loading ? (
+                        <TableRow>
+                          <TableCell colSpan={5} align="center">
+                            <Typography>Loading...</Typography>
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        blogPosts.map((post) => (
+                          <TableRow key={post.id} hover>
+                            <TableCell>
+                              <Box>
+                                <Typography variant="body2" fontWeight="bold">
+                                  {post.title}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  /{post.slug}
+                                </Typography>
+                              </Box>
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={post.status.toUpperCase()}
+                                color={post.status === 'published' ? 'success' : 'warning'}
+                                size="small"
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2">{post.view_count}</Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2">
+                                {dayjs(post.created_at).format('MMM DD, YYYY')}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Button size="small" onClick={() => navigate(`/blog/${post.slug}`)}>
+                                View
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </CardContent>
+            </Card>
+          </TabPanel>
+
+          <Dialog
+            open={editUserModal}
+            onClose={() => {
+              setEditUserModal(false);
+              reset();
+            }}
+            maxWidth="sm"
+            fullWidth
+          >
+            <DialogTitle>Edit User</DialogTitle>
+            <form onSubmit={handleSubmit(handleUpdateUser)}>
+              <DialogContent>
+                <Stack spacing={3} sx={{ mt: 1 }}>
+                  <Controller
+                    name="role"
+                    control={control}
+                    rules={{ required: 'Please select a role' }}
+                    render={({ field, fieldState }) => (
+                      <FormControl fullWidth error={!!fieldState.error}>
+                        <InputLabel>Role</InputLabel>
+                        <Select {...field} label="Role">
+                          <MenuItem value="customer">Customer</MenuItem>
+                          <MenuItem value="artist">Artist</MenuItem>
+                          <MenuItem value="admin">Admin</MenuItem>
+                        </Select>
+                      </FormControl>
+                    )}
+                  />
+
+                  <Controller
+                    name="is_active"
+                    control={control}
+                    rules={{ required: 'Please select a status' }}
+                    render={({ field }) => (
+                      <FormControl fullWidth>
+                        <InputLabel>Status</InputLabel>
+                        <Select
+                          {...field}
+                          value={field.value ? 'active' : 'inactive'}
+                          onChange={(e) => field.onChange(e.target.value === 'active')}
+                          label="Status"
+                        >
+                          <MenuItem value="active">Active</MenuItem>
+                          <MenuItem value="inactive">Inactive</MenuItem>
+                        </Select>
+                      </FormControl>
+                    )}
+                  />
+                </Stack>
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  onClick={() => {
+                    setEditUserModal(false);
+                    reset();
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" variant="contained">
+                  Update User
+                </Button>
+              </DialogActions>
+            </form>
+          </Dialog>
+        </Stack>
+      </Box>
     </AppLayout>
   );
 };

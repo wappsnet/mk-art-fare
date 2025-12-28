@@ -1,31 +1,18 @@
-import { useState, useEffect, useMemo } from 'react';
+import { FC, useState, useEffect, useMemo } from 'react';
 
-import { ShoppingCartOutlined, FilterOutlined } from '@ant-design/icons';
-import { Row, Col, Button, Typography, Spin, Empty, Pagination, Drawer } from 'antd';
-import { Link } from 'react-router';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import { Container, Button, Typography, Box } from '@mui/material';
 
+import AppDataGrid from '@/components/AppDataGrid';
+import AppDrawer from '@/components/AppDrawer';
 import AppLayout from '@/components/AppLayout';
+import EmptyState from '@/components/EmptyState';
+import ProductCard from '@/components/ProductCard';
 import { useGetProductsQuery, useGetGlobalCategoriesQuery } from '@/services/apiSlice';
 
 import FilterPanel from './Addons/components/FilterPanel';
-import {
-  PageContainerStyled,
-  PageHeaderStyled,
-  ContainerStyled,
-  SidebarStyled,
-  MainContentStyled,
-  MobileFilterButtonStyled,
-  ProductCardStyled,
-  PlaceholderImageStyled,
-  ProductPriceStyled,
-  ProductShop,
-  LoadingContainerStyled,
-  PaginationContainerStyled,
-} from './styles';
 
-const { Title, Text } = Typography;
-
-const ProductsPage = () => {
+const ProductsPage: FC = () => {
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -42,7 +29,7 @@ const ProductsPage = () => {
     const timer = setTimeout(() => {
       setSearch(searchInput);
       setPage(1);
-    }, 500); // Wait 500ms after user stops typing
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [searchInput]);
@@ -101,116 +88,83 @@ const ProductsPage = () => {
 
   return (
     <AppLayout>
-      <PageContainerStyled>
-        <PageHeaderStyled>
-          <Title level={2}>Discover Artworks</Title>
-          <Text type="secondary">
+      <Container maxWidth="xl" sx={{ py: 8 }}>
+        {/* Page Header */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h3" gutterBottom>
+            Discover Artworks
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
             Browse through our curated collection of amazing artworks from talented artists
-          </Text>
-        </PageHeaderStyled>
+          </Typography>
+        </Box>
 
-        <MobileFilterButtonStyled
-          icon={<FilterOutlined />}
+        {/* Mobile Filter Button */}
+        <Button
+          variant="outlined"
+          startIcon={<FilterListIcon />}
           size="large"
           onClick={() => setDrawerOpen(true)}
+          sx={{ mb: 3, display: { xs: 'inline-flex', md: 'none' } }}
         >
           Filters
-        </MobileFilterButtonStyled>
+        </Button>
 
-        <ContainerStyled>
+        <Box sx={{ display: 'flex', gap: 4 }}>
           {/* Desktop Sidebar */}
-          <SidebarStyled>{Filters}</SidebarStyled>
-
-          {/* Mobile Drawer */}
-          <Drawer
-            title="Filters"
-            placement="left"
-            onClose={() => setDrawerOpen(false)}
-            open={drawerOpen}
-            width={500}
+          <Box
+            sx={{
+              width: 280,
+              flexShrink: 0,
+              position: 'sticky',
+              top: 80,
+              height: 'fit-content',
+              display: { xs: 'none', md: 'block' },
+            }}
           >
             {Filters}
-          </Drawer>
+          </Box>
+
+          {/* Mobile Drawer */}
+          <AppDrawer
+            open={drawerOpen}
+            onClose={() => setDrawerOpen(false)}
+            title="Filters"
+            width={320}
+          >
+            {Filters}
+          </AppDrawer>
 
           {/* Main Content */}
-          <MainContentStyled>
-            {(() => {
-              if (loading) {
-                return (
-                  <LoadingContainerStyled>
-                    <Spin size="large" />
-                  </LoadingContainerStyled>
-                );
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <AppDataGrid
+              data={products}
+              isLoading={loading}
+              emptyContent={
+                <EmptyState title="No products found" description="Try adjusting your filters" />
               }
-
-              if (products.length === 0) {
-                return (
-                  <Empty description="No products found" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-                );
-              }
-
-              return (
-                <>
-                  <Row gutter={[24, 24]}>
-                    {products.map((product) => (
-                      <Col xs={24} sm={12} lg={8} key={product.id}>
-                        <Link to={`/products/${product.slug}`}>
-                          <ProductCardStyled
-                            cover={
-                              product.images && product.images.length > 0 ? (
-                                <img
-                                  alt={product.name}
-                                  src={
-                                    product.images.find((img) => img.is_thumbnail)?.url ||
-                                    product.images[0].url
-                                  }
-                                />
-                              ) : (
-                                <PlaceholderImageStyled>
-                                  <Text type="secondary">No Image</Text>
-                                </PlaceholderImageStyled>
-                              )
-                            }
-                          >
-                            <ProductShop
-                              css={{
-                                display: 'block',
-                                color: '#666',
-                                marginBottom: 8,
-                                fontSize: 12,
-                              }}
-                            >
-                              by {product.organization_name || 'Unknown Artist'}
-                            </ProductShop>
-                            <Title level={5} ellipsis={{ rows: 2 }}>
-                              {product.name}
-                            </Title>
-                            <ProductPriceStyled>${product.price.toFixed(2)}</ProductPriceStyled>
-                            <Button type="primary" icon={<ShoppingCartOutlined />} block>
-                              Add to Cart
-                            </Button>
-                          </ProductCardStyled>
-                        </Link>
-                      </Col>
-                    ))}
-                  </Row>
-
-                  <PaginationContainerStyled>
-                    <Pagination
-                      current={page}
-                      total={total}
-                      pageSize={limit}
-                      onChange={setPage}
-                      showSizeChanger={false}
-                      showTotal={(total) => `Total ${total} products`}
-                    />
-                  </PaginationContainerStyled>
-                </>
-              );
-            })()}
-          </MainContentStyled>
-        </ContainerStyled>
-      </PageContainerStyled>
+              renderItem={(product) => (
+                <ProductCard
+                  slug={product.slug}
+                  name={product.name}
+                  price={product.price}
+                  imageUrl={product.primary_image_url ?? product.images?.[0]?.url}
+                  organizationName={product.organization_name || 'Unknown Artist'}
+                  stockQuantity={product.stock_quantity}
+                />
+              )}
+              getItemKey={(product) => product.id}
+              gridProps={{ xs: 12, sm: 6, lg: 4 }}
+              pagination={{
+                page,
+                pageSize: limit,
+                total,
+                onPageChange: (newPage) => setPage(newPage),
+              }}
+            />
+          </Box>
+        </Box>
+      </Container>
     </AppLayout>
   );
 };
