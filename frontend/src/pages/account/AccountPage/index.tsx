@@ -4,12 +4,12 @@ import LockIcon from '@mui/icons-material/Lock';
 import PersonIcon from '@mui/icons-material/Person';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import StarIcon from '@mui/icons-material/Star';
-import { Card, Typography, Tabs, Tab } from '@mui/material';
+import { Card, Tabs, Tab, Box, Stack } from '@mui/material';
 import { useNavigate, Outlet, useLocation } from 'react-router';
 
 import AppLayout from '@/components/AppLayout';
 
-import { ContainerStyled, HeaderStyled, OutletContainer } from './styles';
+import { ContainerStyled } from './styles';
 
 const AccountPage = () => {
   const navigate = useNavigate();
@@ -45,33 +45,31 @@ const AccountPage = () => {
   return (
     <AppLayout>
       <ContainerStyled>
-        <HeaderStyled>
-          <Typography variant="h4">Account Settings</Typography>
-        </HeaderStyled>
-
-        <Card>
-          <Tabs
-            value={location.pathname}
-            onChange={handleTabChange}
-            variant="scrollable"
-            scrollButtons="auto"
-            sx={{ borderBottom: 1, borderColor: 'divider' }}
-          >
-            {tabItems.map((item) => (
-              <Tab
-                key={item.key}
-                value={item.key}
-                label={item.label}
-                icon={item.icon}
-                iconPosition="start"
-                sx={{ minHeight: 64 }}
-              />
-            ))}
-          </Tabs>
-          <OutletContainer>
-            <Outlet />
-          </OutletContainer>
-        </Card>
+        <Stack spacing={2} p={2}>
+          <Card>
+            <Tabs
+              value={location.pathname}
+              onChange={handleTabChange}
+              variant="scrollable"
+              scrollButtons="auto"
+              sx={{ borderBottom: 1, borderColor: 'divider' }}
+            >
+              {tabItems.map((item) => (
+                <Tab
+                  key={item.key}
+                  value={item.key}
+                  label={item.label}
+                  icon={item.icon}
+                  iconPosition="start"
+                  sx={{ minHeight: 64 }}
+                />
+              ))}
+            </Tabs>
+            <Box p={2}>
+              <Outlet />
+            </Box>
+          </Card>
+        </Stack>
       </ContainerStyled>
     </AppLayout>
   );

@@ -50,7 +50,7 @@ const AppDrawer: FC<AppDrawerProps> = ({ open, onClose, title, children, footer,
           sx={{
             flex: 1,
             overflowY: 'auto',
-            p: 3,
+            p: 1,
           }}
         >
           {children}

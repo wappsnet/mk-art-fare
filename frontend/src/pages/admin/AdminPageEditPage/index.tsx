@@ -95,149 +95,149 @@ const AdminPageEditPage: FC = () => {
   const getPageName = (slug: string) => {
     const nameMap: Record<string, string> = {
       'help-center': 'Help Center',
-      'terms': 'Terms of Use',
-      'about': 'About Us',
-      'privacy': 'Privacy Policy',
+      terms: 'Terms of Use',
+      about: 'About Us',
+      privacy: 'Privacy Policy',
     };
     return nameMap[slug] || slug;
   };
 
   return (
-    <AppLayout>
-      <Box sx={{ py: 4, px: 3 }}>
-        <form onSubmit={handleSubmit(handleSave)}>
-          <Stack spacing={4}>
-            {/* Breadcrumbs */}
-            <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
-              <MuiLink
-                component={Link}
-                to="/admin"
-                underline="hover"
-                color="inherit"
-                sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-              >
-                <HomeIcon fontSize="small" />
-                Admin Dashboard
-              </MuiLink>
-              <MuiLink
-                component={Link}
-                to="/admin/pages"
-                underline="hover"
-                color="inherit"
-                sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-              >
-                <DescriptionIcon fontSize="small" />
-                Page Management
-              </MuiLink>
-              <Typography color="text.primary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                Edit {getPageName(page.slug)}
-              </Typography>
-            </Breadcrumbs>
+    <form onSubmit={handleSubmit(handleSave)}>
+      <Stack spacing={4}>
+        {/* Breadcrumbs */}
+        <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
+          <MuiLink
+            component={Link}
+            to="/admin"
+            underline="hover"
+            color="inherit"
+            sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
+          >
+            <HomeIcon fontSize="small" />
+            Admin Dashboard
+          </MuiLink>
+          <MuiLink
+            component={Link}
+            to="/admin/pages"
+            underline="hover"
+            color="inherit"
+            sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
+          >
+            <DescriptionIcon fontSize="small" />
+            Page Management
+          </MuiLink>
+          <Typography color="text.primary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            Edit {getPageName(page.slug)}
+          </Typography>
+        </Breadcrumbs>
 
-            {/* Header */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Box>
-                <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <DescriptionIcon /> Edit {getPageName(page.slug)}
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  Edit page content and settings
-                </Typography>
-              </Box>
-              <Stack direction="row" spacing={2}>
-                <Button
-                  variant="outlined"
-                  startIcon={<ArrowBackIcon />}
-                  onClick={() => navigate('/admin/pages')}
-                >
-                  Back
-                </Button>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  startIcon={<SaveIcon />}
-                  disabled={isUpdating}
-                >
-                  {isUpdating ? 'Saving...' : 'Save Changes'}
-                </Button>
-              </Stack>
-            </Box>
-
-            {/* Form */}
-            <Card>
-              <CardContent>
-                <Stack spacing={4}>
-                  <Controller
-                    name="title"
-                    control={control}
-                    rules={{ required: 'Title is required' }}
-                    render={({ field, fieldState }) => (
-                      <TextField
-                        {...field}
-                        label="Page Title"
-                        error={!!fieldState.error}
-                        helperText={fieldState.error?.message}
-                        fullWidth
-                      />
-                    )}
-                  />
-
-                  <Controller
-                    name="meta_description"
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        label="Meta Description"
-                        multiline
-                        rows={2}
-                        fullWidth
-                        helperText="SEO description for search engines"
-                      />
-                    )}
-                  />
-
-                  <Box>
-                    <Typography variant="subtitle1" gutterBottom fontWeight="bold">
-                      Page Content
-                    </Typography>
-                    <Controller
-                      name="content"
-                      control={control}
-                      rules={{ required: 'Content is required' }}
-                      render={({ field }) => (
-                        <EditorJSComponent
-                          ref={editorRef}
-                          value={field.value as any}
-                          onChange={field.onChange}
-                          placeholder="Start writing your page content..."
-                        />
-                      )}
-                    />
-                  </Box>
-
-                  <Controller
-                    name="is_published"
-                    control={control}
-                    render={({ field }) => (
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            checked={field.value}
-                            onChange={(e) => field.onChange(e.target.checked)}
-                          />
-                        }
-                        label="Published"
-                      />
-                    )}
-                  />
-                </Stack>
-              </CardContent>
-            </Card>
+        {/* Header */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box>
+            <Typography
+              variant="h4"
+              gutterBottom
+              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+            >
+              <DescriptionIcon /> Edit {getPageName(page.slug)}
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Edit page content and settings
+            </Typography>
+          </Box>
+          <Stack direction="row" spacing={2}>
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBackIcon />}
+              onClick={() => navigate('/admin/pages')}
+            >
+              Back
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              startIcon={<SaveIcon />}
+              disabled={isUpdating}
+            >
+              {isUpdating ? 'Saving...' : 'Save Changes'}
+            </Button>
           </Stack>
-        </form>
-      </Box>
-    </AppLayout>
+        </Box>
+
+        {/* Form */}
+        <Card>
+          <CardContent>
+            <Stack spacing={4}>
+              <Controller
+                name="title"
+                control={control}
+                rules={{ required: 'Title is required' }}
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    label="Page Title"
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    fullWidth
+                  />
+                )}
+              />
+
+              <Controller
+                name="meta_description"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Meta Description"
+                    multiline
+                    rows={2}
+                    fullWidth
+                    helperText="SEO description for search engines"
+                  />
+                )}
+              />
+
+              <Box>
+                <Typography variant="subtitle1" gutterBottom fontWeight="bold">
+                  Page Content
+                </Typography>
+                <Controller
+                  name="content"
+                  control={control}
+                  rules={{ required: 'Content is required' }}
+                  render={({ field }) => (
+                    <EditorJSComponent
+                      ref={editorRef}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Start writing your page content..."
+                    />
+                  )}
+                />
+              </Box>
+
+              <Controller
+                name="is_published"
+                control={control}
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                      />
+                    }
+                    label="Published"
+                  />
+                )}
+              />
+            </Stack>
+          </CardContent>
+        </Card>
+      </Stack>
+    </form>
   );
 };
 

@@ -18,11 +18,11 @@ import {
   MenuItem,
   IconButton,
   List,
-  ListItem,
   ListItemIcon,
   ListItemText,
   Divider,
   Container,
+  ListItemButton,
 } from '@mui/material';
 import { Link, useNavigate } from 'react-router';
 
@@ -110,8 +110,6 @@ const AppHeader: FC = () => {
                   anchorEl={userMenuAnchor}
                   open={Boolean(userMenuAnchor)}
                   onClose={handleUserMenuClose}
-                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                 >
                   {(user.role === 'artist' ||
                     user.role === 'admin' ||
@@ -168,69 +166,69 @@ const AppHeader: FC = () => {
 
         {/* Mobile Drawer Menu */}
         <AppDrawer open={mobileMenuOpen} onClose={closeMobileMenu} title="Menu" width={280}>
+          {user ? (
+            <List>
+              {(user.role === 'artist' || user.role === 'admin' || user.role === 'customer') && (
+                <ListItemButton component={Link} to="/dashboard" onClick={closeMobileMenu}>
+                  <ListItemIcon>
+                    <StorefrontIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Dashboard" />
+                </ListItemButton>
+              )}
+              <ListItemButton component={Link} to="/account" onClick={closeMobileMenu}>
+                <ListItemIcon>
+                  <PersonIcon />
+                </ListItemIcon>
+                <ListItemText primary="Account" />
+              </ListItemButton>
+              {user.role === 'admin' && (
+                <ListItemButton component={Link} to="/admin" onClick={closeMobileMenu}>
+                  <ListItemIcon>
+                    <PersonIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Admin" />
+                </ListItemButton>
+              )}
+              <ListItemButton
+                onClick={() => {
+                  handleLogout();
+                  closeMobileMenu();
+                }}
+              >
+                <ListItemIcon>
+                  <LogoutIcon />
+                </ListItemIcon>
+                <ListItemText primary="Logout" />
+              </ListItemButton>
+            </List>
+          ) : (
+            <List>
+              <ListItemButton component={Link} to="/login" onClick={closeMobileMenu}>
+                <ListItemIcon>
+                  <LoginIcon />
+                </ListItemIcon>
+                <ListItemText primary="Login" />
+              </ListItemButton>
+              <ListItemButton component={Link} to="/register" onClick={closeMobileMenu}>
+                <ListItemIcon>
+                  <PersonIcon />
+                </ListItemIcon>
+                <ListItemText primary="Sign Up" />
+              </ListItemButton>
+            </List>
+          )}
+          <Divider />
           <List>
-            <ListItem component={Link} to="/" onClick={closeMobileMenu}>
+            <ListItemButton component={Link} to="/" onClick={closeMobileMenu}>
               <ListItemText primary="Home" />
-            </ListItem>
-            <ListItem component={Link} to="/products" onClick={closeMobileMenu}>
+            </ListItemButton>
+            <ListItemButton component={Link} to="/products" onClick={closeMobileMenu}>
               <ListItemText primary="Products" />
-            </ListItem>
-            <ListItem component={Link} to="/blog" onClick={closeMobileMenu}>
+            </ListItemButton>
+            <ListItemButton component={Link} to="/blog" onClick={closeMobileMenu}>
               <ListItemText primary="Blog" />
-            </ListItem>
-            <Divider />
-            {user ? (
-              <>
-                {(user.role === 'artist' || user.role === 'admin' || user.role === 'customer') && (
-                  <ListItem component={Link} to="/dashboard" onClick={closeMobileMenu}>
-                    <ListItemIcon>
-                      <StorefrontIcon />
-                    </ListItemIcon>
-                    <ListItemText primary="Dashboard" />
-                  </ListItem>
-                )}
-                <ListItem component={Link} to="/account" onClick={closeMobileMenu}>
-                  <ListItemIcon>
-                    <PersonIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Account" />
-                </ListItem>
-                {user.role === 'admin' && (
-                  <ListItem component={Link} to="/admin" onClick={closeMobileMenu}>
-                    <ListItemIcon>
-                      <PersonIcon />
-                    </ListItemIcon>
-                    <ListItemText primary="Admin" />
-                  </ListItem>
-                )}
-                <ListItem
-                  onClick={() => {
-                    handleLogout();
-                    closeMobileMenu();
-                  }}
-                >
-                  <ListItemIcon>
-                    <LogoutIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Logout" />
-                </ListItem>
-              </>
-            ) : (
-              <>
-                <ListItem component={Link} to="/login" onClick={closeMobileMenu}>
-                  <ListItemIcon>
-                    <LoginIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Login" />
-                </ListItem>
-                <ListItem component={Link} to="/register" onClick={closeMobileMenu}>
-                  <ListItemIcon>
-                    <PersonIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Sign Up" />
-                </ListItem>
-              </>
-            )}
+            </ListItemButton>
           </List>
         </AppDrawer>
       </Toolbar>

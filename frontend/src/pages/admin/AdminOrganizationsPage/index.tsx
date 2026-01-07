@@ -3,8 +3,6 @@ import { FC, useState } from 'react';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
-import HomeIcon from '@mui/icons-material/Home';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -21,14 +19,11 @@ import {
   DialogActions,
   TextField,
   Box,
-  Breadcrumbs,
-  Link as MuiLink,
 } from '@mui/material';
 import dayjs from 'dayjs';
-import { Link, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 
 import AppDataTable, { Column } from '@/components/AppDataTable';
-import AppLayout from '@/components/AppLayout';
 import { useConfirm } from '@/components/ConfirmDialog';
 import {
   useGetOrganizationsQuery,
@@ -202,120 +197,94 @@ const AdminOrganizationsPage: FC = () => {
   ];
 
   return (
-    <AppLayout>
-      <Box sx={{ py: 4, px: 3 }}>
-        <Stack spacing={4}>
-          <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
-            <MuiLink
-              component={Link}
-              to="/admin"
-              underline="hover"
-              color="inherit"
-              sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-            >
-              <HomeIcon fontSize="small" />
-              Admin Dashboard
-            </MuiLink>
-            <Typography
-              color="text.primary"
-              sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-            >
-              <StorefrontIcon fontSize="small" />
-              Organization Moderation
-            </Typography>
-          </Breadcrumbs>
-
-          <Box>
-            <Typography
-              variant="h4"
-              gutterBottom
-              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-            >
-              <StorefrontIcon /> Organization Moderation
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Review and moderate shop listings
-            </Typography>
-          </Box>
-
-          <Card>
-            <CardContent>
-              <AppDataTable
-                columns={columns}
-                data={organizations}
-                isLoading={isLoading}
-                getRowKey={(org) => org.id}
-                emptyContent={
-                  <Typography color="text.secondary">No organizations found</Typography>
-                }
-              />
-            </CardContent>
-          </Card>
-
-          <Dialog
-            open={moderationModal}
-            onClose={() => {
-              setModerationModal(false);
-              setModerationNote('');
-              setSelectedOrg(null);
-            }}
-            maxWidth="sm"
-            fullWidth
-          >
-            <DialogTitle>Moderate Organization</DialogTitle>
-            <DialogContent>
-              {selectedOrg && (
-                <Stack spacing={3} sx={{ mt: 2 }}>
-                  <Box>
-                    <Typography variant="h6" gutterBottom>
-                      {selectedOrg.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      {selectedOrg.description}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Slug: /{selectedOrg.slug}
-                    </Typography>
-                  </Box>
-
-                  <Box>
-                    <Typography variant="subtitle2" gutterBottom>
-                      Moderation Note (Optional):
-                    </Typography>
-                    <TextField
-                      multiline
-                      rows={4}
-                      value={moderationNote}
-                      onChange={(e) => setModerationNote(e.target.value)}
-                      placeholder="Add a note about this moderation decision..."
-                      fullWidth
-                    />
-                  </Box>
-                </Stack>
-              )}
-            </DialogContent>
-            <DialogActions>
-              <Button
-                color="error"
-                startIcon={<CloseIcon />}
-                onClick={() => selectedOrg && handleModerate(selectedOrg.id, 'declined')}
-                disabled={isModerating}
-              >
-                Decline
-              </Button>
-              <Button
-                variant="contained"
-                startIcon={<CheckIcon />}
-                onClick={() => selectedOrg && handleModerate(selectedOrg.id, 'approved')}
-                disabled={isModerating}
-              >
-                Approve
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </Stack>
+    <Stack spacing={4}>
+      <Box>
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+        >
+          <StorefrontIcon /> Organization Moderation
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Review and moderate shop listings
+        </Typography>
       </Box>
-    </AppLayout>
+
+      <Card>
+        <CardContent>
+          <AppDataTable
+            columns={columns}
+            data={organizations}
+            isLoading={isLoading}
+            getRowKey={(org) => org.id}
+            emptyContent={<Typography color="text.secondary">No organizations found</Typography>}
+          />
+        </CardContent>
+      </Card>
+
+      <Dialog
+        open={moderationModal}
+        onClose={() => {
+          setModerationModal(false);
+          setModerationNote('');
+          setSelectedOrg(null);
+        }}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Moderate Organization</DialogTitle>
+        <DialogContent>
+          {selectedOrg && (
+            <Stack spacing={3} sx={{ mt: 2 }}>
+              <Box>
+                <Typography variant="h6" gutterBottom>
+                  {selectedOrg.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  {selectedOrg.description}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Slug: /{selectedOrg.slug}
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography variant="subtitle2" gutterBottom>
+                  Moderation Note (Optional):
+                </Typography>
+                <TextField
+                  multiline
+                  rows={4}
+                  value={moderationNote}
+                  onChange={(e) => setModerationNote(e.target.value)}
+                  placeholder="Add a note about this moderation decision..."
+                  fullWidth
+                />
+              </Box>
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            color="error"
+            startIcon={<CloseIcon />}
+            onClick={() => selectedOrg && handleModerate(selectedOrg.id, 'declined')}
+            disabled={isModerating}
+          >
+            Decline
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<CheckIcon />}
+            onClick={() => selectedOrg && handleModerate(selectedOrg.id, 'approved')}
+            disabled={isModerating}
+          >
+            Approve
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Stack>
   );
 };
 

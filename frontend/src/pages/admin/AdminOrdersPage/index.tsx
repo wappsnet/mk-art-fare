@@ -3,8 +3,6 @@ import { FC, useState } from 'react';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import HomeIcon from '@mui/icons-material/Home';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import {
   Card,
@@ -18,14 +16,10 @@ import {
   FormControl,
   InputLabel,
   Box,
-  Breadcrumbs,
-  Link as MuiLink,
 } from '@mui/material';
 import dayjs from 'dayjs';
-import { Link } from 'react-router';
 
 import AppDataTable, { Column } from '@/components/AppDataTable';
-import AppLayout from '@/components/AppLayout';
 import { useGetOrdersQuery } from '@/services/apiSlice';
 import { Order, OrderStatus } from '@/types/common';
 
@@ -45,9 +39,7 @@ const AdminOrdersPage: FC = () => {
     completedOrders: orders.filter((o: Order) => o.status === OrderStatus.DELIVERED).length,
   };
 
-  const getStatusColor = (
-    status: string
-  ): 'default' | 'warning' | 'info' | 'success' | 'error' => {
+  const getStatusColor = (status: string): 'default' | 'warning' | 'info' | 'success' | 'error' => {
     const colorMap: Record<string, 'default' | 'warning' | 'info' | 'success' | 'error'> = {
       pending: 'warning',
       processing: 'info',
@@ -59,9 +51,7 @@ const AdminOrdersPage: FC = () => {
     return colorMap[status] || 'default';
   };
 
-  const getPaymentStatusColor = (
-    status: string
-  ): 'default' | 'warning' | 'success' | 'error' => {
+  const getPaymentStatusColor = (status: string): 'default' | 'warning' | 'success' | 'error' => {
     const colorMap: Record<string, 'default' | 'warning' | 'success' | 'error'> = {
       pending: 'warning',
       paid: 'success',
@@ -134,133 +124,116 @@ const AdminOrdersPage: FC = () => {
   ];
 
   return (
-    <AppLayout>
-      <Box sx={{ py: 4, px: 3 }}>
-        <Stack spacing={4}>
-          <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
-            <MuiLink
-              component={Link}
-              to="/admin"
-              underline="hover"
-              color="inherit"
-              sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-            >
-              <HomeIcon fontSize="small" />
-              Admin Dashboard
-            </MuiLink>
-            <Typography color="text.primary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <ShoppingCartIcon fontSize="small" />
-              All Orders
-            </Typography>
-          </Breadcrumbs>
+    <Stack spacing={4}>
+      <Box>
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+        >
+          <ShoppingCartIcon /> All Orders
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          View and manage all platform orders
+        </Typography>
+      </Box>
 
-          <Box>
-            <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <ShoppingCartIcon /> All Orders
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              View and manage all platform orders
-            </Typography>
-          </Box>
-
-          {/* Stats Grid */}
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-              <Card>
-                <CardContent>
-                  <Stack direction="row" spacing={2} alignItems="center">
-                    <ShoppingCartIcon sx={{ fontSize: 40, color: 'primary.main' }} />
-                    <Box>
-                      <Typography variant="h4">{stats.totalOrders}</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Total Orders
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-              <Card>
-                <CardContent>
-                  <Stack direction="row" spacing={2} alignItems="center">
-                    <AttachMoneyIcon sx={{ fontSize: 40, color: 'success.main' }} />
-                    <Box>
-                      <Typography variant="h4">${stats.totalRevenue.toFixed(2)}</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Total Revenue
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-              <Card>
-                <CardContent>
-                  <Stack direction="row" spacing={2} alignItems="center">
-                    <AccessTimeIcon sx={{ fontSize: 40, color: 'warning.main' }} />
-                    <Box>
-                      <Typography variant="h4">{stats.pendingOrders}</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Pending Orders
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-              <Card>
-                <CardContent>
-                  <Stack direction="row" spacing={2} alignItems="center">
-                    <CheckCircleIcon sx={{ fontSize: 40, color: 'success.main' }} />
-                    <Box>
-                      <Typography variant="h4">{stats.completedOrders}</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Completed Orders
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-
-          {/* Orders Table */}
+      {/* Stats Grid */}
+      <Grid container spacing={2}>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <Card>
             <CardContent>
-              <Stack spacing={3}>
-                <FormControl sx={{ width: 200 }}>
-                  <InputLabel>Filter by status</InputLabel>
-                  <Select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    label="Filter by status"
-                  >
-                    <MenuItem value="all">All Orders</MenuItem>
-                    <MenuItem value="pending">Pending</MenuItem>
-                    <MenuItem value="processing">Processing</MenuItem>
-                    <MenuItem value="shipped">Shipped</MenuItem>
-                    <MenuItem value="delivered">Delivered</MenuItem>
-                    <MenuItem value="completed">Completed</MenuItem>
-                    <MenuItem value="cancelled">Cancelled</MenuItem>
-                  </Select>
-                </FormControl>
-
-                <AppDataTable
-                  columns={columns}
-                  data={filteredOrders}
-                  isLoading={isLoading}
-                  getRowKey={(order) => order.id}
-                  emptyContent={<Typography color="text.secondary">No orders found</Typography>}
-                />
+              <Stack direction="row" spacing={2} alignItems="center">
+                <ShoppingCartIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+                <Box>
+                  <Typography variant="h4">{stats.totalOrders}</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Total Orders
+                  </Typography>
+                </Box>
               </Stack>
             </CardContent>
           </Card>
-        </Stack>
-      </Box>
-    </AppLayout>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+          <Card>
+            <CardContent>
+              <Stack direction="row" spacing={2} alignItems="center">
+                <AttachMoneyIcon sx={{ fontSize: 40, color: 'success.main' }} />
+                <Box>
+                  <Typography variant="h4">${stats.totalRevenue.toFixed(2)}</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Total Revenue
+                  </Typography>
+                </Box>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+          <Card>
+            <CardContent>
+              <Stack direction="row" spacing={2} alignItems="center">
+                <AccessTimeIcon sx={{ fontSize: 40, color: 'warning.main' }} />
+                <Box>
+                  <Typography variant="h4">{stats.pendingOrders}</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Pending Orders
+                  </Typography>
+                </Box>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+          <Card>
+            <CardContent>
+              <Stack direction="row" spacing={2} alignItems="center">
+                <CheckCircleIcon sx={{ fontSize: 40, color: 'success.main' }} />
+                <Box>
+                  <Typography variant="h4">{stats.completedOrders}</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Completed Orders
+                  </Typography>
+                </Box>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* Orders Table */}
+      <Card>
+        <CardContent>
+          <Stack spacing={3}>
+            <FormControl sx={{ width: 200 }}>
+              <InputLabel>Filter by status</InputLabel>
+              <Select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                label="Filter by status"
+              >
+                <MenuItem value="all">All Orders</MenuItem>
+                <MenuItem value="pending">Pending</MenuItem>
+                <MenuItem value="processing">Processing</MenuItem>
+                <MenuItem value="shipped">Shipped</MenuItem>
+                <MenuItem value="delivered">Delivered</MenuItem>
+                <MenuItem value="completed">Completed</MenuItem>
+                <MenuItem value="cancelled">Cancelled</MenuItem>
+              </Select>
+            </FormControl>
+
+            <AppDataTable
+              columns={columns}
+              data={filteredOrders}
+              isLoading={isLoading}
+              getRowKey={(order) => order.id}
+              emptyContent={<Typography color="text.secondary">No orders found</Typography>}
+            />
+          </Stack>
+        </CardContent>
+      </Card>
+    </Stack>
   );
 };
 

@@ -2,13 +2,10 @@ import { FC } from 'react';
 
 import DescriptionIcon from '@mui/icons-material/Description';
 import EditIcon from '@mui/icons-material/Edit';
-import HomeIcon from '@mui/icons-material/Home';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import { Chip, Stack, Typography, Button, Box, Breadcrumbs, Link as MuiLink } from '@mui/material';
-import { Link, useNavigate } from 'react-router';
+import { Chip, Stack, Typography, Button, Box } from '@mui/material';
+import { useNavigate } from 'react-router';
 
 import AppDataTable, { Column } from '@/components/AppDataTable';
-import AppLayout from '@/components/AppLayout';
 import EmptyState from '@/components/EmptyState';
 import { useGetPagesQuery } from '@/services/apiSlice';
 import { Page } from '@/types/common';
@@ -88,53 +85,28 @@ const AdminPagesListPage: FC = () => {
   ];
 
   return (
-    <AppLayout>
-      <Box sx={{ py: 4, px: 3 }}>
-        <Stack spacing={3}>
-          {/* Breadcrumbs */}
-          <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
-            <MuiLink
-              component={Link}
-              to="/admin"
-              underline="hover"
-              color="inherit"
-              sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-            >
-              <HomeIcon fontSize="small" />
-              Admin Dashboard
-            </MuiLink>
-            <Typography
-              color="text.primary"
-              sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-            >
-              <DescriptionIcon fontSize="small" />
-              Page Management
-            </Typography>
-          </Breadcrumbs>
-
-          <Box>
-            <Typography
-              variant="h4"
-              gutterBottom
-              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-            >
-              <DescriptionIcon /> Page Management
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Manage static page content for Help Center, Terms, About, and Privacy Policy
-            </Typography>
-          </Box>
-
-          <AppDataTable
-            columns={columns}
-            data={pages}
-            isLoading={isLoading}
-            getRowKey={(page) => page.id}
-            emptyContent={<EmptyState icon={DescriptionIcon} title="No pages found" />}
-          />
-        </Stack>
+    <Stack spacing={3}>
+      <Box>
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+        >
+          <DescriptionIcon /> Page Management
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Manage static page content for Help Center, Terms, About, and Privacy Policy
+        </Typography>
       </Box>
-    </AppLayout>
+
+      <AppDataTable
+        columns={columns}
+        data={pages}
+        isLoading={isLoading}
+        getRowKey={(page) => page.id}
+        emptyContent={<EmptyState icon={DescriptionIcon} title="No pages found" />}
+      />
+    </Stack>
   );
 };
 

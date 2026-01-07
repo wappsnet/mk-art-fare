@@ -308,7 +308,7 @@ export const api = createApi({
 
     // Blog endpoints
     getBlogPosts: builder.query<
-      ApiResponse<{ posts: BlogPost[]; total: number; page: number; limit: number }>,
+      ApiResponse<BlogPost[]>,
       { search?: string; page?: number; limit?: number }
     >({
       query: (params) => {
@@ -810,7 +810,13 @@ export const api = createApi({
     }),
     createPage: builder.mutation<
       ApiResponse<Page>,
-      { slug: string; title: string; content: Record<string, unknown>; meta_description?: string; is_published?: boolean }
+      {
+        slug: string;
+        title: string;
+        content: Record<string, unknown>;
+        meta_description?: string;
+        is_published?: boolean;
+      }
     >({
       query: (data) => ({
         url: '/admin/pages',

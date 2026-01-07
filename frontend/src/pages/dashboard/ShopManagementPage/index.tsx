@@ -1,4 +1,4 @@
-import { FC, useMemo, SyntheticEvent } from 'react';
+import { FC, useMemo } from 'react';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import {
@@ -26,10 +26,6 @@ const ShopManagementPage: FC = () => {
 
   const { data: orgData, isLoading } = useGetOrganizationByIdQuery(orgId, { skip: !orgId });
   const organization = orgData?.data;
-
-  const handleTabChange = (_: SyntheticEvent, path: string) => {
-    navigate(path);
-  };
 
   const tabItems = useMemo(
     () => [
@@ -73,7 +69,7 @@ const ShopManagementPage: FC = () => {
     );
   }
 
-  if (organization === null || organization === undefined) {
+  if (!organization) {
     return (
       <AppLayout>
         <Container maxWidth="lg" sx={{ py: 8 }}>
@@ -101,9 +97,12 @@ const ShopManagementPage: FC = () => {
           <Card>
             <Tabs
               variant="scrollable"
-              scrollButtons={true}
+              scrollButtons
+              allowScrollButtonsMobile
               value={location.pathname}
-              onChange={handleTabChange}
+              onChange={(_, path: string) => {
+                navigate(path);
+              }}
             >
               {tabItems.map((item) => (
                 <Tab key={item.value} label={item.label} value={item.value} />
