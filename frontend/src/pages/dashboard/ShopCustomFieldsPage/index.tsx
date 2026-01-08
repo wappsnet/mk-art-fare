@@ -22,37 +22,6 @@ import FieldDefinitionForm from './Addons/components/FieldDefinitionForm';
 import FieldGroupCard from './Addons/components/FieldGroupCard';
 import FieldGroupForm from './Addons/components/FieldGroupForm';
 
-const getFieldTypeColor = (type: FieldType): string => {
-  switch (type) {
-    case FieldType.TEXT:
-      return 'blue';
-    case FieldType.NUMBER:
-      return 'green';
-    case FieldType.SELECT:
-      return 'purple';
-    case FieldType.RADIO:
-      return 'magenta';
-    case FieldType.CHECKBOX:
-      return 'orange';
-    case FieldType.TOGGLE:
-      return 'cyan';
-    case FieldType.DATE:
-      return 'geekblue';
-    case FieldType.TIME:
-      return 'gold';
-    case FieldType.COLOR:
-      return 'volcano';
-    case FieldType.IMAGE:
-      return 'lime';
-    case FieldType.FILE:
-      return 'red';
-    case FieldType.RICHTEXT:
-      return 'purple';
-    default:
-      return 'default';
-  }
-};
-
 const fieldTypeNeedsOptions = (fieldType?: FieldType): boolean => {
   if (!fieldType) return false;
 
@@ -277,7 +246,6 @@ const ShopCustomFieldsPage: FC = () => {
               onAddField={openFieldDrawer}
               onEditField={openFieldDrawer}
               onDeleteField={handleDeleteField}
-              getFieldTypeColor={getFieldTypeColor}
             />
           ))}
         </Stack>

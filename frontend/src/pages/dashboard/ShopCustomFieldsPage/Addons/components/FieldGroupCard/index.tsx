@@ -9,7 +9,7 @@ import { Card, CardHeader, CardContent, Button, Chip, Stack, Divider, Box } from
 import { useConfirm } from '@/components/ConfirmDialog';
 import { useDeleteFieldGroupMutation } from '@/services/apiSlice';
 import { getErrorMessage } from '@/types/errors';
-import { FieldGroup, FieldDefinition, FieldType } from '@/types/fields';
+import { FieldGroup, FieldDefinition } from '@/types/fields';
 import { message } from '@/utils/notification';
 
 import FieldDefinitionList from './Addons/components/FieldDefinitionList';
@@ -20,7 +20,6 @@ interface FieldGroupCardProps {
   onAddField: (groupId: number) => void;
   onEditField: (groupId: number, field: FieldDefinition) => void;
   onDeleteField: (groupId: number, fieldId: number) => void;
-  getFieldTypeColor: (type: FieldType) => string;
 }
 
 const FieldGroupCard: FC<FieldGroupCardProps> = ({
@@ -29,7 +28,6 @@ const FieldGroupCard: FC<FieldGroupCardProps> = ({
   onAddField,
   onEditField,
   onDeleteField,
-  getFieldTypeColor,
 }) => {
   const [deleteFieldGroup] = useDeleteFieldGroupMutation();
   const { confirm } = useConfirm();
@@ -63,18 +61,10 @@ const FieldGroupCard: FC<FieldGroupCardProps> = ({
         }
         action={
           <Stack direction="row" spacing={1}>
-            <Button
-              size="small"
-              startIcon={<AddIcon />}
-              onClick={() => onAddField(group.id)}
-            >
+            <Button size="small" startIcon={<AddIcon />} onClick={() => onAddField(group.id)}>
               Add Field
             </Button>
-            <Button
-              size="small"
-              startIcon={<EditIcon />}
-              onClick={() => onEditGroup(group)}
-            />
+            <Button size="small" startIcon={<EditIcon />} onClick={() => onEditGroup(group)} />
             <Button
               size="small"
               color="error"
@@ -86,9 +76,7 @@ const FieldGroupCard: FC<FieldGroupCardProps> = ({
       />
       <CardContent>
         {group.description && (
-          <Box sx={{ mb: 2, color: 'text.secondary' }}>
-            {group.description}
-          </Box>
+          <Box sx={{ mb: 2, color: 'text.secondary' }}>{group.description}</Box>
         )}
         <Divider sx={{ mb: 2 }} />
         <FieldDefinitionList
@@ -96,7 +84,6 @@ const FieldGroupCard: FC<FieldGroupCardProps> = ({
           groupId={group.id}
           onEditField={onEditField}
           onDeleteField={onDeleteField}
-          getFieldTypeColor={getFieldTypeColor}
         />
       </CardContent>
     </Card>

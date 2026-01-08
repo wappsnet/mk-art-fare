@@ -1,7 +1,7 @@
 import { FC, ReactNode } from 'react';
 
 import CloseIcon from '@mui/icons-material/Close';
-import { Drawer, Box, Typography, IconButton, Divider } from '@mui/material';
+import { Drawer, Box, Typography, IconButton } from '@mui/material';
 
 interface AppDrawerProps {
   open: boolean;
@@ -27,7 +27,7 @@ const AppDrawer: FC<AppDrawerProps> = ({ open, onClose, title, children, footer,
         },
       }}
     >
-      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }} gap={1}>
         {/* Header */}
         <Box
           sx={{
@@ -58,18 +58,15 @@ const AppDrawer: FC<AppDrawerProps> = ({ open, onClose, title, children, footer,
 
         {/* Footer */}
         {footer && (
-          <>
-            <Divider />
-            <Box
-              sx={{
-                p: 3,
-                borderTop: '1px solid',
-                borderColor: 'divider',
-              }}
-            >
-              {footer}
-            </Box>
-          </>
+          <Box
+            sx={{
+              p: 3,
+              borderTop: '1px solid',
+              borderColor: 'divider',
+            }}
+          >
+            {footer}
+          </Box>
         )}
       </Box>
     </Drawer>

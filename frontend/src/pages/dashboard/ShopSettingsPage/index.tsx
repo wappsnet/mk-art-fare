@@ -17,6 +17,7 @@ import {
   Card,
   CardContent,
   CardActions,
+  Avatar,
 } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { useParams } from 'react-router';
@@ -227,26 +228,17 @@ const ShopSettingsPage: FC = () => {
                     Logo
                   </Typography>
                   {organization.logo_url ? (
-                    <Box
-                      component="img"
+                    <Avatar
                       src={organization.logo_url}
-                      alt="Shop logo"
-                      sx={{ width: 120, height: 120, objectFit: 'cover', borderRadius: 1 }}
+                      alt="Shop Logo"
+                      sx={{
+                        width: 100,
+                        height: 100,
+                      }}
                     />
                   ) : (
-                    <Box
-                      sx={{
-                        width: 120,
-                        height: 120,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        bgcolor: 'grey.100',
-                        borderRadius: 1,
-                      }}
-                    >
-                      <ImageIcon sx={{ fontSize: 40, color: 'text.secondary' }} />
+                    <Box>
+                      <ImageIcon />
                       <Typography variant="caption" color="text.secondary">
                         No logo uploaded
                       </Typography>

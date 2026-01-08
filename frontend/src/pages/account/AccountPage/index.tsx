@@ -51,8 +51,8 @@ const AccountPage = () => {
               value={location.pathname}
               onChange={handleTabChange}
               variant="scrollable"
-              scrollButtons="auto"
-              sx={{ borderBottom: 1, borderColor: 'divider' }}
+              scrollButtons
+              allowScrollButtonsMobile
             >
               {tabItems.map((item) => (
                 <Tab

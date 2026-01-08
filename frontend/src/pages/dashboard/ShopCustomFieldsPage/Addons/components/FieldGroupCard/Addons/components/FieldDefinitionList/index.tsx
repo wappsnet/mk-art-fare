@@ -5,14 +5,13 @@ import EditIcon from '@mui/icons-material/Edit';
 import { List, ListItem, Button, Stack, Chip, Typography, Box } from '@mui/material';
 
 import { useConfirm } from '@/components/ConfirmDialog';
-import { FieldDefinition, FieldType } from '@/types/fields';
+import { FieldDefinition } from '@/types/fields';
 
 interface FieldDefinitionListProps {
   fields: FieldDefinition[];
   groupId: number;
   onEditField: (groupId: number, field: FieldDefinition) => void;
   onDeleteField: (groupId: number, fieldId: number) => void;
-  getFieldTypeColor: (type: FieldType) => string;
 }
 
 const FieldDefinitionList: FC<FieldDefinitionListProps> = ({
@@ -20,7 +19,6 @@ const FieldDefinitionList: FC<FieldDefinitionListProps> = ({
   groupId,
   onEditField,
   onDeleteField,
-  getFieldTypeColor,
 }) => {
   const { confirm } = useConfirm();
 
@@ -40,28 +38,7 @@ const FieldDefinitionList: FC<FieldDefinitionListProps> = ({
     );
   }
 
-  const getMuiColor = (
-    antdColor: string
-  ): 'primary' | 'secondary' | 'success' | 'error' | 'info' | 'warning' | 'default' => {
-    const colorMap: Record<
-      string,
-      'primary' | 'secondary' | 'success' | 'error' | 'info' | 'warning' | 'default'
-    > = {
-      blue: 'primary',
-      green: 'success',
-      purple: 'secondary',
-      magenta: 'error',
-      orange: 'warning',
-      cyan: 'info',
-      geekblue: 'primary',
-      gold: 'warning',
-      volcano: 'error',
-      lime: 'success',
-      red: 'error',
-    };
-    return colorMap[antdColor] || 'default';
-  };
-
+  console.info(fields);
   return (
     <List>
       {fields.map((field) => (
@@ -72,17 +49,12 @@ const FieldDefinitionList: FC<FieldDefinitionListProps> = ({
             alignItems: 'flex-start',
             borderBottom: '1px solid',
             borderColor: 'divider',
-            '&:last-child': { borderBottom: 'none' },
           }}
         >
           <Stack direction="row" justifyContent="space-between" sx={{ width: '100%', mb: 1 }}>
             <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
               <Typography variant="subtitle2">{field.label}</Typography>
-              <Chip
-                label={field.type}
-                color={getMuiColor(getFieldTypeColor(field.type))}
-                size="small"
-              />
+              <Chip label={field.type} color="secondary" size="small" />
               {field.required && <Chip label="Required" color="error" size="small" />}
               {field.isSearchable && <Chip label="Searchable" color="primary" size="small" />}
               {field.isFilterable && <Chip label="Filterable" color="success" size="small" />}
